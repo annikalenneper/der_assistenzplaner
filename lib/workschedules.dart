@@ -87,34 +87,21 @@ class WorkScheduleView extends StatefulWidget {
 }
 
 class WorkScheduleViewState extends State<WorkScheduleView> {
-  DateTime _selectedDay = DateTime.now(); // Standardmäßig ist der aktuelle Tag ausgewählt
-  List<ScheduledShift> _selectedShifts = []; // Liste der Schichten für den ausgewählten Tag
-
   @override
   Widget build(BuildContext context) {
     final workschedule = widget.workschedule;
-
+    
     final calendar = TableCalendar(
       firstDay: workschedule.start,
       lastDay: workschedule.end,
       focusedDay: DateTime.now(),
-      selectedDayPredicate: (day) {
-        // Markiere den ausgewählten Tag im Kalender
-        return isSameDay(_selectedDay, day);
-      },
-      onDaySelected: (selectedDay, focusedDay) {
-        setState(() {
-          _selectedDay = selectedDay; // Aktualisiere den ausgewählten Tag
-          _selectedShifts = workschedule.getShiftsForDay(selectedDay); // Lade die Schichten
-        });
-      },
+      /// use class method to get shifts for day and return them as events
       eventLoader: (day) {
-        // Lade Schichten für den jeweiligen Tag
-        return workschedule.getShiftsForDay(day);
+        return workschedule.getShiftsForDay(day); 
       },
       calendarBuilders: CalendarBuilders(
         markerBuilder: (context, date, events) {
-          if (events.isEmpty) return null;
+          if (events.isEmpty) return null; 
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: events.map((event) {
@@ -126,11 +113,10 @@ class WorkScheduleViewState extends State<WorkScheduleView> {
                   height: 5,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.blue,
+                    color: Colors.blue, 
                   ),
                   child: Tooltip(
-                    message:
-                        "${shift.start.hour}:${shift.start.minute} - ${shift.end.hour}:${shift.end.minute} (${shift.assistent.name})",
+                    message: "${shift.start.hour}:${shift.start.minute} - ${shift.end.hour}:${shift.end.minute} (${shift.assistent.name})",
                   ),
                 ),
               );
@@ -140,25 +126,8 @@ class WorkScheduleViewState extends State<WorkScheduleView> {
       ),
     );
 
-    return Column(
-      children: [
-        calendar,
-        const SizedBox(height: 16),
-        Expanded(
-          child: _selectedShifts.isEmpty
-              ? Center(child: Text("Keine Schichten für den ${_selectedDay.toLocal().toString().split(' ')[0]}"))
-              : ListView.builder(
-                  itemCount: _selectedShifts.length,
-                  itemBuilder: (context, index) {
-                    final shift = _selectedShifts[index];
-                    return ListTile(
-                      title: Text("${shift.start.hour}:${shift.start.minute} - ${shift.end.hour}:${shift.end.minute}"),
-                      subtitle: Text("Assistent: ${shift.assistent.name}"),
-                    );
-                  },
-                ),
-        ),
-      ],
-    );
+    return calendar;
   }
 }
+
+
