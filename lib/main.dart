@@ -1,7 +1,11 @@
+import 'package:der_assistenzplaner/workschedules.dart';
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 
 void main() {
-  runApp(MyApp());
+  initializeDateFormatting().then((_) => runApp(MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -74,13 +78,13 @@ class _HomeState extends State<HomeScreen> {
 
 ///WorkScheduleScreen
 class WorkScheduleScreen extends StatelessWidget {
+  final workscheduleView = null;
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
         children: [
-          Text('Monat'),
-          Text('Dienstplan'),       
+          workscheduleView?? Text('Dienstplan'),       
         ]
       ),
     );
