@@ -1,12 +1,23 @@
 import 'package:der_assistenzplaner/workschedules.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:der_assistenzplaner/test_data.dart';
 
 
 void main() {
-  initializeDateFormatting().then((_) => runApp(MyApp()));
+  Workschedule workschedule = createTestWorkSchedule();
+  initializeDateFormatting().then((_) {
+    runApp(
+      ChangeNotifierProvider(
+        create: (_) => WorkscheduleModel(workschedule),
+        child: MyApp(),
+      ),
+    );
+  });
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -32,15 +43,16 @@ class HomeScreen extends StatefulWidget {
 class _HomeState extends State<HomeScreen> {
   int currentPageIndex = 0;
 
-  final List<Widget> pages = [
-    WorkScheduleScreen(),
-    AssistantsScreen(),
-    TagScreen(),
-    SettingsScreen()
-  ];
-
   @override
   Widget build(BuildContext context) {
+
+    final pages = [
+      WorkScheduleScreen(),
+      AssistantsScreen(),
+      TagScreen(),
+      SettingsScreen()
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Der Assistenzplaner'),
@@ -78,13 +90,15 @@ class _HomeState extends State<HomeScreen> {
 
 ///WorkScheduleScreen
 class WorkScheduleScreen extends StatelessWidget {
-  final workscheduleView = null;
   @override
   Widget build(BuildContext context) {
+    final workscheduleModel = Provider.of<WorkscheduleModel>(context);
+    final workschedule = workscheduleModel.workschedule;
     return Center(
       child: Column(
         children: [
-          workscheduleView?? Text('Dienstplan'),       
+          Text('Dienstplan'),
+          WorkScheduleView(workschedule: workschedule),  
         ]
       ),
     );
