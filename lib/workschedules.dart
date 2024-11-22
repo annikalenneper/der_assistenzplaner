@@ -4,27 +4,6 @@ import 'package:der_assistenzplaner/assistents.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class Workschedule {
-  final DateTime start;
-  final DateTime end;
-  /// map of shifts by date
-  final Map<DateTime, List<ScheduledShift>> shiftsByDate = {};
-
-  Workschedule(this.start, this.end);
-
-  void addShift(ScheduledShift shift) {
-    /// get date of shift
-    final date = DateTime(shift.start.year, shift.start.month, shift.start.day);
-    /// add shift to list of shifts for that date if it exists, otherwise create a new list
-    shiftsByDate.putIfAbsent(date, () => []).add(shift);
-  }
-
-  /// returns all shifts for a given day or empty list if no shifts are scheduled
-  List<ScheduledShift> getShiftsForDay(DateTime day) {
-    final date = DateTime(day.year, day.month, day.day);
-    return shiftsByDate[date] ?? [];
-  }
-}
 
 class Shift {
   DateTime start;
@@ -52,6 +31,49 @@ class Availability {
   final Assistent assistent;
 
   const Availability(this.shift, this.assistent);
+}
+
+
+
+
+//----------------- Workschedule -----------------
+
+class Workschedule {
+  final DateTime start;
+  final DateTime end;
+  /// map of shifts by date
+  final Map<DateTime, List<ScheduledShift>> shiftsByDate = {};
+
+  Workschedule(this.start, this.end);
+
+  void addShift(ScheduledShift shift) {
+    /// get date of shift
+    final date = DateTime(shift.start.year, shift.start.month, shift.start.day);
+    /// add shift to list of shifts for that date if it exists, otherwise create a new list
+    shiftsByDate.putIfAbsent(date, () => []).add(shift);
+  }
+
+  /// returns all shifts for a given day or empty list if no shifts are scheduled
+  List<ScheduledShift> getShiftsForDay(DateTime day) {
+    final date = DateTime(day.year, day.month, day.day);
+    return shiftsByDate[date] ?? [];
+  }
+}
+
+/// model for workschedule
+class WorkscheduleModel extends ChangeNotifier {
+  final Workschedule workschedule;
+
+  WorkscheduleModel(this.workschedule);
+
+  void addShift(ScheduledShift shift) {
+    workschedule.addShift(shift);
+    notifyListeners(); // Widgets benachrichtigen
+  }
+
+  List<ScheduledShift> getShiftsForDay(DateTime day) {
+    return workschedule.getShiftsForDay(day);
+  }
 }
 
 /// dynamically displays workschedule based on selected workschedule
