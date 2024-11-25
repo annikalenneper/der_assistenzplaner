@@ -1,4 +1,6 @@
-import 'package:der_assistenzplaner/workschedules.dart';
+import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
+import 'package:der_assistenzplaner/models/workschedule.dart';
+import 'package:der_assistenzplaner/views/workschedule_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';

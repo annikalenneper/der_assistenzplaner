@@ -21,3 +21,9 @@ class Assistant {
     //TO-DO: Implement this method
   }
 }
+
+class AssistantModel {
+  final Assistant assistant;
+
+  AssistantModel(this.assistant);
+}

@@ -1,102 +1,8 @@
-
-
-import 'package:der_assistenzplaner/assistants.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:der_assistenzplaner/models/shift.dart';
+import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
 
-
-
-//----------------- Shift -----------------
-
-class Shift {
-  DateTime start;
-  DateTime end;
-
-  Shift(this.start, this.end);
-  
-  Duration get duration => end.difference(start);
-}
-
-
-
-
-//----------------- ScheduledShift -----------------
-
-class ScheduledShift extends Shift {
-  final Assistant assistant;
-
-  /// TO-DO: implement getter/setter-methods for conflicts
-  var tagConflictPrio1 = false;
-  var tagConflictPrio2 = false;
-  var availabilityConflict1 = false;
-  var availabilityConflict2 = false;
-
-  ScheduledShift(super.start, super.end, this.assistant);
-}
-
-class Availability {
-  final Shift shift;
-  final Assistant assistant;
-
-  const Availability(this.shift, this.assistant);
-}
-
-
-
-
-//----------------- Workschedule -----------------
-
-class Workschedule {
-  final DateTime start;
-  final DateTime end;
-  /// map of shifts by date
-  final Map<DateTime, List<ScheduledShift>> shiftsByDate = {};
-
-  Workschedule(this.start, this.end);
-
-  void addShift(ScheduledShift shift) {
-    /// get date of shift, then add shift to list of shifts for that date if it exists, otherwise create a new list
-    final date = DateTime(shift.start.year, shift.start.month, shift.start.day);
-    shiftsByDate.putIfAbsent(date, () => []).add(shift);
-  }
-
-  /// returns all shifts for a given day or empty list if no shifts are scheduled
-  List<ScheduledShift> getScheduledShiftsByDay(DateTime day) {
-    final date = DateTime(day.year, day.month, day.day);
-    return shiftsByDate[date] ?? [];
-  }
-}
-
-
-
-//----------------- Workschedule-Model -----------------
-
-class WorkscheduleModel extends ChangeNotifier {
-  final Workschedule _workschedule;
-
-  WorkscheduleModel(this._workschedule);
-
-  DateTime getStart() {
-    return _workschedule.start;
-  }
-
-  DateTime getEnd() {
-    return _workschedule.end;
-  }
-
-  void addShift(ScheduledShift shift) {
-    _workschedule.addShift(shift);
-    notifyListeners(); // Widgets benachrichtigen
-  }
-
-  List<ScheduledShift> getScheduledShiftsByDay(DateTime day) {
-    return _workschedule.getScheduledShiftsByDay(day);
-  }
-}
-
-
-
-//----------------- Workschedule-View -----------------
 
 
 class WorkScheduleView extends StatefulWidget {
@@ -211,8 +117,3 @@ class WorkScheduleViewState extends State<WorkScheduleView> {
     );
   }
 }
-
-
-
-
-

@@ -1,5 +1,6 @@
-import 'package:der_assistenzplaner/assistants.dart';
-import 'package:der_assistenzplaner/workschedules.dart';
+import 'package:der_assistenzplaner/models/assistant.dart';
+import 'package:der_assistenzplaner/models/workschedule.dart';
+import 'package:der_assistenzplaner/models/shift.dart';
 
 /// create test workschedule with two assistents and three shifts
 Workschedule createTestWorkSchedule() {
@@ -8,7 +9,7 @@ Workschedule createTestWorkSchedule() {
 
   ScheduledShift shift1 = ScheduledShift(
     DateTime(2024, 11, 23, 9, 0), 
-    DateTime(2024, 11, 23, 17, 0), 
+    DateTime(2024, 11, 24, 17, 0), 
     assistent1,
   );
 

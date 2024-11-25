@@ -1,6 +1,5 @@
+import 'package:der_assistenzplaner/models/shift.dart';
 
-
-import 'package:der_assistenzplaner/workschedules.dart';
 
 class Tag {
   String name = '';
