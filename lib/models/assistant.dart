@@ -22,8 +22,3 @@ class Assistant {
   }
 }
 
-class AssistantModel {
-  final Assistant assistant;
-
-  AssistantModel(this.assistant);
-}
