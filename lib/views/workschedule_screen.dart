@@ -32,8 +32,8 @@ class WorkScheduleViewState extends State<WorkScheduleView> {
     final wsModel = widget.wsModel;
     
     final calendar = TableCalendar(
-      firstDay: wsModel.getStart(),
-      lastDay: wsModel.getEnd(),
+      firstDay: wsModel.start,
+      lastDay: wsModel.end,
       focusedDay: _focusedDay,
       calendarFormat: _calendarFormat,
       
@@ -66,9 +66,7 @@ class WorkScheduleViewState extends State<WorkScheduleView> {
         return isSameDay(_selectedDay, day);
       },
 
-      eventLoader: (day) {
-        return wsModel.getScheduledShiftsByDay(day);
-      },
+      eventLoader: (day) => wsModel.getScheduledShiftsByDay(day),
 
       onDaySelected: (selectedDay, focusedDay) {
         setState(() {
