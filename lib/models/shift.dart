@@ -13,7 +13,6 @@ class Shift {
 
 
 
-
 //----------------- ScheduledShift -----------------
 
 class ScheduledShift extends Shift {
@@ -26,7 +25,24 @@ class ScheduledShift extends Shift {
   var availabilityConflict2 = false;
 
   ScheduledShift(super.start, super.end, this.assistant);
+
+  /// override == operator to compare ScheduledShifts by start, end and assistant
+  @override
+  bool operator == (Object other) {
+    if (identical(this, other)) return true;
+    if (other is! ScheduledShift) return false;
+    return start == other.start &&
+        end == other.end &&
+        assistant == other.assistant;
+  }
+
+  @override
+  int get hashCode => Object.hash(start, end, assistant);
 }
+
+
+
+//----------------- Availability -----------------
 
 class Availability {
   final Shift shift;
