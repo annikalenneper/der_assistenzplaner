@@ -7,20 +7,16 @@ class WorkscheduleModel extends ChangeNotifier {
 
   WorkscheduleModel(this._workschedule);
 
-  DateTime getStart() {
-    return _workschedule.start;
-  }
+  get start => _workschedule.start;
+  get end => _workschedule.end;
+  get shifts => _workschedule.scheduledShifts;
 
-  DateTime getEnd() {
-    return _workschedule.end;
+  List<ScheduledShift> getScheduledShiftsByDay(DateTime day) {
+    return _workschedule.getScheduledShiftsByDay(day);
   }
 
   void addShift(ScheduledShift shift) {
     _workschedule.addShift(shift);
     notifyListeners(); 
-  }
-
-  List<ScheduledShift> getScheduledShiftsByDay(DateTime day) {
-    return _workschedule.getScheduledShiftsByDay(day);
   }
 }
