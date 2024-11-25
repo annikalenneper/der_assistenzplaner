@@ -87,6 +87,8 @@ class WorkScheduleView extends StatefulWidget {
 }
 
 class WorkScheduleViewState extends State<WorkScheduleView> {
+  DateTime? _selectedDay;
+
   @override
   Widget build(BuildContext context) {
     final workschedule = widget.workschedule;
@@ -95,39 +97,31 @@ class WorkScheduleViewState extends State<WorkScheduleView> {
       firstDay: workschedule.start,
       lastDay: workschedule.end,
       focusedDay: DateTime.now(),
-      /// use class method to get shifts for day and return them as events
-      eventLoader: (day) {
-        return workschedule.getShiftsForDay(day); 
-      },
-      calendarBuilders: CalendarBuilders(
-        markerBuilder: (context, date, events) {
-          if (events.isEmpty) return null; 
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: events.map((event) {
-              final shift = event as ScheduledShift;
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                child: Container(
-                  width: 5,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.blue, 
-                  ),
-                  child: Tooltip(
-                    message: "${shift.start.hour}:${shift.start.minute} - ${shift.end.hour}:${shift.end.minute} (${shift.assistent.name})",
-                  ),
-                ),
-              );
-            }).toList(),
-          );
-        },
-      ),
-    );
 
-    return calendar;
+      selectedDayPredicate: (day) {
+        return isSameDay(_selectedDay, day);
+      },
+
+      onDaySelected: (selectedDay, focusedDay) {
+        setState(() {
+        _selectedDay = selectedDay;
+        });
+      },
+
+      eventLoader: (day) {
+        return workschedule.getShiftsForDay(day);
+      }, 
+    );
+    
+    return Column(
+      children: [
+        calendar,
+      ],
+    );
   }
 }
+
+
+
 
 
