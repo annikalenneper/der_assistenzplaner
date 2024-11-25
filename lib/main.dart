@@ -1,7 +1,6 @@
 import 'package:der_assistenzplaner/workschedules.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:der_assistenzplaner/test_data.dart';
 
@@ -93,12 +92,11 @@ class WorkScheduleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final workscheduleModel = Provider.of<WorkscheduleModel>(context);
-    final workschedule = workscheduleModel.workschedule;
     return Center(
       child: Column(
         children: [
           Text('Dienstplan'),
-          WorkScheduleView(workschedule: workschedule),  
+          WorkScheduleView(wsModel: workscheduleModel),  
         ]
       ),
     );
