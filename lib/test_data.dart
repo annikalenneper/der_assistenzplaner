@@ -1,10 +1,10 @@
-import 'package:der_assistenzplaner/assistents.dart';
+import 'package:der_assistenzplaner/assistants.dart';
 import 'package:der_assistenzplaner/workschedules.dart';
 
 /// create test workschedule with two assistents and three shifts
 Workschedule createTestWorkSchedule() {
-  Assistent assistent1 = Assistent("Max Mustermann");
-  Assistent assistent2 = Assistent("Anna Müller");
+  Assistant assistent1 = Assistant("Max Mustermann");
+  Assistant assistent2 = Assistant("Anna Müller");
 
   ScheduledShift shift1 = ScheduledShift(
     DateTime(2024, 11, 23, 9, 0), 
@@ -24,6 +24,12 @@ Workschedule createTestWorkSchedule() {
     assistent2,
   );
 
+  ScheduledShift shift4 = ScheduledShift(
+    DateTime(2024, 11, 23, 18, 0), 
+    DateTime(2024, 11, 23, 22, 0), 
+    assistent2,
+  );
+
   Workschedule workschedule = Workschedule(
     DateTime(2024, 11, 1),  
     DateTime(2024, 11, 30), 
@@ -33,6 +39,8 @@ Workschedule createTestWorkSchedule() {
   workschedule.addShift(shift1);
   workschedule.addShift(shift2);
   workschedule.addShift(shift3);
+  workschedule.addShift(shift4);
 
   return workschedule;
 }
+
