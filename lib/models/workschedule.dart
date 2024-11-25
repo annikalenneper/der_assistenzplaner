@@ -1,22 +1,50 @@
 import 'package:der_assistenzplaner/models/shift.dart';
+import 'package:der_assistenzplaner/utils/sort.dart';
 
 class Workschedule {
   final DateTime start;
   final DateTime end;
   /// map of shifts by date
-  final Map<DateTime, List<ScheduledShift>> shiftsByDate = {};
+  final List<ScheduledShift> scheduledShifts = [];
 
   Workschedule(this.start, this.end);
 
-  void addShift(ScheduledShift shift) {
-    /// get date of shift, then add shift to list of shifts for that date if it exists, otherwise create a new list
-    final date = DateTime(shift.start.year, shift.start.month, shift.start.day);
-    shiftsByDate.putIfAbsent(date, () => []).add(shift);
+  List<ScheduledShift> getScheduledShiftsByDay(DateTime day) {
+    return scheduledShifts.where((shift) => shift.start.day == day.day).toList();
   }
 
-  /// returns all shifts for a given day or empty list if no shifts are scheduled
-  List<ScheduledShift> getScheduledShiftsByDay(DateTime day) {
-    final date = DateTime(day.year, day.month, day.day);
-    return shiftsByDate[date] ?? [];
+  void addShift(ScheduledShift shift) {
+    if (shift.start.isBefore(start) || shift.end.isAfter(end)) {
+      throw ArgumentError('Schicht liegt nicht im ausgewählten Zeitraum.');
+    } 
+    /// insert shift sorted by start time (helper function from utils/sort.dart)
+    insertSorted<ScheduledShift>(
+      scheduledShifts,
+      shift,
+      (a, b) => a.start.compareTo(b.start),
+    );
+
+    /// warning if shifts overlap
+    int index = scheduledShifts.indexOf(shift);
+    if (index > 0 && doesOverlap(shift, scheduledShifts[index - 1])) {
+      print('Hinweis: Die neue Schicht überschneidet sich mit der vorherigen Schicht (${scheduledShifts[index - 1].toString()}).');
+    } if (index < scheduledShifts.length - 1 && doesOverlap(shift, scheduledShifts[index + 1])) {
+      print('Hinweis: Die neue Schicht überschneidet sich mit der nächsten Schicht (${scheduledShifts[index + 1].toString()}).');
+      } else {
+        print('Schicht erfolgreich hinzugefügt.');
+      }
   }
+
+  void removeShift(ScheduledShift shift) {
+    bool removed = scheduledShifts.remove(shift);
+    if (!removed) {
+      print('Schicht nicht gefunden.');
+    } else {
+      print('Schicht erfolgreich entfernt.');
+    }
+  }
+
 }
+
+
+bool doesOverlap(ScheduledShift newShift, ScheduledShift existingShift) => newShift.start.isBefore(existingShift.end) && newShift.end.isAfter(existingShift.start);
