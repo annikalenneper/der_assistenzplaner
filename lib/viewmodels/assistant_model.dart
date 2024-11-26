@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:flutter/material.dart';
 
@@ -13,23 +14,23 @@ class AssistantModel extends ChangeNotifier {
   ///add application specific logic 
   set name(String name) {
     assistant.name = name;
-    print('AssistantModel: name set to $name');
+    log('AssistantModel: name set to $name');
     notifyListeners();
   }
   set contractedHours(double contractedHours) {
     assistant.contractedHours = contractedHours;
-    print('AssistantModel: contractedHours set to $contractedHours');
+    log('AssistantModel: contractedHours set to $contractedHours');
     notifyListeners();
   } 
   set actualHours(double actualHours) {
     assistant.actualHours = actualHours;
-    print('AssistantModel: actualHours set to $actualHours');
+    log('AssistantModel: actualHours set to $actualHours');
     notifyListeners();
   }
   
   void addNote(String title, String text) {
     assistant.addNote(title, text);
-    print('AssistantModel: added note with title $title and text $text');
+    log('AssistantModel: added note with title $title and text $text');
     notifyListeners();
   }
 
