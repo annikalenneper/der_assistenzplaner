@@ -2,8 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
 import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
+import 'package:provider/provider.dart';
 
-
+///WorkScheduleScreen
+class WorkScheduleScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final workscheduleModel = Provider.of<WorkscheduleModel>(context);
+    return Center(
+      child: Column(
+        children: [
+          Text('Dienstplan'),
+          WorkScheduleView(wsModel: workscheduleModel),  
+        ]
+      ),
+    );
+  }
+}
 
 class WorkScheduleView extends StatefulWidget {
   final WorkscheduleModel wsModel;

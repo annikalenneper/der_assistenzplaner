@@ -8,6 +8,7 @@ import 'package:der_assistenzplaner/test_data.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/views/assistant_screen.dart';
+import 'package:der_assistenzplaner/views/settings_screen.dart';
 
 
 
@@ -92,32 +93,6 @@ class _HomeState extends State<HomeScreen> {
         ],
       ),
       body: pages[currentPageIndex], 
-    );
-  }
-}
-
-///WorkScheduleScreen
-class WorkScheduleScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final workscheduleModel = Provider.of<WorkscheduleModel>(context);
-    return Center(
-      child: Column(
-        children: [
-          Text('Dienstplan'),
-          WorkScheduleView(wsModel: workscheduleModel),  
-        ]
-      ),
-    );
-  }
-}
-
-///SettingsScreen
-class SettingsScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Einstellungen'),
     );
   }
 }
