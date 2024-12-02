@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:flutter/material.dart';
+import 'package:der_assistenzplaner/models/tag.dart';
 
 class AssistantModel extends ChangeNotifier {
   final Assistant assistant;
@@ -10,6 +11,11 @@ class AssistantModel extends ChangeNotifier {
   String get name => assistant.name;
   double get contractedHours => assistant.contractedHours;
   double get actualHours => assistant.actualHours;
+  double get deviation => assistant.deviation;
+  List<double> get surchargeCounter => assistant.surchargeCounter;
+  List<double> get futureSurchargeCounter => assistant.futureSurchargeCounter;
+  List<Note> get notes => assistant.notes;
+  List<Tag> get tags => assistant.tags;
 
   ///add application specific logic 
   set name(String name) {
