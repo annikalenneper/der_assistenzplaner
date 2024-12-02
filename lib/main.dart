@@ -5,20 +5,32 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:der_assistenzplaner/test_data.dart';
+import 'package:der_assistenzplaner/views/shared/assistant_card.dart';
+import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
+import 'package:der_assistenzplaner/models/assistant.dart';
+
 
 
 void main() {
   Workschedule workschedule = createTestWorkSchedule();
+  Assistant assistant = Assistant('Mona');
+  
   initializeDateFormatting().then((_) {
     runApp(
-      ChangeNotifierProvider(
-        create: (_) => WorkscheduleModel(workschedule),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (_) => WorkscheduleModel(workschedule),
+          ),
+          ChangeNotifierProvider(
+            create: (_) => AssistantModel(assistant),
+          ),
+        ],
         child: MyApp(),
       ),
     );
   });
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -109,14 +121,13 @@ class WorkScheduleScreen extends StatelessWidget {
 class AssistantsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
+    final assistantModel = Provider.of<AssistantModel>(context);
+    return Column(
         children: [
           Text('Assistenzkräfte'),
-          Text('Liste der Assistenzkräfte'),
+          AssistantCard(assistantModel),
         ] 
-      ),
-    );
+      );
   }
 }
 
