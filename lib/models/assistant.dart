@@ -5,6 +5,8 @@ class Assistant {
   String _name;
   double _contractedHours = 0.0;
   double _actualHours = 0.0;
+  double _deviation = 0.0;
+
   final List<double> _surchargeCounter = [];
   final List <double> _futureSurchargeCounter = [];
   final List<Note> _notes = [];
@@ -15,9 +17,11 @@ class Assistant {
   String get name => _name;
   double get contractedHours => _contractedHours;
   double get actualHours => _actualHours;
+  double get deviation => _contractedHours - _actualHours;
   List<double> get surchargeCounter => List.unmodifiable(_surchargeCounter);
   List<double> get futureSurchargeCounter => List.unmodifiable(_futureSurchargeCounter);
   List<Note> get notes => List.unmodifiable(_notes);
+  List<Tag> get tags => List.unmodifiable(_tags);
 
   //TO-DO: Implement checks for valid name
   set name(String name) => (name.isNotEmpty) ? _name = name : throw ArgumentError('name darf nicht leer sein.');
