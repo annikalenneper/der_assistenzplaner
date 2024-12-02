@@ -5,7 +5,6 @@ class Assistant {
   String _name;
   double _contractedHours = 0.0;
   double _actualHours = 0.0;
-  double _deviation = 0.0;
 
   final List<double> _surchargeCounter = [];
   final List <double> _futureSurchargeCounter = [];
