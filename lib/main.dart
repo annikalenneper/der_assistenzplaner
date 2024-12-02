@@ -62,7 +62,6 @@ class _HomeState extends State<HomeScreen> {
     final pages = [
       WorkScheduleScreen(),
       AssistantsScreen(),
-      TagScreen(),
       SettingsScreen()
     ];
 
@@ -85,10 +84,6 @@ class _HomeState extends State<HomeScreen> {
           NavigationDestination(
             icon: Icon(Icons.person),
             label: 'Assistenzkräfte',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.label),
-            label: 'Besondere Anforderungen',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings),
