@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:der_assistenzplaner/test_data.dart';
-import 'package:der_assistenzplaner/views/shared/assistant_card.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/models/assistant.dart';
+import 'package:der_assistenzplaner/views/assistant_screen.dart';
 
 
 
@@ -108,30 +108,6 @@ class WorkScheduleScreen extends StatelessWidget {
           WorkScheduleView(wsModel: workscheduleModel),  
         ]
       ),
-    );
-  }
-}
-
-///AssistantsScreen
-class AssistantsScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final assistantModel = Provider.of<AssistantModel>(context);
-    return Column(
-        children: [
-          Text('Assistenzkräfte'),
-          AssistantCard(assistantModel),
-        ] 
-      );
-  }
-}
-
-//TagScreen
-class TagScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Besondere Anforderungen'),
     );
   }
 }
