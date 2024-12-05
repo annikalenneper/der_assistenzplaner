@@ -4,8 +4,8 @@ import 'package:der_assistenzplaner/models/shift.dart';
 
 /// create test workschedule with two assistents and three shifts
 Workschedule createTestWorkSchedule() {
-  Assistant assistent1 = Assistant("Max Mustermann");
-  Assistant assistent2 = Assistant("Anna Müller");
+  Assistant assistent1 = Assistant("Max Mustermann", 120);
+  Assistant assistent2 = Assistant("Anna Müller", 80);
 
   ScheduledShift shift1 = ScheduledShift(
     DateTime(2024, 12, 23, 9, 0), 
