@@ -1,3 +1,4 @@
+import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
 import 'package:der_assistenzplaner/models/workschedule.dart';
 import 'package:der_assistenzplaner/views/workschedule_screen.dart';
@@ -6,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:der_assistenzplaner/test_data.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
-import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/views/assistant_screen.dart';
 import 'package:der_assistenzplaner/views/settings_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -19,9 +19,12 @@ Future<void> main() async {
   
   //test data
   Workschedule workschedule = createTestWorkSchedule();
-  Assistant assistant = Assistant('Mona', 120);
 
   await Hive.initFlutter();
+  Hive.registerAdapter(AssistantAdapter());
+
+  final assistantModel = AssistantModel();
+  await assistantModel.initialize();
   
   initializeDateFormatting().then((_) {
     runApp(
@@ -31,7 +34,7 @@ Future<void> main() async {
             create: (_) => WorkscheduleModel(workschedule),
           ),
           ChangeNotifierProvider(
-            create: (_) => AssistantModel(),
+            create: (_) => assistantModel,
           ),
         ],
         child: MyApp(),
