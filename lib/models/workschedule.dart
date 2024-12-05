@@ -46,5 +46,5 @@ class Workschedule {
 
 }
 
-
+///TO-DO: move to utils, make generic
 bool doesOverlap(ScheduledShift newShift, ScheduledShift existingShift) => newShift.start.isBefore(existingShift.end) && newShift.end.isAfter(existingShift.start);
