@@ -34,17 +34,6 @@ class AssistantScreen extends StatelessWidget {
   }
 }
 
-//----------------- AssistantDetailView -----------------
-
-class AssistantDetailView extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      
-    );
-  }
-}
-
 
 //----------------- AssistantAddScreen -----------------
 
@@ -95,8 +84,10 @@ class _AssistantAddViewState extends State<AssistantAddView> {
       return;
     }
 
-    var newAssistant = AssistantModel(Assistant(name, hours));
-    newAssistant.saveAssistant(); /// not implemented yet
+    /// save assistant to database
+    var newAssistant = AssistantModel();
+    newAssistant.currentAssistant = Assistant(name, hours);
+    newAssistant.saveCurrentAssistant(); 
 
     /// testing + user feedback
     print("Neue Assistenzkraft: Name = $name, Stunden = $hours");
