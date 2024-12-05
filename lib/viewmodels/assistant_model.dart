@@ -2,37 +2,46 @@ import 'dart:developer';
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/models/tag.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class AssistantModel extends ChangeNotifier {
-  final Assistant assistant;
-
-  AssistantModel(this.assistant);
+  late Box<Assistant> _assistantBox;
+  late List<Assistant> assistants = getAllAssistants();
+  Assistant? currentAssistant;
+  
+  AssistantModel();
 
   //----------------- Getter methods -----------------
 
-  String get name => assistant.name;
-  double get contractedHours => assistant.contractedHours;
-  double get actualHours => assistant.actualHours;
-  double get deviation => assistant.deviation;
-  List<double> get surchargeCounter => assistant.surchargeCounter;
-  List<double> get futureSurchargeCounter => assistant.futureSurchargeCounter;
-  List<Note> get notes => assistant.notes;
-  List<Tag> get tags => assistant.tags;
+  String get name => currentAssistant?.name ?? '';
+  double get contractedHours => currentAssistant?.contractedHours ?? 0.0;
+  double get actualHours => currentAssistant?.actualHours ?? 0.0;
+  double get deviation => currentAssistant?.deviation ?? 0.0;
+  List<double> get surchargeCounter => currentAssistant?.surchargeCounter ?? [];
+  List<double> get futureSurchargeCounter => currentAssistant?.futureSurchargeCounter ?? [];
+  List<Note> get notes => currentAssistant?.notes ?? [];
+  List<Tag> get tags => currentAssistant?.tags ?? [];
 
   //----------------- Setter methods -----------------
 
+  set assistant(Assistant assistant) {
+    currentAssistant = assistant;
+    log('AssistantModel: assistant set to $assistant');
+    notifyListeners();
+  }
+
   set name(String name) {
-    assistant.name = name;
+    currentAssistant?.name = name;
     log('AssistantModel: name set to $name');
     notifyListeners();
   }
   set contractedHours(double contractedHours) {
-    assistant.contractedHours = contractedHours;
+    currentAssistant?.contractedHours = contractedHours;
     log('AssistantModel: contractedHours set to $contractedHours');
     notifyListeners();
   } 
   set actualHours(double actualHours) {
-    assistant.actualHours = actualHours;
+    currentAssistant?.actualHours = actualHours;
     log('AssistantModel: actualHours set to $actualHours');
     notifyListeners();
   }
@@ -40,13 +49,13 @@ class AssistantModel extends ChangeNotifier {
   //----------------- User interaction methods -----------------
   
   void addNote(String title, String text) {
-    assistant.addNote(title, text);
+    currentAssistant?.addNote(title, text);
     log('AssistantModel: added note with title $title and text $text');
     notifyListeners();
   }
   
   void assignTag(Tag tag) {
-    assistant.assignTag(tag);
+    currentAssistant?.assignTag(tag);
     log('AssistantModel: assigned tag $tag');
     notifyListeners();
   }
@@ -69,8 +78,45 @@ class AssistantModel extends ChangeNotifier {
 
   //----------------- Database methods -----------------
 
-  void saveAssistant() {
-    //TO-DO: Implement this method
-    //save assistant to database
+  /// initialize box for assistant objects and keep assistants list synchronized with database
+  Future<void> initialize() async {
+  _assistantBox = await Hive.openBox<Assistant>('assistantBox');
+  
+  assistants = getAllAssistants();
+  
+  /// listen to changes in database and update assistants list accordingly
+  _assistantBox.watch().listen((event) {
+    assistants = getAllAssistants();
+    notifyListeners(); 
+    log('AssistantModel: assistants list updated');
+  });
+}
+
+
+  Future<void> saveCurrentAssistant() async {
+    if (currentAssistant == null) {
+      log('AssistantModel: currentAssistant is null');
+      return;
+    } else
+    if (assistants.contains(currentAssistant)) {
+      log('AssistantModel: currentAssistant already exists in database');
+      return;
+    }; 
+    await _assistantBox.add(currentAssistant!);
+    notifyListeners(); 
+  }
+
+  Future<void> updateAssistant(int index, Assistant updatedAssistant) async {
+    await _assistantBox.putAt(index, updatedAssistant); 
+    notifyListeners(); 
+  }
+
+  List<Assistant> getAllAssistants() {
+    return _assistantBox.values.toList();
+  }
+
+  Future<void> deleteAssistant(int index) async {
+    await _assistantBox.deleteAt(index);
+    notifyListeners(); 
   }
 }
