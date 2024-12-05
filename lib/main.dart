@@ -14,7 +14,7 @@ import 'package:der_assistenzplaner/views/settings_screen.dart';
 
 void main() {
   Workschedule workschedule = createTestWorkSchedule();
-  Assistant assistant = Assistant('Mona');
+  Assistant assistant = Assistant('Mona', 120);
   
   initializeDateFormatting().then((_) {
     runApp(
@@ -62,7 +62,7 @@ class _HomeState extends State<HomeScreen> {
 
     final pages = [
       WorkScheduleScreen(),
-      AssistantsScreen(),
+      AssistantScreen(),
       SettingsScreen()
     ];
 

@@ -8,6 +8,8 @@ class AssistantModel extends ChangeNotifier {
 
   AssistantModel(this.assistant);
 
+  //----------------- Getter methods -----------------
+
   String get name => assistant.name;
   double get contractedHours => assistant.contractedHours;
   double get actualHours => assistant.actualHours;
@@ -17,7 +19,8 @@ class AssistantModel extends ChangeNotifier {
   List<Note> get notes => assistant.notes;
   List<Tag> get tags => assistant.tags;
 
-  ///add application specific logic 
+  //----------------- Setter methods -----------------
+
   set name(String name) {
     assistant.name = name;
     log('AssistantModel: name set to $name');
@@ -33,12 +36,22 @@ class AssistantModel extends ChangeNotifier {
     log('AssistantModel: actualHours set to $actualHours');
     notifyListeners();
   }
+
+  //----------------- User interaction methods -----------------
   
   void addNote(String title, String text) {
     assistant.addNote(title, text);
     log('AssistantModel: added note with title $title and text $text');
     notifyListeners();
   }
+  
+  void assignTag(Tag tag) {
+    assistant.assignTag(tag);
+    log('AssistantModel: assigned tag $tag');
+    notifyListeners();
+  }
+
+  //----------------- Application specific methods -----------------
 
   ///TO-DO: listen to changes in workschedules and update actualHours and surchargeCounters accordingly
   void updateActualHours() {
@@ -52,5 +65,12 @@ class AssistantModel extends ChangeNotifier {
   void updateFutureSurchargeCounter() {
     //TO-DO: Implement this method
     //for each scheduledShift assigned to this assistant -> (if shiftstart > current date) add surcharges to var futureSurchargeCounter 
+  }
+
+  //----------------- Database methods -----------------
+
+  void saveAssistant() {
+    //TO-DO: Implement this method
+    //save assistant to database
   }
 }
