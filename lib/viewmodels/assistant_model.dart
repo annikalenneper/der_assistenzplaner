@@ -26,7 +26,7 @@ class AssistantModel extends ChangeNotifier {
 
   set assistant(Assistant assistant) {
     currentAssistant = assistant;
-    log('AssistantModel: assistant set to $assistant');
+    log('AssistantModel: currentAssistant set to $assistant');
     notifyListeners();
   }
 
@@ -97,11 +97,11 @@ class AssistantModel extends ChangeNotifier {
     if (currentAssistant == null) {
       log('AssistantModel: currentAssistant is null');
       return;
-    } else
+    } 
     if (assistants.contains(currentAssistant)) {
       log('AssistantModel: currentAssistant already exists in database');
       return;
-    }; 
+    } 
     await _assistantBox.add(currentAssistant!);
     notifyListeners(); 
   }
