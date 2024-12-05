@@ -11,7 +11,7 @@ class Assistant {
   final List<Note> _notes = [];
   final List<Tag> _tags = [];
 
-  Assistant(this._name);
+  Assistant(this._name, this._contractedHours);
 
   String get name => _name;
   double get contractedHours => _contractedHours;
