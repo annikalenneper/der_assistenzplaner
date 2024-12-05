@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:der_assistenzplaner/views/shared/assistant_card.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/models/assistant.dart';
+import 'dart:developer';
+import 'package:der_assistenzplaner/views/shared/assistant_details.dart';
 
 //----------------- AssistantScreen -----------------
 
@@ -10,29 +12,52 @@ class AssistantScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final assistantModel = Provider.of<AssistantModel>(context);
+
     return Stack(
       children: [
         Column(
-        children: [
-          Text('Assistenzkräfte'),
-          AssistantCard(assistantModel),      
-        ] 
-      ),
-      Positioned(
-        bottom: 20,
-        right: 20,
-        child: 
-          FloatingActionButton(
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => AssistantAddScreen()));
-          },
-          child: Icon(Icons.add),
-          ),  
+          children: [
+            Text(
+              'Assistenzkräfte',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: assistantModel.assistants.length,
+                itemBuilder: (context, index) {
+                  var assistant = assistantModel.assistants[index];
+                  return GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AssistantDetails(assistant),
+                      ),
+                    ),
+                    child: AssistantCard(assistant)
+                  );
+                },
+              ),
+            ),
+          ],
         ),
-      ] 
+        Positioned(
+          bottom: 20,
+          right: 20,
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AssistantAddScreen()),
+              );
+            },
+            child: Icon(Icons.add),
+          ),
+        ),
+      ],
     );
   }
 }
+
 
 
 //----------------- AssistantAddScreen -----------------
@@ -85,12 +110,13 @@ class _AssistantAddViewState extends State<AssistantAddView> {
     }
 
     /// save assistant to database
-    var newAssistant = AssistantModel();
-    newAssistant.currentAssistant = Assistant(name, hours);
-    newAssistant.saveCurrentAssistant(); 
+    final assistantModel = Provider.of<AssistantModel>(context, listen: false);
+    assistantModel.currentAssistant = Assistant(name, hours);
+    assistantModel.saveCurrentAssistant();
+    log(assistantModel.assistants.toString());
 
     /// testing + user feedback
-    print("Neue Assistenzkraft: Name = $name, Stunden = $hours");
+    log("Neue Assistenzkraft: Name = $name, Stunden = $hours");
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Assistenzkraft $name wurde hinzugefügt')),
     );
