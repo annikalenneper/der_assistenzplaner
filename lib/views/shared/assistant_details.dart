@@ -3,9 +3,9 @@ import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:flutter/material.dart';
 
 class AssistantDetails extends StatelessWidget {
-  final AssistantModel assistant;
+  final AssistantModel selectedAssistant;
 
-  AssistantDetails(this.assistant);
+  AssistantDetails(this.selectedAssistant);
 
   @override
   Widget build(BuildContext context) {
@@ -22,16 +22,16 @@ class AssistantDetails extends StatelessWidget {
         Column(
         children: [
           Icon(Icons.person),
-          Text(assistant.name),
+          Text(selectedAssistant.name),
           Row(
             children: [
-              Text(assistant.tags.toString()),
+              Text(selectedAssistant.tags.toString()),
               Icon(Icons.add),
             ],
           ),
-          Text('${assistant.deviation}'),
-          Text('StundenVertragliche Arbeitsstunden: ${assistant.contractedHours}'),
-          Text('Tatsächliche Arbeitsstunden: ${assistant.actualHours}'),
+          Text('${selectedAssistant.deviation}'),
+          Text('Vertraglich vereinbarte Arbeitsstunden: ${selectedAssistant.contractedHours}'),
+          Text('Tatsächliche Arbeitsstunden: ${selectedAssistant.actualHours}'),
         ],
       ),
       ] 
