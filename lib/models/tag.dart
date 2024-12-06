@@ -10,7 +10,7 @@ class Tag {
   String name;
 
   @HiveField(1)
-  Icon tagSymbol;
+  IconData tagSymbol;
 
   Tag(this.name, this.tagSymbol);
 }

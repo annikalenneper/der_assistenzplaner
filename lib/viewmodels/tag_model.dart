@@ -17,48 +17,26 @@ class TagModel extends ChangeNotifier {
   /// list of all tagSymbols
   /// selection of tag examples
   
-  final List<IconData> availableIcons = [
-    FontAwesomeIcons.car,
-    FontAwesomeIcons.shower,
-    FontAwesomeIcons.bed,
-    FontAwesomeIcons.bath,
-    FontAwesomeIcons.baby,
-    FontAwesomeIcons.book,
-    FontAwesomeIcons.dog,
-    FontAwesomeIcons.cat,
-    FontAwesomeIcons.suitcase,
-    FontAwesomeIcons.briefcase,
-    FontAwesomeIcons.moon,
-    FontAwesomeIcons.campground,
-    FontAwesomeIcons.basketShopping,
-    FontAwesomeIcons.train,
-    FontAwesomeIcons.umbrellaBeach,
-    FontAwesomeIcons.gamepad,
-    FontAwesomeIcons.leaf,
-    FontAwesomeIcons.bicycle,
-    FontAwesomeIcons.bus,
-    FontAwesomeIcons.guitar,
-  ];
 
   final List<Tag> exampleTags = [
-    Tag('Urlaub', Icon(FontAwesomeIcons.umbrella)),
-    Tag('Krankenhaus', Icon(FontAwesomeIcons.hospital)),
-    Tag('Führerschein', Icon(FontAwesomeIcons.car)),
-    Tag('Langer Abend', Icon(FontAwesomeIcons.moon)),
-    Tag('Arbeit', Icon(FontAwesomeIcons.briefcase)),
-    Tag('Duschen', Icon(FontAwesomeIcons.shower)),
-    Tag('Baden', Icon(FontAwesomeIcons.bath)),
-    Tag('Hund', Icon(FontAwesomeIcons.dog)),
-    Tag('Doppeldienst', Icon(FontAwesomeIcons.checkDouble)),
-    Tag('Schwimmen', Icon(FontAwesomeIcons.water)),
-    Tag('Kino', Icon(FontAwesomeIcons.film)),
-    Tag('Handwerk', Icon(FontAwesomeIcons.hammer)),
-    Tag('Essen gehen', Icon(FontAwesomeIcons.utensils)),
-    Tag('Gartenarbeit', Icon(FontAwesomeIcons.leaf)),
-    Tag('Konzert', Icon(FontAwesomeIcons.music)),
-    Tag('Ausgehen', Icon(FontAwesomeIcons.wineGlass)),
-    Tag('Draußen in der Natur', Icon(FontAwesomeIcons.tree)),
-    Tag('Arzttermin', Icon(FontAwesomeIcons.stethoscope)),
+    Tag('Urlaub', FontAwesomeIcons.umbrellaBeach),
+    Tag('Krankenhaus', FontAwesomeIcons.hospital),
+    Tag('Führerschein', FontAwesomeIcons.car),
+    Tag('Langer Abend', FontAwesomeIcons.moon),
+    Tag('Arbeit', FontAwesomeIcons.briefcase),
+    Tag('Duschen', FontAwesomeIcons.shower),
+    Tag('Baden', FontAwesomeIcons.bath),
+    Tag('Hund', FontAwesomeIcons.dog),
+    Tag('Doppeldienst', FontAwesomeIcons.checkDouble),
+    Tag('Schwimmen', FontAwesomeIcons.water),
+    Tag('Kino', FontAwesomeIcons.film),
+    Tag('Handwerk', FontAwesomeIcons.hammer),
+    Tag('Essen gehen', FontAwesomeIcons.utensils),
+    Tag('Gartenarbeit', FontAwesomeIcons.leaf),
+    Tag('Konzert', FontAwesomeIcons.music),
+    Tag('Ausgehen', FontAwesomeIcons.wineGlass),
+    Tag('In der Natur', FontAwesomeIcons.tree),
+    Tag('Arzttermin', FontAwesomeIcons.stethoscope),
 
   ];
 
@@ -70,7 +48,7 @@ class TagModel extends ChangeNotifier {
     selectedTag = tag;
   } 
 
-  void addTag(String name, Icon tagSymbol) {
+  void addTag(String name, IconData tagSymbol) {
     personalTags.add(Tag(name, tagSymbol));
   }
 

@@ -18,7 +18,7 @@ class TagAdapter extends TypeAdapter<Tag> {
     };
     return Tag(
       fields[0] as String,
-      fields[1] as Icon,
+      fields[1] as IconData,
     );
   }
 
