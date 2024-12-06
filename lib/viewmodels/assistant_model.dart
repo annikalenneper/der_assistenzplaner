@@ -80,17 +80,17 @@ class AssistantModel extends ChangeNotifier {
 
   /// initialize box for assistant objects and keep assistants list synchronized with database
   Future<void> initialize() async {
-  _assistantBox = await Hive.openBox<Assistant>('assistantBox');
+    _assistantBox = await Hive.openBox<Assistant>('assistantBox');
   
-  assistants = getAllAssistants();
+    assistants = getAllAssistants();
   
   /// listen to changes in database and update assistants list accordingly
-  _assistantBox.watch().listen((event) {
-    assistants = getAllAssistants();
-    notifyListeners(); 
-    log('AssistantModel: assistants list updated');
-  });
-}
+    _assistantBox.watch().listen((event) {
+      assistants = getAllAssistants();
+      notifyListeners(); 
+      log('AssistantModel: assistants list updated');
+    });
+  }
 
 
   Future<void> saveCurrentAssistant() async {
