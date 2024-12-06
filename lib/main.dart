@@ -10,6 +10,7 @@ import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/views/assistant_screen.dart';
 import 'package:der_assistenzplaner/views/settings_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:der_assistenzplaner/viewmodels/tag_model.dart';
 
 
 
@@ -25,17 +26,24 @@ Future<void> main() async {
 
   final assistantModel = AssistantModel();
   await assistantModel.initialize();
+
+  final tagModel = TagModel();
+  await tagModel.initialize();
   
   initializeDateFormatting().then((_) {
     runApp(
       MultiProvider(
         providers: [
           ChangeNotifierProvider(
+            create: (_) => tagModel,
+          ),
+          ChangeNotifierProvider(
             create: (_) => WorkscheduleModel(workschedule),
           ),
           ChangeNotifierProvider(
             create: (_) => assistantModel,
           ),
+          
         ],
         child: MyApp(),
       ),
