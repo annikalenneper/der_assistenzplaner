@@ -12,7 +12,6 @@ class WorkScheduleScreen extends StatelessWidget {
     return Center(
       child: Column(
         children: [
-          Text('Dienstplan'),
           WorkScheduleView(wsModel: workscheduleModel),  
         ]
       ),
