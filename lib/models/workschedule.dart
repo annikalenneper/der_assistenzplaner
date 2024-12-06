@@ -27,9 +27,9 @@ class Workschedule {
     /// warning if shifts overlap
     int index = scheduledShifts.indexOf(shift);
     if (index > 0 && doesOverlap(shift, scheduledShifts[index - 1])) {
-      print('Hinweis: Die neue Schicht überschneidet sich mit der vorherigen Schicht (${scheduledShifts[index - 1].toString()}).');
+      print('Hinweis: Die neue Schicht überschneidet sich mit der vorherigen Schicht (Start: ${shift.start} liegt vor Ende: ${scheduledShifts[index - 1].end.toString()}).');
     } if (index < scheduledShifts.length - 1 && doesOverlap(shift, scheduledShifts[index + 1])) {
-      print('Hinweis: Die neue Schicht überschneidet sich mit der nächsten Schicht (${scheduledShifts[index + 1].toString()}).');
+      print('Hinweis: Die neue Schicht überschneidet sich mit der nächsten Schicht (Ende: ${shift.end} liegt nach Start: ${scheduledShifts[index + 1].start.toString()}).');
       } else {
         print('Schicht erfolgreich hinzugefügt.');
       }
