@@ -11,6 +11,7 @@ import 'package:der_assistenzplaner/views/assistant_screen.dart';
 import 'package:der_assistenzplaner/views/settings_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:der_assistenzplaner/viewmodels/tag_model.dart';
+import 'package:der_assistenzplaner/views/documents_screen.dart';
 
 
 
@@ -81,6 +82,7 @@ class _HomeState extends State<HomeScreen> {
     final pages = [
       WorkScheduleScreen(),
       AssistantScreen(),
+      DocumentsScreen(),
       SettingsScreen()
     ];
 
@@ -103,6 +105,10 @@ class _HomeState extends State<HomeScreen> {
           NavigationDestination(
             icon: Icon(Icons.person),
             label: 'Assistenzkräfte',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.file_copy),
+            label: 'Dokumente',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings),
