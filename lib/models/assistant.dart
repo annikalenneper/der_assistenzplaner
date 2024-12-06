@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'assistant.g.dart';
 
-///hive fields and type ids for persistence
+///hive fields for persistence (needs unique type id)
 @HiveType(typeId: 0) 
   class Assistant extends HiveObject {
     @HiveField(0) 
