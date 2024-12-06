@@ -1,17 +1,20 @@
 import 'package:der_assistenzplaner/models/shift.dart';
+import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
+part 'tag.g.dart'; 
 
+@HiveType(typeId: 4) 
 class Tag {
-  String name = '';
-  String emoji = '';
-  String description = '';
+  @HiveField(0)
+  String name;
 
-  Tag(this.name, this.emoji, this.description);
+  @HiveField(1)
+  Icon tagSymbol;
 
-  void assignTag(){
-    //TO-DO: Implement this method
-  }
+  Tag(this.name, this.tagSymbol);
 }
+
 
 class ShiftTag {
   final Tag tag;
