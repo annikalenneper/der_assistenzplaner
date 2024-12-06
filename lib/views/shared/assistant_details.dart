@@ -11,9 +11,16 @@ class AssistantDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(assistant.name.toString())),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+            children: [ 
+              Icon(Icons.person, size: 100),
+              Text(assistant.tags.toString()),
+              Text(assistant.deviation.toString()),
+              Text(assistant.notes.toString()),
+          ],
+        ),
       ),
     );
   }
