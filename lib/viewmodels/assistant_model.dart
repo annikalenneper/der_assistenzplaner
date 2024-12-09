@@ -115,8 +115,13 @@ class AssistantModel extends ChangeNotifier {
     return _assistantBox.values.toList();
   }
 
-  Future<void> deleteAssistant(int index) async {
-    await _assistantBox.deleteAt(index);
+  Future<void> deleteAssistant() async {
+    if (currentAssistant != null) {
+      await _assistantBox.delete(currentAssistant!.key);
+      notifyListeners();
+    } else {
+      log('AssistantModel: currentAssistant is null');
+    }
     notifyListeners(); 
   }
 }
