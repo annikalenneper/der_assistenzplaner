@@ -1,11 +1,9 @@
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
-import 'package:der_assistenzplaner/models/workschedule.dart';
 import 'package:der_assistenzplaner/views/workschedule_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:der_assistenzplaner/test_data.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/views/assistant_screen.dart';
 import 'package:der_assistenzplaner/views/settings_screen.dart';
@@ -18,9 +16,6 @@ import 'package:der_assistenzplaner/views/documents_screen.dart';
 Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
-  
-  //test data
-  Workschedule workschedule = createTestWorkSchedule();
 
   await Hive.initFlutter();
   Hive.registerAdapter(AssistantAdapter());
@@ -30,6 +25,8 @@ Future<void> main() async {
 
   final tagModel = TagModel();
   await tagModel.initialize();
+
+  final workscheduleModel = WorkscheduleModel();
   
   initializeDateFormatting().then((_) {
     runApp(
@@ -39,7 +36,7 @@ Future<void> main() async {
             create: (_) => tagModel,
           ),
           ChangeNotifierProvider(
-            create: (_) => WorkscheduleModel(workschedule),
+            create: (_) => workscheduleModel,
           ),
           ChangeNotifierProvider(
             create: (_) => assistantModel,
@@ -57,6 +54,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final assistantModel = Provider.of<AssistantModel>(context);
     return MaterialApp(
       title: 'Der Assistenzplaner',
       theme: ThemeData(
@@ -64,17 +62,34 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.pink),
       ),
       home: HomeScreen(),
+      /// routes for navigation without stack
+      routes: {
+        '/assistantScreen': (context) => HomeScreen(initialPageIndex: 1),
+        '/documentsScreen': (context) => HomeScreen(initialPageIndex: 2), 
+        '/settingsScreen': (context) => HomeScreen(initialPageIndex: 3),
+        '/assistantAddScreen': (context) => AssistantAddScreen(),
+        '/assistantDetails': (context) => AssistantDetails(assistantModel),
+      }
     );
   }
 }
 
 class HomeScreen extends StatefulWidget {
+  final int initialPageIndex;
+  const HomeScreen({this.initialPageIndex = 0, super.key});
+
   @override
   State<HomeScreen> createState() => _HomeState();
 }
 
 class _HomeState extends State<HomeScreen> {
-  int currentPageIndex = 0;
+  late int _currentPageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPageIndex = widget.initialPageIndex; // Initialen Index setzen
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,10 +106,10 @@ class _HomeState extends State<HomeScreen> {
         title: Text('Der Assistenzplaner'),
       ),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: currentPageIndex,
+        selectedIndex: _currentPageIndex,
         onDestinationSelected: (int index) {
           setState(() {
-            currentPageIndex = index;
+            _currentPageIndex = index;
           });
         },
         destinations: const <Widget>[
@@ -116,7 +131,7 @@ class _HomeState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: pages[currentPageIndex], 
+      body: pages[_currentPageIndex], 
     );
   }
 }
