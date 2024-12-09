@@ -241,14 +241,17 @@ class AssistantDetails extends StatelessWidget {
                   context: context, 
                   builder: (BuildContext context) => Dialog(
                     child: Padding(
-                      padding: EdgeInsets.all(40),
+                      padding: EdgeInsets.all(20),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Tags hier'),
+                          SizedBox(
+                            height: MediaQuery.sizeOf(context).height,   
+                            width: MediaQuery.sizeOf(context).width,
+                            child: TagView(true)),
                           ElevatedButton(
                             onPressed: () {
-
+                              /// TO-DO assignTag()
                             }, 
                             child: Text('Ausgewählte Tags zuordnen'))
                         ],

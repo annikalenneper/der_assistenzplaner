@@ -1,12 +1,18 @@
+import 'package:der_assistenzplaner/models/tag.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 
-class TagWidget extends StatelessWidget {
-  final IconData icon;
-  final String name;
+class TagWidget extends StatefulWidget {
+  final Tag tag;
+  TagWidget(this.tag);
 
-  TagWidget({required this.icon, required this.name});
+  @override
+  State<StatefulWidget> createState() => _TagWidgetViewState();
+}
+
+class _TagWidgetViewState extends State<TagWidget> {
+  var isFocused = false;
 
   @override
   Widget build(BuildContext context) {
@@ -14,24 +20,33 @@ class TagWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.grey, width: 2),
-          ),
-          child: Center(
-            child: FaIcon(
-              icon,
-              size: 30,
-              color: Colors.grey.shade800,
+        Focus(
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                isFocused = !isFocused;   
+              });
+            },
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: isFocused ? Colors.blue : Colors.grey, width: 2),
+              ),
+              child: Center(
+                child: FaIcon(
+                  widget.tag.tagSymbol,
+                  size: 30,
+                  color: isFocused ? Colors.blue : Colors.grey.shade800,
+                ),
+              ),
             ),
           ),
         ),
         SizedBox(height: 8),
         Text(
-          name,
+          widget.tag.name,
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
           maxLines: 2, 
