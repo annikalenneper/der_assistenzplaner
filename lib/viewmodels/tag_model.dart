@@ -1,6 +1,6 @@
 import 'dart:developer';
-
 import 'package:der_assistenzplaner/models/tag.dart';
+import 'package:der_assistenzplaner/views/shared/tag_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -12,13 +12,10 @@ class TagModel extends ChangeNotifier {
   late Box<Tag> _tagBox;
   late List<Tag> personalTags = [];
 
-  TagModel();
+  get name => selectedTag?.name;
+  get tagSymbol => selectedTag?.tagSymbol;
   
-  /// list of all tagSymbols
-  /// selection of tag examples
-  
-
-  final List<Tag> exampleTags = [
+  List<Tag> exampleTags = [
     Tag('Urlaub', FontAwesomeIcons.umbrellaBeach),
     Tag('Krankenhaus', FontAwesomeIcons.hospital),
     Tag('Führerschein', FontAwesomeIcons.car),
@@ -37,9 +34,12 @@ class TagModel extends ChangeNotifier {
     Tag('Ausgehen', FontAwesomeIcons.wineGlass),
     Tag('In der Natur', FontAwesomeIcons.tree),
     Tag('Arzttermin', FontAwesomeIcons.stethoscope),
-
   ];
 
+  set tag(Tag tag) {
+      selectedTag = tag;
+      log('TagModel: currentTag set to $tag');
+  }
 
   //----------------- User interaction methods -----------------
   
@@ -55,6 +55,8 @@ class TagModel extends ChangeNotifier {
   void removeTag(Tag tag) {
     personalTags.remove(tag);
   }
+
+  List<Widget> tagListView() => exampleTags.map((tag)=>TagWidget(tag)).toList();
 
 
   //----------------- Database methods -----------------
