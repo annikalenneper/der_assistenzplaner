@@ -1,6 +1,8 @@
+import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/views/assistant_screen.dart';
+import 'package:provider/provider.dart';
 
 class AssistantCard extends StatelessWidget {
   final Assistant assistant;
@@ -9,6 +11,8 @@ class AssistantCard extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+    final assistantModel = Provider.of<AssistantModel>(context);
+    assistantModel.currentAssistant = assistant;
     return SizedBox(
       height: 100,
       child: Card(
@@ -19,7 +23,7 @@ class AssistantCard extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AssistantDetails(assistant),
+                builder: (context) => AssistantDetails(assistantModel),
               ),
             );
           },

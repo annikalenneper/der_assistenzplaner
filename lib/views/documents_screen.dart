@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 class DocumentsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Dokumente')),
-      body: Center(
+    return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -15,7 +13,6 @@ class DocumentsScreen extends StatelessWidget {
             Text('Arbeitszeitaufschlüsselung pro Assistenzkraft'),
           ],
         ),
-      ),
-    );   
+      );  
   }
 }

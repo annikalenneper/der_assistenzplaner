@@ -8,9 +8,7 @@ import 'package:der_assistenzplaner/views/shared/tag_widget.dart';
 class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Einstellungen')),
-      body: Column(
+    return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly, 
         children: [
@@ -42,7 +40,6 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
         ],
-      ),
     );
   }
 }

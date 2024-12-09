@@ -1,9 +1,11 @@
+import 'package:der_assistenzplaner/views/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:der_assistenzplaner/views/shared/assistant_card.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'dart:developer';
+import 'package:der_assistenzplaner/utils/nav.dart';
 
 
 //----------------- AssistantScreen -----------------
@@ -12,49 +14,45 @@ class AssistantScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final assistantModel = Provider.of<AssistantModel>(context);
-
     return Stack(
-      children: [
-        Column(
-          children: [
-            Text(
-              'Assistenzkräfte',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: assistantModel.assistants.length,
-                itemBuilder: (context, index) {
-                  var assistant = assistantModel.assistants[index];
-                  return GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AssistantDetails(assistant),
+        children: [
+          Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: assistantModel.assistants.length,
+                  itemBuilder: (context, index) {
+                    var assistant = assistantModel.assistants[index];
+                    return GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AssistantDetails(assistantModel),
+                        ),
                       ),
-                    ),
-                    child: AssistantCard(assistant)
-                  );
-                },
+                      child: AssistantCard(assistant)
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
-        ),
-        Positioned(
-          bottom: 20,
-          right: 20,
-          child: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AssistantAddScreen()),
-              );
-            },
-            child: Icon(Icons.add),
+            ],
           ),
-        ),
-      ],
-    );
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AssistantAddScreen()),
+                );
+              },
+              icon: Icon(Icons.add),
+              label: Text('Neue Assistenzkraft'),
+            ),
+          ),
+        ],
+      );
   }
 }
 
@@ -93,14 +91,14 @@ class _AssistantAddViewState extends State<AssistantAddView> {
     /// get textfield values withouth whitespaces
     final name = _nameController.text.trim();
     final hoursText = _hoursController.text.trim();
-
+    /// input check
     if (name.isEmpty || hoursText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Bitte gib einen Namen und eine monatliche Stundenanzahl für deine Assistenzkraft ein')),
       );
       return;
     }
-
+    /// only accept double as input
     final  double? hours = double.tryParse(hoursText);
     if (hours == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -108,18 +106,13 @@ class _AssistantAddViewState extends State<AssistantAddView> {
       );
       return;
     }
-
     /// save assistant to database
     final assistantModel = Provider.of<AssistantModel>(context, listen: false);
     assistantModel.currentAssistant = Assistant(name, hours);
     assistantModel.saveCurrentAssistant();
     log(assistantModel.assistants.toString());
-
-    /// testing + user feedback
-    log("Neue Assistenzkraft: Name = $name, Stunden = $hours");
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Assistenzkraft $name wurde hinzugefügt')),
-    );
+    /// navigate back to AssistantScreen with new data
+    navigateToAssistantDetails(context, assistantModel);
 
     /// clear textfields
     _nameController.clear();
@@ -128,7 +121,6 @@ class _AssistantAddViewState extends State<AssistantAddView> {
       _index = 0;
     });
   }
-
 
   /// stepper for user input of assistant data 
   @override
@@ -188,7 +180,7 @@ class _AssistantAddViewState extends State<AssistantAddView> {
 //----------------- AssistantDetailScreen -----------------
 
 class AssistantDetails extends StatelessWidget {
-  final Assistant assistant;
+  final AssistantModel assistant;
 
   AssistantDetails(this.assistant);
 
@@ -199,14 +191,79 @@ class AssistantDetails extends StatelessWidget {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
-            children: [ 
-              Icon(Icons.person, size: 100),
-              Text(assistant.tags.toString()),
-              Text(assistant.deviation.toString()),
-              Text(assistant.notes.toString()),
+          children: [ 
+            Icon(Icons.person, size: 100),
+            Text(assistant.tags.toString()),
+            Text(assistant.deviation.toString()),
+            Text(assistant.notes.toString()),
+            ElevatedButton(
+              onPressed: () => showDialog<String>(
+                context: context,
+                builder: (BuildContext context) => AlertDialog(
+                  title: Text('Warnung!'), 
+                  content: SingleChildScrollView(
+                    child: ListBody(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text('Alle Daten, die mit der Assistenzkraft zusammenhängen, gehen beim Löschen verloren.'),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text('Du kannst die Assistenzkraft stattdessen auch archivieren. Sie ist dann nicht mehr in der Teamübersicht sichtbar, bleibt jedoch im Archiv erhalten.'),
+                        )
+                      ],
+                    )
+                  ), 
+                  actions: [
+                    TextButton(
+                      onPressed: () { 
+                        assistant.deleteAssistant();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${assistant.name} erfolgreich gelöscht.')),
+                        );
+                        navigateToAssistantScreen(context);
+                      },
+                      child: Text('Entgültig löschen')
+                    ),
+                    TextButton(
+                      onPressed: (){},
+                      child: Text('Archivieren')
+                    )
+                  ], 
+                ),
+              ),       
+              child: Text('Löschen'),      
+            ),
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context, 
+                  builder: (BuildContext context) => Dialog(
+                    child: Padding(
+                      padding: EdgeInsets.all(40),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Tags hier'),
+                          ElevatedButton(
+                            onPressed: () {
+
+                            }, 
+                            child: Text('Ausgewählte Tags zuordnen'))
+                        ],
+                      ),            
+                    ),
+                  ),                  
+                );
+              },
+              child: Text('Tag zuordnen')
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+
