@@ -18,3 +18,4 @@ void navigateToAssistantDetails(BuildContext context, assistant) {
     MaterialPageRoute(builder: (context) => AssistantDetails(assistant)),
   );
 }
+
