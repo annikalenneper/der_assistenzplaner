@@ -1,40 +1,47 @@
 import 'package:der_assistenzplaner/models/tag.dart';
 import 'package:hive/hive.dart';
+import 'package:uuid/uuid.dart';
 
 part 'assistant.g.dart';
 
 ///hive fields for persistence (needs unique type id)
 @HiveType(typeId: 0) 
   class Assistant extends HiveObject {
-    @HiveField(0) 
+    @HiveField(0)
+    String _assistantID;
+
+    @HiveField(1) 
     String _name;
 
-    @HiveField(1)
+    @HiveField(2)
     double _contractedHours;
 
-    @HiveField(2)
+    @HiveField(3)
     double _actualHours;
 
-    @HiveField(3)
+    @HiveField(4)
     final List<double> _surchargeCounter;
 
-    @HiveField(4)
+    @HiveField(5)
     final List<double> _futureSurchargeCounter;
 
-    @HiveField(5)
+    @HiveField(6)
     final List<Note> _notes;
 
-    @HiveField(6)
+    @HiveField(7)
     final List<Tag> _tags;
+
 
    /// constructor for new assistant, initializes all fields with default values
     Assistant(this._name, this._contractedHours)
-      : _actualHours = 0.0,
+      : _assistantID = Uuid().v4().toString(),
+        _actualHours = 0.0,
         _surchargeCounter = [],
         _futureSurchargeCounter = [],
         _notes = [],
         _tags = [];
 
+    String get assistantID => _assistantID;
     String get name => _name;
     double get contractedHours => _contractedHours;
     double get actualHours => _actualHours;

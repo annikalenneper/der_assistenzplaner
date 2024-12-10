@@ -17,28 +17,32 @@ class AssistantAdapter extends TypeAdapter<Assistant> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Assistant(
-      fields[0] as String,
-      fields[1] as double,
-    ).._actualHours = fields[2] as double;
+      fields[1] as String,
+      fields[2] as double,
+    )
+      .._assistantID = fields[0] as String
+      .._actualHours = fields[3] as double;
   }
 
   @override
   void write(BinaryWriter writer, Assistant obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
-      ..write(obj._name)
+      ..write(obj._assistantID)
       ..writeByte(1)
-      ..write(obj._contractedHours)
+      ..write(obj._name)
       ..writeByte(2)
-      ..write(obj._actualHours)
+      ..write(obj._contractedHours)
       ..writeByte(3)
-      ..write(obj._surchargeCounter)
+      ..write(obj._actualHours)
       ..writeByte(4)
-      ..write(obj._futureSurchargeCounter)
+      ..write(obj._surchargeCounter)
       ..writeByte(5)
-      ..write(obj._notes)
+      ..write(obj._futureSurchargeCounter)
       ..writeByte(6)
+      ..write(obj._notes)
+      ..writeByte(7)
       ..write(obj._tags);
   }
 

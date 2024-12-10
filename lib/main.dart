@@ -1,4 +1,6 @@
 import 'package:der_assistenzplaner/models/assistant.dart';
+import 'package:der_assistenzplaner/models/tag.dart';
+import 'package:der_assistenzplaner/models/shift.dart';
 import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
 import 'package:der_assistenzplaner/views/workschedule_screen.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +21,9 @@ Future<void> main() async {
 
   await Hive.initFlutter();
   Hive.registerAdapter(AssistantAdapter());
+  Hive.registerAdapter(ShiftAdapter());
+  Hive.registerAdapter(TagAdapter());
+  //Hive.registerAdapter(NoteAdapter());
 
   final assistantModel = AssistantModel();
   await assistantModel.initialize();

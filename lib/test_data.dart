@@ -10,25 +10,25 @@ Workschedule createTestWorkSchedule() {
   ScheduledShift shift1 = ScheduledShift(
     DateTime(2024, 12, 23, 9, 0), 
     DateTime(2024, 12, 24, 17, 0), 
-    assistent1,
+    assistent1.assistantID,
   );
 
   ScheduledShift shift2 = ScheduledShift(
     DateTime(2024, 12, 24, 14, 0), 
     DateTime(2024, 12, 24, 22, 0), 
-    assistent2,
+    assistent2.assistantID,
   );
 
   ScheduledShift shift3 = ScheduledShift(
     DateTime(2024, 12, 23, 18, 0), 
     DateTime(2024, 12, 23, 22, 0), 
-    assistent2,
+    assistent2.assistantID,
   );
 
   ScheduledShift shift4 = ScheduledShift(
     DateTime(2024, 12, 23, 18, 0), 
     DateTime(2024, 12, 23, 22, 0), 
-    assistent2,
+    assistent2.assistantID,
   );
 
   Workschedule workschedule = Workschedule(

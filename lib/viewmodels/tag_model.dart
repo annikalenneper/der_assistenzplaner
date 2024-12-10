@@ -56,7 +56,7 @@ class TagModel extends ChangeNotifier {
     personalTags.remove(tag);
   }
 
-  List<Widget> tagListView() => exampleTags.map((tag)=>TagWidget(tag)).toList();
+  List<Widget> tagsViewList() => exampleTags.map((tag)=>TagWidget(tag)).toList();
 
 
   //----------------- Database methods -----------------
