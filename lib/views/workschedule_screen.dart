@@ -112,7 +112,7 @@ class WorkScheduleViewState extends State<WorkScheduleView> {
               itemBuilder: (context, index) {
                 final shift = workschedule[index];
                 return ListTile(
-                  title: Text(shift.assistant.name),
+                  title: Text(shift.assistantID),
                   subtitle: Text('${shift.start} - ${shift.end}'),
                 );
               },

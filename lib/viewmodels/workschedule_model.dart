@@ -8,9 +8,9 @@ class WorkscheduleModel extends ChangeNotifier {
 
   WorkscheduleModel();
 
-  get start => workschedule?.start;
-  get end => workschedule?.end;
-  get shifts => workschedule?.scheduledShifts;
+  get start => workschedule.start;
+  get end => workschedule.end;
+  get shifts => workschedule.scheduledShifts;
 
   List<ScheduledShift> getScheduledShiftsByDay(DateTime day) {
     return workschedule.getScheduledShiftsByDay(day);
