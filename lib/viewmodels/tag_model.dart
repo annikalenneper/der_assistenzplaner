@@ -48,7 +48,7 @@ class TagModel extends ChangeNotifier {
     selectedTag = tag;
   } 
 
-  void addTag(String name, IconData tagSymbol) {
+  void addTag(index) {
     personalTags.add(Tag(name, tagSymbol));
   }
 
@@ -56,7 +56,8 @@ class TagModel extends ChangeNotifier {
     personalTags.remove(tag);
   }
 
-  List<Widget> tagsViewList() => exampleTags.map((tag)=>TagWidget(tag)).toList();
+  List<Widget> exampleTagsViewList() => exampleTags.map((tag)=>TagWidget(tag)).toList();
+  List<Widget> personalTagsViewList() => personalTags.map((tag)=>TagWidget(tag)).toList();
 
 
   //----------------- Database methods -----------------
