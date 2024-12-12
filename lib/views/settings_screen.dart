@@ -60,7 +60,7 @@ class TagView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var tags = Provider.of<TagModel>(context).tagsViewList();
+    var tags = Provider.of<TagModel>(context).exampleTagsViewList();
     return Padding(
       padding: const EdgeInsets.all(80),
       child: GridView.count(
