@@ -11,11 +11,13 @@ void navigateToAssistantScreen(BuildContext context) {
   );
 }
 
-/// replaces current Route, stack won't change
-void navigateToAssistantDetails(BuildContext context, assistant) {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => AssistantDetails(assistant)),
-  );
-}
+// /// replaces current Route, stack won't change
+// void navigateToAssistantDetails(BuildContext context, assistant) {
+//   Navigator.pushReplacement(
+//     context,
+//     MaterialPageRoute(builder: (context) => AssistantScreen(
+//       initialViewIndex: 1,
+//     )),
+//   );
+// }
 
