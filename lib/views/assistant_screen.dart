@@ -11,67 +11,218 @@ import 'package:der_assistenzplaner/utils/nav.dart';
 //----------------- AssistantScreen -----------------
 
 class AssistantScreen extends StatelessWidget {
+  AssistantScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final assistantModel = Provider.of<AssistantModel>(context);
-    return Stack(
-        children: [
-          Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  itemCount: assistantModel.assistants.length,
-                  itemBuilder: (context, index) {
-                    var assistant = assistantModel.assistants[index];
-                    return GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AssistantDetails(assistantModel),
-                        ),
-                      ),
-                      child: AssistantCard(assistant)
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-          Positioned(
-            bottom: 20,
-            right: 20,
-            child: FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AssistantAddScreen()),
-                );
-              },
-              icon: Icon(Icons.add),
-              label: Text('Neue Assistenzkraft'),
-            ),
-          ),
-        ],
-      );
+    return AssistantPage();
   }
 }
 
+//----------------- AssistantPage -----------------
 
+/// main view for the assistant management
+class AssistantPage extends StatefulWidget {
+  const AssistantPage({super.key});
+  @override
+  State<AssistantPage> createState() => _AssistantPageState();
+}
 
-//----------------- AssistantAddScreen -----------------
+class _AssistantPageState extends State<AssistantPage> {
+  int _index = 0;
 
-class AssistantAddScreen extends StatelessWidget {
+  /// change view in AssistantPage
+  void _setAssistantPageViewState(int index) {
+    setState(() {
+      _index = index;
+    });
+    log('AssistantPageViewState: $_index');
+  }
+
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Center(
+      child: IndexedStack(
+        index: _index,
+        children: [
+          /// callback function executes setAssistantPageViewState() from AssistantListView
+          AssistantListView(
+            changePageViewIndex: _setAssistantPageViewState
+          ),
+          AssistantDetailView(),
+          AssistantAddView()
+        ],
+      ),
+    ),
+  );
+}
+
+}
+
+//----------------- AssistantListView -----------------	
+
+class AssistantListView extends StatefulWidget {
+  /// pass callback function from AssistantPage to AssistantListView
+  final Function(int) changePageViewIndex;
+  const AssistantListView({required this.changePageViewIndex, super.key});
+  @override
+  State<AssistantListView> createState() => _AssistantListViewState();
+}
+
+class _AssistantListViewState extends State<AssistantListView> {
+  late AssistantModel assistantModel = Provider.of<AssistantModel>(context);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Neue Assistenzkraft hinzufügen')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: AssistantAddView(),
+      appBar: AppBar(title: Text('Assistenzkräfte')),
+      body: SizedBox(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    /// get all assistants from assistantModel
+                    itemCount: assistantModel.assistants.length,
+                    itemBuilder: (context, index) {
+                      var assistant = assistantModel.assistants[index];
+                      return GestureDetector(
+                        onTap: () {
+                          assistantModel.currentAssistant = assistant;
+                          widget.changePageViewIndex(1);
+                        },
+                        child: AssistantCard(
+                          assistant: assistant));
+                    },
+                  ),
+                ),
+              ],
+            ),
+            Positioned(
+              bottom: 20,
+              right: 20,
+              child: FloatingActionButton(
+                onPressed: () {
+                  widget.changePageViewIndex(2);
+                },
+                child: Icon(Icons.add),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
+
+
+//----------------- AssistantDetailScreen -----------------
+
+class AssistantDetailView extends StatelessWidget {
+  AssistantDetailView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    late AssistantModel assistant = Provider.of<AssistantModel>(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(assistant.name),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            navigateToAssistantScreen(context);
+          },
+        ),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [ 
+            Icon(Icons.person, size: 100),
+            Text(assistant.tags.toString()),
+            Text(assistant.deviation.toString()),
+            Text(assistant.notes.toString()),
+            ElevatedButton(
+              onPressed: () => showDialog<String>(
+                context: context,
+                builder: (BuildContext context) => AlertDialog(
+                  title: Text('Warnung!'), 
+                  content: SingleChildScrollView(
+                     child: ListBody(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text('Alle Daten, die mit der Assistenzkraft zusammenhängen, gehen beim Löschen verloren.'),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text('Du kannst die Assistenzkraft stattdessen auch archivieren. Sie ist dann nicht mehr in der Teamübersicht sichtbar, bleibt jedoch im Archiv erhalten.'),
+                        )
+                      ],
+                    )
+                  ), 
+                  actions: [
+                    TextButton(
+                      onPressed: () { 
+                        assistant.deleteAssistant();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${assistant.name} erfolgreich gelöscht.')),
+                        );
+                        Navigator.pop(context);
+                        navigateToAssistantScreen(context);
+                      },
+                      child: Text('Entgültig löschen')
+                    ),
+                    TextButton(
+                      onPressed: (){},
+                      child: Text('Archivieren')
+                    )
+                  ], 
+                ),
+              ),       
+              child: Text('Löschen'),      
+            ),
+            ElevatedButton(
+              onPressed: () {
+                 showDialog(
+                  context: context, 
+                  builder: (BuildContext context) => Dialog(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.sizeOf(context).height,   
+                            width: MediaQuery.sizeOf(context).width,
+                            child: TagView(true)),
+                          ElevatedButton(
+                            onPressed: () {
+                             /// TO-DO assignTag()
+                            }, 
+                            child: Text('Ausgewählte Tags zuordnen'))
+                        ],
+                      ),            
+                    ),
+                  ),                  
+                );
+              },
+              child: Text('Tag zuordnen')
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+//----------------- AssistantAddScreen -----------------
+
+
 
 class AssistantAddView extends StatefulWidget {
   const AssistantAddView({super.key});
@@ -112,7 +263,7 @@ class _AssistantAddViewState extends State<AssistantAddView> {
     assistantModel.saveCurrentAssistant();
     log(assistantModel.assistants.toString());
     /// navigate back to AssistantScreen with new data
-    navigateToAssistantDetails(context, assistantModel);
+    Navigator.pop(context);
 
     /// clear textfields
     _nameController.clear();
@@ -125,142 +276,64 @@ class _AssistantAddViewState extends State<AssistantAddView> {
   /// stepper for user input of assistant data 
   @override
   Widget build(BuildContext context) {
-    return Stepper(
-      currentStep: _index,
-      onStepCancel: () {
-        if (_index > 0) {
-          setState(() {
-            _index -= 1;
-          });
-        }
-      },
-      onStepContinue: () {
-        if (_index < 1) {
-          setState(() {
-            _index += 1;
-          });
-        } else {
-          _submitDataAndCreateAssistant();
-        }
-      },
-      onStepTapped: (int index) {
-        setState(() {
-          _index = index;
-        });
-      },
-      steps: <Step>[
-        Step(
-          title: const Text('Wie soll die neue Assistenzkraft heißen?'),
-          content: TextField(
-            controller: _nameController,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Name der Assistenzkraft',
-            ),
-          ),
-        ),
-        Step(
-          title: const Text('Wie viele Stunden soll die Assistenzkraft arbeiten?'),
-          content: TextField(
-            controller: _hoursController,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Stundenzahl pro Monat',
-            ),
-            //only numbers allowed
-            keyboardType: TextInputType.number, 
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-
-//----------------- AssistantDetailScreen -----------------
-
-class AssistantDetails extends StatelessWidget {
-  final AssistantModel assistant;
-
-  AssistantDetails(this.assistant);
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(assistant.name.toString())),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [ 
-            Icon(Icons.person, size: 100),
-            Text(assistant.tags.toString()),
-            Text(assistant.deviation.toString()),
-            Text(assistant.notes.toString()),
-            ElevatedButton(
-              onPressed: () => showDialog<String>(
-                context: context,
-                builder: (BuildContext context) => AlertDialog(
-                  title: Text('Warnung!'), 
-                  content: SingleChildScrollView(
-                    child: ListBody(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text('Alle Daten, die mit der Assistenzkraft zusammenhängen, gehen beim Löschen verloren.'),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text('Du kannst die Assistenzkraft stattdessen auch archivieren. Sie ist dann nicht mehr in der Teamübersicht sichtbar, bleibt jedoch im Archiv erhalten.'),
-                        )
-                      ],
-                    )
-                  ), 
-                  actions: [
-                    TextButton(
-                      onPressed: () { 
-                        assistant.deleteAssistant();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${assistant.name} erfolgreich gelöscht.')),
-                        );
-                        navigateToAssistantScreen(context);
-                      },
-                      child: Text('Entgültig löschen')
-                    ),
-                    TextButton(
-                      onPressed: (){},
-                      child: Text('Archivieren')
-                    )
-                  ], 
+      appBar: AppBar(
+        title: Text('Erstelle eine neue Assistenzkraft'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            navigateToAssistantScreen(context);
+          },
+        ),
+      ),
+      body: Container(
+        padding: EdgeInsets.all(20),
+        child: Stepper(
+          currentStep: _index,
+          onStepCancel: () {
+            if (_index > 0) {
+              setState(() {
+                _index -= 1;
+              });
+            }
+          },
+          onStepContinue: () {
+            if (_index < 1) {
+              setState(() {
+                _index += 1;
+              });
+            } else {
+              _submitDataAndCreateAssistant();
+              navigateToAssistantScreen(context);
+            }
+          },
+          onStepTapped: (int index) {
+            setState(() {
+              _index = index;
+            });
+          },
+          steps: <Step>[
+            Step(
+              title: const Text('Wie soll die neue Assistenzkraft heißen?'),
+              content: TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Name der Assistenzkraft',
                 ),
-              ),       
-              child: Text('Löschen'),      
+              ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context, 
-                  builder: (BuildContext context) => Dialog(
-                    child: Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            height: MediaQuery.sizeOf(context).height,   
-                            width: MediaQuery.sizeOf(context).width,
-                            child: TagView(true)),
-                          ElevatedButton(
-                            onPressed: () {
-                              /// TO-DO assignTag()
-                            }, 
-                            child: Text('Ausgewählte Tags zuordnen'))
-                        ],
-                      ),            
-                    ),
-                  ),                  
-                );
-              },
-              child: Text('Tag zuordnen')
+            Step(
+              title: const Text('Wie viele Stunden soll die Assistenzkraft arbeiten?'),
+              content: TextField(
+                controller: _hoursController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Stundenzahl pro Monat',
+                ),
+                //only numbers allowed
+                keyboardType: TextInputType.number, 
+              ),
             ),
           ],
         ),
@@ -268,5 +341,3 @@ class AssistantDetails extends StatelessWidget {
     );
   }
 }
-
-
