@@ -1,6 +1,6 @@
 import 'dart:developer';
 import 'package:der_assistenzplaner/models/tag.dart';
-import 'package:der_assistenzplaner/views/shared/tag_widget.dart';
+import 'package:der_assistenzplaner/views/shared/small_custom_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
