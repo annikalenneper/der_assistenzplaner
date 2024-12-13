@@ -1,7 +1,7 @@
 import 'package:der_assistenzplaner/views/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:der_assistenzplaner/views/shared/assistant_card.dart';
+import 'package:der_assistenzplaner/views/shared/small_custom_widgets.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'dart:developer';
