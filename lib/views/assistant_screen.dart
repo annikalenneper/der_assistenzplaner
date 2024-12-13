@@ -76,7 +76,6 @@ class _AssistantListViewState extends State<AssistantListView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Assistenzkräfte')),
       body: SizedBox(
         child: Stack(
           children: [
@@ -171,8 +170,6 @@ class AssistantDetailView extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('${assistant.name} erfolgreich gelöscht.')),
                         );
-                        Navigator.pop(context);
-                        navigateToAssistantScreen(context);
                       },
                       child: Text('Entgültig löschen')
                     ),
@@ -282,7 +279,7 @@ class _AssistantAddViewState extends State<AssistantAddView> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            navigateToAssistantScreen(context);
+            Navigator.pop(context);
           },
         ),
       ),
@@ -304,7 +301,7 @@ class _AssistantAddViewState extends State<AssistantAddView> {
               });
             } else {
               _submitDataAndCreateAssistant();
-              navigateToAssistantScreen(context);
+              Navigator.pop(context);
             }
           },
           onStepTapped: (int index) {

@@ -105,8 +105,8 @@ class WorkScheduleViewState extends State<WorkScheduleView> {
         valueListenable: _scheduledShiftsSelectedDay,
         builder: (context, workschedule, child) {
           return workschedule.isEmpty ? Text ('Keine Schichten') 
-          : Center(
-            child: ListView.builder(
+          : Column(
+            children: [ListView.builder(
               shrinkWrap: true,
               itemCount: workschedule.length,
               itemBuilder: (context, index) {
@@ -117,14 +117,15 @@ class WorkScheduleViewState extends State<WorkScheduleView> {
                 );
               },
             ),
+            ]
           );
         },
       );
 
-    return Column(
+    return Row(
       children: [
-        calendar,
-        scheduledShiftsView,
+        Flexible(child: calendar),
+        Flexible(child: scheduledShiftsView),
       ],
     );
   }

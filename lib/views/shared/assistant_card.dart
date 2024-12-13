@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/models/assistant.dart';
-import 'package:der_assistenzplaner/views/assistant_screen.dart';
 
 
 class AssistantCard extends StatelessWidget {

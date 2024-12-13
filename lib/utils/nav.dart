@@ -1,15 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:der_assistenzplaner/views/assistant_screen.dart';
 import 'package:der_assistenzplaner/main.dart';
+import 'package:flutter/material.dart';
 
-/// remove stack and navigate 
+
+// navigation without stack
 void navigateToAssistantScreen(BuildContext context) {
-  Navigator.pushNamedAndRemoveUntil(
-    context,
-    '/assistantScreen',
-    (route) => false
-  );
+  Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (context) => HomeScreen(initialTabIndex: 1)),
+);
+
 }
+
 
 // /// replaces current Route, stack won't change
 // void navigateToAssistantDetails(BuildContext context, assistant) {
