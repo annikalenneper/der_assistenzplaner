@@ -32,7 +32,7 @@ part 'shift.g.dart';
 
   //----------------- ScheduledShift -----------------
 
-@HiveType(typeId: 1)
+@HiveType(typeId: 2)
   class ScheduledShift extends Shift {
     @HiveField(2)
     String _assistantID;
