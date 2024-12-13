@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/tag.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
@@ -13,7 +12,7 @@ import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/views/assistant_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:der_assistenzplaner/viewmodels/tag_model.dart';
-import 'package:der_assistenzplaner/views/documents_screen.dart';
+
 
 
 
@@ -51,15 +50,14 @@ Future<void> main() async {
           ChangeNotifierProvider(
             create: (_) => assistantModel,
           ),
-          
-        ],
-    
+        ],   
         child: MyApp(),
       ),
     );
   });
 }
 
+/// stateless widget holds stateful home screen
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
@@ -78,6 +76,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// home screen with tab bar as main navigation
 class HomeScreen extends StatefulWidget {
   final int initialTabIndex;
 
@@ -97,6 +96,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _tabController.index = widget.initialTabIndex; 
   }
 
+  /// avoid memory leaks
   @override
   void dispose() {
     _tabController.dispose();
@@ -113,8 +113,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: IconButton(
-              icon: Icon(Icons.menu),
-              onPressed: () {},
+              icon: Icon(Icons.settings),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsScreen()),
+              ),
             ),
           ),
         ],
@@ -138,9 +141,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
-              FloatingActionButton.extended(onPressed: (){}, label: Text('Dienstplan'), icon: Icon(Icons.add),),
+              TextButton.icon(onPressed: (){}, label: Text('Dienstplan'), icon: Icon(Icons.add),),
               Spacer(),
-              FloatingActionButton.extended(onPressed: (){}, label: Text('Downloads'), icon: Icon(Icons.download),)
+              TextButton.icon(onPressed: (){}, label: Text('Downloads'), icon: Icon(Icons.download),)
             ],
           
           ),
