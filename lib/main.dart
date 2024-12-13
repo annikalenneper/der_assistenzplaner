@@ -18,7 +18,6 @@ import 'package:der_assistenzplaner/views/documents_screen.dart';
 
 
 Future<void> main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
 
   /// initialize Hive database
@@ -63,203 +62,91 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       title: 'Der Assistenzplaner',
+      // TO-DO: add theme
       theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: Colors.white,
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.pink),
-        
+        primarySwatch: Colors.amber,
       ),
       home: HomeScreen(),
       routes: {
-          '/assistantScreen': (context) => HomeScreen(initialPageIndex: 1),
-        },
+        '/assistantTab': (context) => HomeScreen(initialTabIndex: 1),
+      },
     );
   }
 }
 
 class HomeScreen extends StatefulWidget {
-  final int initialPageIndex;
-  const HomeScreen({this.initialPageIndex = 0, super.key});
+  final int initialTabIndex;
+
+  HomeScreen({this.initialTabIndex = 0});
 
   @override
-  State<HomeScreen> createState() => _HomeState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeState extends State<HomeScreen> {
-  /// key for the inner scaffold (drawer)
-  final GlobalKey<ScaffoldState> _drawerScaffoldKey = GlobalKey<ScaffoldState>();
-  late int _currentPageIndex = 0;
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    /// initial page index set to calendar/ workschedule
-    _currentPageIndex = widget.initialPageIndex; 
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.index = widget.initialTabIndex; 
   }
 
-  /// list of screens to be displayed via navigation bar
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final pages = [
-      WorkScheduleScreen(),
-      AssistantScreen(),
-      DocumentsScreen(),
-      SettingsScreen()
-    ];
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        /// responsive design: switch between wide and normal container
-        return constraints.maxWidth >= 600 
-          ? _buildForWideScreens(pages)
-          : _buildForNarrowScreens(pages);
-      },
-    );
-  }
-
-  /// narrow screen uses bottom navigation bar, wide screen uses navigation rail
-  Widget _buildForNarrowScreens(List<Widget> pages) {
-    log("HomeScreen build: narrow screen");
+    var ws = Provider.of<WorkscheduleModel>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Der Assistenzplaner'),
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentPageIndex,
-        onDestinationSelected: (int index) {
-          setState(() {
-            _currentPageIndex = index;
-          });
-        },
-        destinations: const <Widget>[
-          NavigationDestination(
-            icon: Icon(Icons.calendar_today),
-            label: 'Dienstplan',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person),
-            label: 'Assistenzkräfte',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.file_copy),
-            label: 'Dokumente',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings),
-            label: 'Einstellungen',
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+              icon: Icon(Icons.menu),
+              onPressed: () {},
+            ),
           ),
         ],
-      ),
-      body: pages[_currentPageIndex],
-    );
-  }
-
- Widget _buildForWideScreens(List<Widget> pages) {
-  log("HomeScreen build: wide screen");
-  return Scaffold(
-    body: Row(
-      children: [
-        NavigationRail(
-          selectedIndex: _currentPageIndex,
-          groupAlignment: -1.0,
-          onDestinationSelected: (int index) {
-            setState(() {
-              _currentPageIndex = index;
-              /// open drawer if settings page is selected
-              if (_currentPageIndex == 3) {
-                _drawerScaffoldKey.currentState?.openDrawer(); 
-              } else {
-                _drawerScaffoldKey.currentState?.closeDrawer();
-              }
-            });
-          },
-          labelType: NavigationRailLabelType.all,
-          destinations: const <NavigationRailDestination>[
-            NavigationRailDestination(
-              icon: Icon(Icons.calendar_today),
-              label: Text('Dienstplan'),
-            ),
-            NavigationRailDestination(
-              icon: Icon(Icons.person),
-              label: Text('Assistenzkräfte'),
-            ),
-            NavigationRailDestination(
-              icon: Icon(Icons.file_copy),
-              label: Text('Dokumente'),
-            ),
-            NavigationRailDestination(
-              icon: Icon(Icons.settings),
-              label: Text('Einstellungen'),
-            ),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: 'Kalender', icon: Icon(Icons.calendar_month)),
+            Tab(text: 'Team', icon: Icon(Icons.group)),
           ],
         ),
-        const VerticalDivider(thickness: 1, width: 1),
-        /// inner scaffold for the selected page
-        Expanded(
-          child: Scaffold(
-            /// key for the inner scaffold
-            key: _drawerScaffoldKey,
-            drawer: SizedBox(
-              width: 250,
-              child: const Drawer(
-                child: SettingsDrawer(),
-              ),
-            ),
-            body: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: pages[_currentPageIndex],
-            ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          WorkScheduleView(wsModel: ws,),
+          AssistantScreen(),
+        ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              FloatingActionButton.extended(onPressed: (){}, label: Text('Dienstplan'), icon: Icon(Icons.add),),
+              Spacer(),
+              FloatingActionButton.extended(onPressed: (){}, label: Text('Downloads'), icon: Icon(Icons.download),)
+            ],
+          
           ),
-        ),
-      ],
-    ),
-  );
-}
-}
-
-class SettingsDrawer extends StatelessWidget {
-  const SettingsDrawer({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        const DrawerHeader(
-          child: Text('Einstellungen'),
-        ),
-        ListTile(
-          title: const Text('Schichten'),
-          onTap: () {
-            /// TO-DO: navigate to shift settings
-          },
-        ),
-        ListTile(
-          title: const Text('Besondere Anforderungen'),
-          onTap: () {
-            /// TO-DO: navigate to tag settings
-          },
-        ),
-        ListTile(
-          title: const Text('Dienstpläne'),
-          onTap: () {
-            ///
-          },
-        ),
-        ListTile(
-          title: const Text('Weitere Einstellungen'),
-          onTap: () {
-            ///
-          },
-        ),
-      ],
+        )      
+      ),
     );
   }
 }
-
 
