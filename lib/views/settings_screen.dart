@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/viewmodels/tag_model.dart';
 import 'package:provider/provider.dart';
-import 'package:der_assistenzplaner/views/shared/boxes_and_containers.dart';
+import 'package:der_assistenzplaner/views/shared/view_containers.dart';
 
 
 ///SettingsScreen
@@ -73,20 +73,15 @@ class AvailabilitySettings extends StatelessWidget {
 //-----------------Tags-----------------
 
 
-class TagView extends StatelessWidget {
-  final bool selectable;
-  TagView(this.selectable);
+class TagGridView extends StatelessWidget {
+  TagGridView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    var tags = Provider.of<TagModel>(context).exampleTagsViewList();
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.6,
-      width: MediaQuery.of(context).size.width * 0.8,
-      child: GridView.count(
-        crossAxisCount: 6,
+    final tags = Provider.of<TagModel>(context).exampleTagsViewList();
+    return GridView.count(
+        crossAxisCount: 7,
         children: tags,        
-      ),   
     );
   }
 }

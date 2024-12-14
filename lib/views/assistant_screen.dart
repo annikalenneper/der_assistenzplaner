@@ -1,4 +1,5 @@
 import 'package:der_assistenzplaner/views/settings_screen.dart';
+import 'package:der_assistenzplaner/views/shared/view_containers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:der_assistenzplaner/views/shared/small_custom_widgets.dart';
@@ -192,7 +193,7 @@ class AssistantDetailView extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          TagView(true),
+                          PopUpBox(view: TagGridView()),
                           ElevatedButton(
                             onPressed: () {
                              /// TO-DO assignTag()

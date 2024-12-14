@@ -19,3 +19,21 @@ class SettingsBox extends StatelessWidget {
     );
   }
 }
+
+
+class PopUpBox extends StatelessWidget {
+  final Widget view;
+  const PopUpBox({super.key, required this.view});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.8,
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: view
+      ),
+    );
+  }
+}

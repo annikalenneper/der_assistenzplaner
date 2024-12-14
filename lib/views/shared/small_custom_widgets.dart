@@ -77,23 +77,25 @@ class _TagWidgetViewState extends State<TagWidget> {
       children: [
         Focus(
           child: GestureDetector(
+            /// two states: focused and not focused 
             onTap: () {
               setState(() {
                 isFocused = !isFocused;   
               });
             },
-            child: Container(
-              width: 60,
-              height: 60,
+            child: Container(      
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
+                /// change border color when focused
                 border: Border.all(color: isFocused ? Colors.blue : Colors.grey, width: 2),
               ),
               child: Center(
-                child: FaIcon(
-                  widget.tag.tagSymbol,
-                  size: 30,
-                  color: isFocused ? Colors.blue : Colors.grey.shade800,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: FaIcon(
+                    widget.tag.tagSymbol,
+                    color: isFocused ? Colors.blue : Colors.grey.shade800,
+                  ),
                 ),
               ),
             ),
