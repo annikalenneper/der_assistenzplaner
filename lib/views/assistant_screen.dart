@@ -192,10 +192,7 @@ class AssistantDetailView extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          SizedBox(
-                            height: MediaQuery.sizeOf(context).height,   
-                            width: MediaQuery.sizeOf(context).width,
-                            child: TagView(true)),
+                          TagView(true),
                           ElevatedButton(
                             onPressed: () {
                              /// TO-DO assignTag()
