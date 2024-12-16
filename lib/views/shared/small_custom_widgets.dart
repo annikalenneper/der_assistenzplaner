@@ -4,55 +4,91 @@ import 'package:der_assistenzplaner/models/tag.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 
-class AssistantCard extends StatelessWidget {
-  /// pass currentAssistant from AssistantModel as assistant to display
-  final Assistant assistant;
-  AssistantCard({required this.assistant});
+
   
+class AssistantCard extends StatelessWidget {
+  final Assistant assistant;
+
+  const AssistantCard({super.key, required this.assistant});
+
   @override
   Widget build(BuildContext context) {
+    final name = assistant.name;
+    final deviation = assistant.deviation.toString();
+    final tags = assistant.tags;
+    final color = Colors.amberAccent;
+
+    var screenWidth = MediaQuery.of(context).size.width;
+    var screenHeight = MediaQuery.of(context).size.height;
+
     return SizedBox(
-      height: 100,
       child: Card(
-        clipBehavior: Clip.antiAlias,
-        margin: EdgeInsets.all(8),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                flex: 1,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [Icon(size: 50, Icons.person)]
+        margin: EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: color,
+                ),
+                child: Center(
+                  child: Text(
+                    name[0].toUpperCase(),
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.04,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
-              Expanded(
-                flex: 4,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(assistant.name),
-                    Text(assistant.notes.toString()),
-                  ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              child: Column(
+                children: [
+                  Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.0175,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Deviation: $deviation',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[700],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            /// tags
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  children: tags.isEmpty
+                    ? [Text('No tags', style: TextStyle(color: Colors.grey))]
+                    : tags.map((tag) => TagWidget(tag)).toList(),
                 ),
               ),
-              Expanded(
-                flex: 2,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                  Text(assistant.deviation.toString()),
-                  Text(assistant.tags.toString()),
-                ]),
-              ),
-            ],
-          ),
-        )
+            ),
+            /// colored bottom section
+            Container(
+              height: screenHeight * 0.04,
+              color: color,
+              padding: EdgeInsets.all(8),
+            ),
+          ],
+        ),
       ),
     );
   }
