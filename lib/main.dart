@@ -108,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     var ws = Provider.of<WorkscheduleModel>(context);
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: MediaQuery.of(context).size.height * 0.08,
         title: Text('Der Assistenzplaner'),
         actions: [
           Padding(
@@ -132,22 +133,31 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       body: TabBarView(
         controller: _tabController,
         children: [
-          WorkScheduleView(wsModel: ws,),
-          AssistantScreen(),
+          CalendarView(wsModel: ws,),
+          AssistantPage(),
         ],
       ),
       bottomNavigationBar: BottomAppBar(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              TextButton.icon(onPressed: (){}, label: Text('Dienstplan'), icon: Icon(Icons.add),),
-              Spacer(),
-              TextButton.icon(onPressed: (){}, label: Text('Downloads'), icon: Icon(Icons.download),)
-            ],
-          
-          ),
-        )      
+        height: MediaQuery.of(context).size.height * 0.15,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Row(
+              children: [
+                TextButton.icon(onPressed: (){}, label: Text('Dienstplan'), icon: Icon(Icons.add),),
+                Spacer(),
+                TextButton.icon(onPressed: (){}, label: Text('Downloads'), icon: Icon(Icons.download),)
+              ],      
+            ),
+            Row(
+              children: [
+                Text("Dein Team hat noch X Tage Zeit für die Abgabe der Verfügbarkeiten für \$nextMonth.", style: TextStyle(fontSize: 12),),
+                Spacer(),
+                Text("Zahl der eingegangenen Verfügbarkeiten: X", style: TextStyle(fontSize: 12),),
+              ],
+            ),
+          ],
+        ),      
       ),
     );
   }
