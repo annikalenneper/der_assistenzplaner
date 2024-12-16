@@ -138,7 +138,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ],
       ),
       bottomNavigationBar: BottomAppBar(
-        height: MediaQuery.of(context).size.height * 0.15,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -148,13 +147,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 Spacer(),
                 TextButton.icon(onPressed: (){}, label: Text('Downloads'), icon: Icon(Icons.download),)
               ],      
-            ),
-            Row(
-              children: [
-                Text("Dein Team hat noch X Tage Zeit für die Abgabe der Verfügbarkeiten für \$nextMonth.", style: TextStyle(fontSize: 12),),
-                Spacer(),
-                Text("Zahl der eingegangenen Verfügbarkeiten: X", style: TextStyle(fontSize: 12),),
-              ],
             ),
           ],
         ),      
