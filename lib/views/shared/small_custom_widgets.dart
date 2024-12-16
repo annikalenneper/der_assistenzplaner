@@ -1,33 +1,38 @@
 import 'package:der_assistenzplaner/models/shift.dart';
-import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/tag.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:provider/provider.dart';
-
 
 class ShiftCard extends StatelessWidget {
-  final Shift shift;
-  final Assistant assistant;
+  final ScheduledShift shift;
+  final String assistantID;
 
-  ShiftCard({super.key, required this.shift, required this.assistant});
+  ShiftCard({super.key, required this.shift, required this.assistantID});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.all(8.0),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
+        padding: EdgeInsets.all(20.0),
+        child: Row(        
           children: [
-            Text(assistant.name),
-            Spacer(),
-            Text(shift.start.toString()),
-            Text(' - '),
-            Text(shift.end.toString()),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(assistantID),
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(shift.start.toString()),
+                    Text(' - '),
+                    Text(shift.end.toString()),
+                  ],
+                ),
+              ],
+            ),
           ],
-        )
+        ),
       ),
     );
   }
@@ -64,7 +69,7 @@ class AssistantCard extends StatelessWidget {
                   child: Text(
                     name[0].toUpperCase(),
                     style: TextStyle(
-                      fontSize: screenWidth * 0.04,
+                      fontSize: screenWidth * 0.035,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -110,10 +115,15 @@ class AssistantCard extends StatelessWidget {
             ),
             /// colored bottom section
             Container(
-              height: screenHeight * 0.04,
-              color: color,
-              padding: EdgeInsets.all(8),
-            ),
+              height: 40,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(8),
+                  bottomRight: Radius.circular(8),
+                ),
+              ),
+            ) 
           ],
         ),
       ),
