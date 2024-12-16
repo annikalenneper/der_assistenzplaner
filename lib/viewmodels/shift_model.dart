@@ -1,8 +1,10 @@
 
 import 'dart:developer';
 import 'package:der_assistenzplaner/models/shift.dart';
+import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
 
 
 class ShiftModel extends ChangeNotifier {
@@ -17,6 +19,15 @@ class ShiftModel extends ChangeNotifier {
   DateTime get start => currentShift?.start ?? DateTime.now();
   DateTime get end => currentShift?.end ?? DateTime.now();
   Duration get duration => currentShift?.duration ?? Duration.zero;
+  String get assistantID {
+    if (currentShift != null && currentShift is ScheduledShift){
+      return (currentShift as ScheduledShift).assistantID;
+    } else {
+      return '';
+    }
+  }  
+
+  //TO-DO: implement method to get assistant by ID
 
   //----------------- Setter methods -----------------
 
@@ -37,6 +48,16 @@ class ShiftModel extends ChangeNotifier {
     log('shiftModel: end set to $end');
     notifyListeners();
   }
+
+  //-------------
+
+  /// get assistant by ID and set as current assistant
+  void getAssignedAssistant(context) {
+    Provider.of<AssistantModel>(context, listen: false).assistants.firstWhere((assistant) => 
+      assistant.assistantID == (currentShift as ScheduledShift).assistantID);
+  }
+
+
 
   //----------------- Database methods -----------------
 
