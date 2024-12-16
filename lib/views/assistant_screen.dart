@@ -9,17 +9,6 @@ import 'dart:developer';
 import 'package:der_assistenzplaner/utils/nav.dart';
 
 
-//----------------- AssistantScreen -----------------
-
-class AssistantScreen extends StatelessWidget {
-  AssistantScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return AssistantPage();
-  }
-}
-
 //----------------- AssistantPage -----------------
 
 /// main view for the assistant management
@@ -41,24 +30,26 @@ class _AssistantPageState extends State<AssistantPage> {
   }
 
  @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: Center(
-      child: IndexedStack(
-        index: _index,
-        children: [
-          /// callback function executes setAssistantPageViewState() from AssistantListView
-          AssistantListView(
-            changePageViewIndex: _setAssistantPageViewState
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+          child: IndexedStack(
+            index: _index,
+            children: [
+              /// callback function executes setAssistantPageViewState() from AssistantListView
+              AssistantListView(
+                changePageViewIndex: _setAssistantPageViewState
+              ),
+              AssistantDetailView(),
+              AssistantAddView()
+            ],
           ),
-          AssistantDetailView(),
-          AssistantAddView()
-        ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }
 
 //----------------- AssistantListView -----------------	
@@ -83,18 +74,25 @@ class _AssistantListViewState extends State<AssistantListView> {
             Column(
               children: [
                 Expanded(
-                  child: ListView.builder(
-                    /// get all assistants from assistantModel
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 6,
+                      childAspectRatio: 0.8,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
                     itemCount: assistantModel.assistants.length,
                     itemBuilder: (context, index) {
+                      /// get individual assistants from assistantModel assistants list
                       var assistant = assistantModel.assistants[index];
                       return GestureDetector(
                         onTap: () {
                           assistantModel.currentAssistant = assistant;
+                          /// navigate to AssistantDetailView
                           widget.changePageViewIndex(1);
                         },
-                        child: AssistantCard(
-                          assistant: assistant));
+                        child: AssistantCard(assistant: assistant)
+                      );
                     },
                   ),
                 ),
@@ -119,7 +117,7 @@ class _AssistantListViewState extends State<AssistantListView> {
 
 
 
-//----------------- AssistantDetailScreen -----------------
+//----------------- AssistantDetailView -----------------
 
 class AssistantDetailView extends StatelessWidget {
   AssistantDetailView({super.key});
@@ -171,6 +169,7 @@ class AssistantDetailView extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('${assistant.name} erfolgreich gelöscht.')),
                         );
+                        navigateToAssistantScreen(context);
                       },
                       child: Text('Entgültig löschen')
                     ),
@@ -215,7 +214,7 @@ class AssistantDetailView extends StatelessWidget {
 }
 
 
-//----------------- AssistantAddScreen -----------------
+//----------------- AssistantAddView -----------------
 
 
 
@@ -277,7 +276,7 @@ class _AssistantAddViewState extends State<AssistantAddView> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context);
+            navigateToAssistantScreen(context);
           },
         ),
       ),
@@ -299,7 +298,7 @@ class _AssistantAddViewState extends State<AssistantAddView> {
               });
             } else {
               _submitDataAndCreateAssistant();
-              Navigator.pop(context);
+              navigateToAssistantScreen(context);
             }
           },
           onStepTapped: (int index) {
