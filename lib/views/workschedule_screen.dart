@@ -6,29 +6,31 @@ import 'package:provider/provider.dart';
 
 ///WorkScheduleScreen
 class WorkScheduleScreen extends StatelessWidget {
+  //TO-DO: implement methods to pass different parameters to WorkScheduleView
   @override
   Widget build(BuildContext context) {
     final workscheduleModel = Provider.of<WorkscheduleModel>(context);
     return Center(
       child: Column(
         children: [
-          WorkScheduleView(wsModel: workscheduleModel),  
+          CalendarView(wsModel: workscheduleModel),  
         ]
       ),
     );
   }
 }
 
-class WorkScheduleView extends StatefulWidget {
+class CalendarView extends StatefulWidget {
   final WorkscheduleModel wsModel;
 
-  WorkScheduleView({required this.wsModel});
+  //TO:DO: instead of using wsModel, use parameters to pass shifts, scheduledShifts and availabilities
+  CalendarView({required this.wsModel});
   
   @override
-  WorkScheduleViewState createState() => WorkScheduleViewState();
+  CalendarViewState createState() => CalendarViewState();
 }
 
-class WorkScheduleViewState extends State<WorkScheduleView> {
+class CalendarViewState extends State<CalendarView> {
   WorkscheduleModel? wsModel;
   DateTime? _selectedDay;
   DateTime _focusedDay = DateTime.now();
@@ -46,11 +48,13 @@ class WorkScheduleViewState extends State<WorkScheduleView> {
     final wsModel = widget.wsModel;
     
     final calendar = TableCalendar(
-      firstDay: wsModel.start,
+      firstDay: wsModel.start, //TO-DO: change to oldest shift
       lastDay: wsModel.end,
       focusedDay: _focusedDay,
       calendarFormat: _calendarFormat,
+      locale: 'de_DE',
       
+      shouldFillViewport: true,
       headerVisible: true,
       headerStyle: const HeaderStyle(
         titleCentered: true,
@@ -100,23 +104,26 @@ class WorkScheduleViewState extends State<WorkScheduleView> {
       },
     );
 
+    /// shows scheduled shifts for selected day
     var scheduledShiftsView = 
       ValueListenableBuilder<List<ScheduledShift>>(
         valueListenable: _scheduledShiftsSelectedDay,
         builder: (context, workschedule, child) {
-          return workschedule.isEmpty ? Text ('Keine Schichten') 
+          return workschedule.isEmpty ? Text('Keine Schichten')
           : Column(
-            children: [ListView.builder(
-              shrinkWrap: true,
-              itemCount: workschedule.length,
-              itemBuilder: (context, index) {
-                final shift = workschedule[index];
-                return ListTile(
-                  title: Text(shift.assistantID),
-                  subtitle: Text('${shift.start} - ${shift.end}'),
-                );
-              },
-            ),
+            children: [
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: workschedule.length,
+                itemBuilder: (context, index) {
+                  final shift = workschedule[index];
+                  return ListTile(
+                    //TO-DO: use shiftCard when implemented
+                    title: Text(shift.assistantID),
+                    subtitle: Text('${shift.start} - ${shift.end}'),
+                  );
+                },
+              ),
             ]
           );
         },
@@ -124,8 +131,12 @@ class WorkScheduleViewState extends State<WorkScheduleView> {
 
     return Row(
       children: [
-        Flexible(child: calendar),
-        Flexible(child: scheduledShiftsView),
+        Flexible(flex: 3, child: calendar),
+        Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: VerticalDivider(),
+        ),
+        Flexible(flex:2, child: scheduledShiftsView),
       ],
     );
   }
