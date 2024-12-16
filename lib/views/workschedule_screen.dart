@@ -23,7 +23,7 @@ class WorkScheduleScreen extends StatelessWidget {
 class CalendarView extends StatefulWidget {
   final WorkscheduleModel wsModel;
 
-  //TO:DO: instead of using wsModel, use parameters to pass shifts, scheduledShifts and availabilities
+  //TO:DO: instead of using wsModel, use parameters to pass shifts, scheduledShifts and availabilities as lists (with methods implemented in models)
   CalendarView({required this.wsModel});
   
   @override
@@ -118,7 +118,7 @@ class CalendarViewState extends State<CalendarView> {
                 itemBuilder: (context, index) {
                   final shift = workschedule[index];
                   return ListTile(
-                    //TO-DO: use shiftCard when implemented
+                    //TO-DO: use shiftCard when impl
                     title: Text(shift.assistantID),
                     subtitle: Text('${shift.start} - ${shift.end}'),
                   );
