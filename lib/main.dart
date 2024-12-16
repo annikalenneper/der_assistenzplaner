@@ -33,8 +33,6 @@ Future<void> main() async {
 
   /// load data
   await assistantModel.initialize();
-  await tagModel.initialize();
-  
   
   /// initialize date formatting and make providers available before running the app
   initializeDateFormatting().then((_) {
