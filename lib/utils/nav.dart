@@ -3,16 +3,18 @@ import 'package:flutter/material.dart';
 
 
 void navigateToWorkScheduleScreen(BuildContext context) {
-  Navigator.pushReplacement(
+  Navigator.pushAndRemoveUntil(
     context,
-    MaterialPageRoute(builder: (context) => HomeScreen(initialTabIndex: 0))
+    MaterialPageRoute(builder: (context) => HomeScreen(initialTabIndex: 0)),
+    (route) => false
   );
 }
 
 void navigateToAssistantScreen(BuildContext context) {
-  Navigator.pushReplacement(
+  Navigator.pushAndRemoveUntil(
     context,
-    MaterialPageRoute(builder: (context) => HomeScreen(initialTabIndex: 1))
+    MaterialPageRoute(builder: (context) => HomeScreen(initialTabIndex: 1)),
+    (route) => false
   );
 }
 
