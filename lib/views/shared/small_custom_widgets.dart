@@ -1,10 +1,37 @@
+import 'package:der_assistenzplaner/models/shift.dart';
+import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/tag.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 
 
+class ShiftCard extends StatelessWidget {
+  final Shift shift;
+  final Assistant assistant;
 
+  ShiftCard({super.key, required this.shift, required this.assistant});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.all(8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            Text(assistant.name),
+            Spacer(),
+            Text(shift.start.toString()),
+            Text(' - '),
+            Text(shift.end.toString()),
+          ],
+        )
+      ),
+    );
+  }
+}
   
 class AssistantCard extends StatelessWidget {
   final Assistant assistant;
@@ -16,7 +43,7 @@ class AssistantCard extends StatelessWidget {
     final name = assistant.name;
     final deviation = assistant.deviation.toString();
     final tags = assistant.tags;
-    final color = Colors.amberAccent;
+    final color = Colors.purple;
 
     var screenWidth = MediaQuery.of(context).size.width;
     var screenHeight = MediaQuery.of(context).size.height;
