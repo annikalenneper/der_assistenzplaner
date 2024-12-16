@@ -1,3 +1,4 @@
+import 'package:der_assistenzplaner/views/shared/small_custom_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
@@ -105,39 +106,62 @@ class CalendarViewState extends State<CalendarView> {
     );
 
     /// shows scheduled shifts for selected day
-    var scheduledShiftsView = 
-      ValueListenableBuilder<List<ScheduledShift>>(
-        valueListenable: _scheduledShiftsSelectedDay,
-        builder: (context, workschedule, child) {
-          return workschedule.isEmpty ? Text('Keine Schichten')
-          : Column(
-            children: [
-              ListView.builder(
+    final scheduledShiftsView = Center(
+      child: Column(
+        children:[
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Text('Schichten am $_selectedDay', style: TextStyle(fontSize: 18)),
+          ),
+          ValueListenableBuilder<List<ScheduledShift>>(
+            valueListenable: _scheduledShiftsSelectedDay,
+            builder: (context, workschedule, child) {
+              return workschedule.isEmpty ? Text('Keine Schichten', textAlign: TextAlign.center,)
+              : ListView.builder(
                 shrinkWrap: true,
                 itemCount: workschedule.length,
                 itemBuilder: (context, index) {
                   final shift = workschedule[index];
-                  return ListTile(
-                    //TO-DO: use shiftCard when impl
-                    title: Text(shift.assistantID),
-                    subtitle: Text('${shift.start} - ${shift.end}'),
-                  );
+                  return ShiftCard(shift: shift, assistantID: shift.assistantID);
                 },
-              ),
-            ]
-          );
-        },
-      );
-
-    return Row(
-      children: [
-        Flexible(flex: 3, child: calendar),
-        Padding(
-          padding: const EdgeInsets.all(40.0),
-          child: VerticalDivider(),
-        ),
-        Flexible(flex:2, child: scheduledShiftsView),
-      ],
+              );
+            },            
+          ),
+          Padding(
+            padding: const EdgeInsets.all(40.0),
+            child: IconButton(onPressed: (){}, icon: Icon(Icons.add), alignment: Alignment.center, padding: EdgeInsets.all(12)),
+          ),
+        ],
+      ),
     );
+
+    return 
+      Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  Flexible(flex: 3, child: calendar),
+                  Flexible(flex:2, child: scheduledShiftsView),
+                ],
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text("Dein Team hat noch X Tage Zeit für die Abgabe der Verfügbarkeiten für \$nextMonth. \nZahl der eingegangenen Verfügbarkeiten: X"),
+                  ),
+                ),
+              ],
+             ),
+            ],
+          )
+        );
+      
+    
   }
 }
