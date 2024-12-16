@@ -11,7 +11,6 @@ import 'package:der_assistenzplaner/test_data.dart';
 /// needs no database, uses scheduledShifts from scheduledShiftBox (hive database)
 class WorkscheduleModel extends ChangeNotifier {
   Workschedule workschedule = createTestWorkSchedule();
-  List<Note> notes = [];
 
   WorkscheduleModel();
 
