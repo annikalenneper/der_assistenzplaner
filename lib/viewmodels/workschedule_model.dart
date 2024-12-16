@@ -1,4 +1,3 @@
-import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
 import 'package:der_assistenzplaner/models/workschedule.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
