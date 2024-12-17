@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/tag.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
@@ -47,6 +46,9 @@ Future<void> main() async {
           ),
           ChangeNotifierProvider(
             create: (_) => workscheduleModel,
+          ),
+          ChangeNotifierProvider(
+            create: (_) => shiftModel,
           ),
           ChangeNotifierProvider(
             create: (_) => assistantModel,
@@ -106,7 +108,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    var ws = Provider.of<WorkscheduleModel>(context);
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height * 0.08,
@@ -134,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       body: TabBarView(
         controller: _tabController,
         children: [
-          CalendarView(wsModel: ws,),
+          CalendarView(),
           AssistantPage(),
         ],
       ),
