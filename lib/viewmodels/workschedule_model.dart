@@ -3,11 +3,13 @@ import 'package:der_assistenzplaner/models/workschedule.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/test_data.dart';
+import 'package:provider/provider.dart';
 
 
-/// WorkscheduleModel holds list of scheduled shifts and notes
-/// will also be used for generating work schedule and export functions
-/// needs no database, uses scheduledShifts from scheduledShiftBox (hive database)
+enum DisplayShifts {scheduled, scheduledAndUpcoming, assistant}
+
+/// used for displaying shifts in calendar generating work schedule and export functions
+/// needs no database, uses lists from scheduledShiftModel
 class WorkscheduleModel extends ChangeNotifier {
   Workschedule workschedule = createTestWorkSchedule();
 
@@ -16,13 +18,22 @@ class WorkscheduleModel extends ChangeNotifier {
   get start => workschedule.start;
   get end => workschedule.end;
 
-  /// workschedule = list of scheduled shifts
-  List<ScheduledShift> getWorkschedule(DateTime start, DateTime end, ShiftModel shiftModel) => 
-    shiftModel.getScheduledShiftsByDayRange(start, end) as List<ScheduledShift>;
-  
+  //test data, remove later
+  List<ScheduledShift> get scheduledShifts => workschedule.scheduledShifts;
 
-  List<ScheduledShift> getScheduledShiftsByDay(DateTime day) {
-    return workschedule.getScheduledShiftsByDay(day);
+  /// returns list of scheduled shifts, depending on selected display option
+  /// hand over function to calendar event loader to display selected shifts
+  List<ScheduledShift> selectDisplayedShifts (context, DisplayShifts selected, {String? assistantID}) {
+    late ShiftModel shiftModel = Provider.of<ShiftModel>(context);
+    switch (selected) {
+      case DisplayShifts.scheduled:
+        return shiftModel.scheduledShifts;
+      case DisplayShifts.scheduledAndUpcoming:
+        return shiftModel.scheduledAndUpcomingShifts;
+      case DisplayShifts.assistant:
+        return shiftModel.shiftsByAssistantsMap[assistantID] ?? [];
+    }
   }
+
 
 }
