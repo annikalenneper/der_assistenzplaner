@@ -41,7 +41,7 @@ class CalendarViewState extends State<CalendarView> {
   @override 
   void initState() {
     super.initState();
-    _scheduledShiftsSelectedDay = ValueNotifier(widget.wsModel.getScheduledShiftsByDay(_focusedDay));
+    //_scheduledShiftsSelectedDay = ValueNotifier(widget.wsModel.getScheduledShiftsByDay(_focusedDay));
   }
   
   @override
@@ -85,13 +85,13 @@ class CalendarViewState extends State<CalendarView> {
         return isSameDay(_selectedDay, day);
       },
 
-      eventLoader: (day) => wsModel.getScheduledShiftsByDay(day),
+      //eventLoader: (day) => wsModel.getScheduledShiftsByDay(day),
 
       onDaySelected: (selectedDay, focusedDay) {
         setState(() {
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
-        _scheduledShiftsSelectedDay.value = wsModel.getScheduledShiftsByDay(selectedDay);
+        //_scheduledShiftsSelectedDay.value = wsModel.getScheduledShiftsByDay(selectedDay);
 
         });
       },
