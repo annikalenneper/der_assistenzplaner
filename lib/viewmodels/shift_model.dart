@@ -1,17 +1,33 @@
 
 import 'dart:developer';
+import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 
-
+/// handels shifts and scheduled shifts, saves them to database
+/// used by WorkScheduleModel to generate work schedule and display shifts in calendar
 class ShiftModel extends ChangeNotifier {
   late Box<Shift> _shiftBox;
   late Box<ScheduledShift> _scheduledShiftBox;
+  List<ScheduledShift> scheduledShifts = [];
+  List<ScheduledShift> scheduledAndUpcomingShifts = []; // TO-DO combine scheduled and unscheduled shifts
+  Map<String, List<ScheduledShift>> shiftsByAssistantsMap = {};
   Shift? currentShift;
 
+  Map<String, List<ScheduledShift>> getMapOfShiftsByAssistants() {
+    Map<String, List<ScheduledShift>> map = {};
+    for (var shift in scheduledShifts) {
+      if (!map.containsKey(shift.assistantID)) {
+        map[shift.assistantID] = [];
+      }
+      map[shift.assistantID]!.add(shift);
+    }
+    return map;
+  }
+    
   ShiftModel();
 
   //----------------- Getter methods -----------------
@@ -26,6 +42,7 @@ class ShiftModel extends ChangeNotifier {
       return '';
     }
   }  
+
 
   //TO-DO: implement method to get assistant by ID
 
@@ -51,12 +68,15 @@ class ShiftModel extends ChangeNotifier {
 
   //-------------
 
-  /// get assistant by ID and set as current assistant
-  void getAssignedAssistant(context) {
-    Provider.of<AssistantModel>(context, listen: false).assistants.firstWhere((assistant) => 
+
+
+
+  /// get assistant assigned to shift by ID (move to AssistantModel? -> shift as parameter?)
+  Assistant getAssignedAssistant(context) {
+    final assistants = Provider.of<AssistantModel>(context, listen: false).assistants;
+    return assistants.firstWhere((assistant) => 
       assistant.assistantID == (currentShift as ScheduledShift).assistantID);
   }
-
 
 
   //----------------- Database methods -----------------
@@ -64,16 +84,46 @@ class ShiftModel extends ChangeNotifier {
   /// initialize box for shift objects 
   Future<void> initialize() async {
     _shiftBox = await Hive.openBox<Shift>('shiftBox');
+    _scheduledShiftBox = await Hive.openBox<ScheduledShift>('scheduledShiftBox');
   
-  /// listen to changes in database and update shifts list accordingly
+  /// listen to changes in database and update shifts lists and map accordingly
     _shiftBox.watch().listen((event) {
+      ///TO-DO: update scheduledAndUpcomingShifts 
       notifyListeners(); 
       log('shiftModel: shifts list updated');
     });
+    _scheduledShiftBox.watch().listen((event) {
+      scheduledShifts = _scheduledShiftBox.values.toList();
+      shiftsByAssistantsMap = getMapOfShiftsByAssistants();
+      notifyListeners(); 
+      log('shiftModel: scheduled shifts list updated');
+    });
+
+    scheduledShifts = _scheduledShiftBox.values.toList();
+    shiftsByAssistantsMap = getMapOfShiftsByAssistants();
   }
 
+    /// read shifts from shiftboxes 
+  List<ScheduledShift> getAllScheduledShifts() => _scheduledShiftBox.values.toList();
+
+  List<ScheduledShift> getScheduledShiftsByDay(DateTime day) {
+    return _scheduledShiftBox.values.where(
+      (shift) => shift.start.day == day.day).toList();
+  }
+
+  List<ScheduledShift> getScheduledShiftsByDayRange(DateTime start, DateTime end) {
+  return _scheduledShiftBox.values.where(
+          (shift) => shift.start.day >= start.day && shift.end.day <= end.day).toList();
+  }
+
+  List<Shift> getUnscheduledShiftsByDayRange(DateTime start, DateTime end) {
+  return _shiftBox.values.where(
+          (shift) => shift.start.day >= start.day && shift.end.day <= end.day).toList();
+  }
+
+
   /// save current shift to shiftbox, only needed for flexible/individual shifts
-  Future<void> saveCurrentShift() async {
+  Future<void> saveCurrentShiftAsShift() async {
     if (currentShift == null) {
       log('shiftModel: currentshift is null');
       return;
@@ -108,15 +158,6 @@ class ShiftModel extends ChangeNotifier {
     }      
   }
 
-  /// get shifts from shiftboxes 
-  List<Shift> getUnscheduledShiftsByDayRange(DateTime start, DateTime end) {
-  return _shiftBox.values.where(
-          (shift) => shift.start.day >= start.day && shift.end.day <= end.day).toList();
-  }
-  List<Shift> getScheduledShiftsByDayRange(DateTime start, DateTime end) {
-  return _scheduledShiftBox.values.where(
-          (shift) => shift.start.day >= start.day && shift.end.day <= end.day).toList();
-  }
 
   /// delete current shift from corresponding hive box, depending on type
   Future<void> deleteShift() async {
