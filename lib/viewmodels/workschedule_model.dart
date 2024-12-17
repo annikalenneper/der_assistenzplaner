@@ -24,7 +24,7 @@ class WorkscheduleModel extends ChangeNotifier {
   /// returns list of scheduled shifts, depending on selected display option
   /// hand over function to calendar event loader to display selected shifts
   List<ScheduledShift> selectDisplayedShifts (context, DisplayShifts selected, {String? assistantID}) {
-    late ShiftModel shiftModel = Provider.of<ShiftModel>(context);
+    late ShiftModel shiftModel = Provider.of<ShiftModel>(context, listen: false);
     switch (selected) {
       case DisplayShifts.scheduled:
         return shiftModel.scheduledShifts;
