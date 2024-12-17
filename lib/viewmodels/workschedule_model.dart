@@ -6,7 +6,7 @@ import 'package:der_assistenzplaner/test_data.dart';
 import 'package:provider/provider.dart';
 
 
-enum DisplayShifts {scheduled, scheduledAndUpcoming, assistant}
+enum DisplayShifts {scheduled, upcoming, scheduledAndUpcoming, assistant}
 
 /// used for displaying shifts in calendar generating work schedule and export functions
 /// needs no database, uses lists from scheduledShiftModel
@@ -28,6 +28,8 @@ class WorkscheduleModel extends ChangeNotifier {
     switch (selected) {
       case DisplayShifts.scheduled:
         return shiftModel.scheduledShifts;
+      case DisplayShifts.upcoming:
+        return shiftModel.upcomingShifts as List<ScheduledShift>;
       case DisplayShifts.scheduledAndUpcoming:
         return shiftModel.scheduledAndUpcomingShifts;
       case DisplayShifts.assistant:

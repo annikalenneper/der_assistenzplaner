@@ -13,6 +13,7 @@ class ShiftModel extends ChangeNotifier {
   late Box<Shift> _shiftBox;
   late Box<ScheduledShift> _scheduledShiftBox;
   List<ScheduledShift> scheduledShifts = [];
+  List<Shift> upcomingShifts = [];
   List<ScheduledShift> scheduledAndUpcomingShifts = []; // TO-DO combine scheduled and unscheduled shifts
   Map<String, List<ScheduledShift>> shiftsByAssistantsMap = {};
   Shift? currentShift;
