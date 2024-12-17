@@ -1,3 +1,4 @@
+import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/views/shared/small_custom_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -10,11 +11,10 @@ class WorkScheduleScreen extends StatelessWidget {
   //TO-DO: implement methods to pass different parameters to WorkScheduleView
   @override
   Widget build(BuildContext context) {
-    final workscheduleModel = Provider.of<WorkscheduleModel>(context);
     return Center(
       child: Column(
         children: [
-          CalendarView(wsModel: workscheduleModel),  
+          CalendarView(),  
         ]
       ),
     );
@@ -22,31 +22,29 @@ class WorkScheduleScreen extends StatelessWidget {
 }
 
 class CalendarView extends StatefulWidget {
-  final WorkscheduleModel wsModel;
-
-  //TO:DO: instead of using wsModel, use parameters to pass shifts, scheduledShifts and availabilities as lists (with methods implemented in models)
-  CalendarView({required this.wsModel});
-  
+  CalendarView({super.key});
   @override
   CalendarViewState createState() => CalendarViewState();
 }
 
 class CalendarViewState extends State<CalendarView> {
-  WorkscheduleModel? wsModel;
-  DateTime? _selectedDay;
+  DateTime? _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
   late final ValueNotifier<List<ScheduledShift>> _scheduledShiftsSelectedDay;
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
-  @override 
-  void initState() {
-    super.initState();
-    //_scheduledShiftsSelectedDay = ValueNotifier(widget.wsModel.getScheduledShiftsByDay(_focusedDay));
+  /// safe use of provider after build
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ShiftModel shiftModel = Provider.of<ShiftModel>(context, listen: false);
+    _scheduledShiftsSelectedDay = ValueNotifier(shiftModel.getScheduledShiftsByDay(_selectedDay!));
   }
   
   @override
   Widget build(BuildContext context) {
-    final wsModel = widget.wsModel;
+    WorkscheduleModel wsModel = Provider.of<WorkscheduleModel>(context, listen: false);
+    var selectDisplayedShifts = DisplayShifts.scheduled;
     
     final calendar = TableCalendar(
       firstDay: wsModel.start, //TO-DO: change to oldest shift
@@ -67,12 +65,12 @@ class CalendarViewState extends State<CalendarView> {
         weekendStyle: TextStyle(color: Colors.black),
       ),
       
-      calendarStyle: const CalendarStyle(
+      calendarStyle: CalendarStyle(
         todayDecoration: BoxDecoration(
-          color: Colors.blue,
+          color: Colors.pink.withOpacity(0.5),
           shape: BoxShape.circle,
         ),
-        selectedDecoration: BoxDecoration(
+        selectedDecoration: const BoxDecoration(
           color: Colors.pink,
           shape: BoxShape.circle,
         ),
@@ -85,14 +83,13 @@ class CalendarViewState extends State<CalendarView> {
         return isSameDay(_selectedDay, day);
       },
 
-      //eventLoader: (day) => wsModel.getScheduledShiftsByDay(day),
+      eventLoader: (day) => wsModel.selectDisplayedShifts(context, selectDisplayedShifts),
 
       onDaySelected: (selectedDay, focusedDay) {
         setState(() {
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
-        //_scheduledShiftsSelectedDay.value = wsModel.getScheduledShiftsByDay(selectedDay);
-
+        _scheduledShiftsSelectedDay.value = wsModel.selectDisplayedShifts(context, selectDisplayedShifts);
         });
       },
 
@@ -108,10 +105,10 @@ class CalendarViewState extends State<CalendarView> {
     /// shows scheduled shifts for selected day
     final scheduledShiftsView = Center(
       child: Column(
-        children:[
+        children:[ 
           Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Text('Schichten am $_selectedDay', style: TextStyle(fontSize: 18)),
+            child: Text('Schichten am ${_selectedDay!.day.toString().padLeft(2, '0')}.${_selectedDay!.month.toString().padLeft(2, '0')}.${_selectedDay!.year}', style: TextStyle(fontSize: 18)),
           ),
           ValueListenableBuilder<List<ScheduledShift>>(
             valueListenable: _scheduledShiftsSelectedDay,
