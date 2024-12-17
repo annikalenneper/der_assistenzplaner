@@ -6,7 +6,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 class AssistantModel extends ChangeNotifier {
   late Box<Assistant> _assistantBox;
-  late List<Assistant> assistants = getAllAssistants();
+  List<Assistant> assistants = [];
   Assistant? currentAssistant;
   
   AssistantModel();
