@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/tag.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
+import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
 import 'package:der_assistenzplaner/views/settings_screen.dart';
 import 'package:der_assistenzplaner/views/workschedule_screen.dart';
@@ -28,12 +29,14 @@ Future<void> main() async {
 
   /// initialize models 
   final assistantModel = AssistantModel();
+  final shiftModel = ShiftModel();
   final tagModel = TagModel();
   final workscheduleModel = WorkscheduleModel();
 
   /// load data
   await assistantModel.initialize();
-  
+  await shiftModel.initialize();
+
   /// initialize date formatting and make providers available before running the app
   initializeDateFormatting().then((_) {
     runApp(
