@@ -126,7 +126,37 @@ class CalendarViewState extends State<CalendarView> {
           ),
           Padding(
             padding: const EdgeInsets.all(40.0),
-            child: IconButton(onPressed: (){}, icon: Icon(Icons.add), alignment: Alignment.center, padding: EdgeInsets.all(12)),
+            child: IconButton(
+              
+              icon: Icon(Icons.add), 
+              alignment: Alignment.center, 
+              padding: EdgeInsets.all(12),
+              onPressed: (){
+                //TO-DO: implement add shift function
+                showDialog(
+                  context: context, 
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text('Schicht hinzufügen'),
+                      content: Text('TO-DO: implement add shift form'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('Abbrechen'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            //TO-DO: implement add shift function
+                            Navigator.pop(context);
+                          },
+                          child: Text('Hinzufügen'),
+                        ),
+                      ],
+                    );
+                  }, 
+                );
+              }
+            ),
           ),
         ],
       ),
