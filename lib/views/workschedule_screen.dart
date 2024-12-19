@@ -50,7 +50,7 @@ class CalendarViewState extends State<CalendarView> {
   @override
   Widget build(BuildContext context) {
     final calendar = TableCalendar(
-      firstDay: DateTime(2024, 12, 1), //TO-DO: change to oldest shift
+      firstDay: DateTime(2024, 12, 1), //TO-DO: change to first day of month of oldest shift
       lastDay: DateTime(2024, 12, 30),
       focusedDay: _focusedDay,
       calendarFormat: _calendarFormat,
