@@ -29,7 +29,7 @@ part 'assistant.g.dart';
     final List<Note> _notes;
 
     @HiveField(7)
-    final List<Tag> _tags;
+    List<Tag> _tags;
 
 
    /// constructor for new assistant, initializes all fields with default values
@@ -59,6 +59,7 @@ part 'assistant.g.dart';
         (contractedHours > 0) ? _contractedHours = contractedHours : throw ArgumentError('contractedHours darf nicht negativ sein.');
     set actualHours(double actualHours) =>
         (actualHours > 0) ? _actualHours = actualHours : throw ArgumentError('actualHours darf nicht negativ sein.');
+    set tags(List<Tag> tags) => _tags = tags;
 
     void addNote(String title, String text) =>
 

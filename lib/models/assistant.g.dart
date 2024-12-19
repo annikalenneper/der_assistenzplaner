@@ -21,7 +21,8 @@ class AssistantAdapter extends TypeAdapter<Assistant> {
       fields[2] as double,
     )
       .._assistantID = fields[0] as String
-      .._actualHours = fields[3] as double;
+      .._actualHours = fields[3] as double
+      .._tags = (fields[7] as List).cast<Tag>();
   }
 
   @override
