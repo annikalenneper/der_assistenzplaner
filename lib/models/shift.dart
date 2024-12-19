@@ -9,7 +9,7 @@ part 'shift.g.dart';
 @HiveType(typeId: 1)
   class Shift extends HiveObject {
     @HiveField(0)
-    String _shiftID;
+    String _shiftID = Uuid().v4().toString();
 
     @HiveField(1)
     DateTime _start;
@@ -17,12 +17,16 @@ part 'shift.g.dart';
     @HiveField(2)
     DateTime _end;
 
-    Shift(this._start, this._end) 
-      : _shiftID = Uuid().v4().toString();
+    @HiveField(3)
+    String? _assistantID;
 
+    Shift(this._start, this._end, this._assistantID); 
+      
     DateTime get start => _start;
     DateTime get end => _end;
     Duration get duration => _end.difference(_start);
+    String get assistantID => _assistantID ?? '';
+    bool get isScheduled => _assistantID != '';
     List<Tag> get tags => [];
 
     set start(DateTime start) => (start.isBefore(_end))
@@ -36,34 +40,6 @@ part 'shift.g.dart';
         : throw ArgumentError('Endzeitpunkt muss nach Startzeitpunkt liegen.');
 
   }
-
-  //----------------- ScheduledShift -----------------
-
-@HiveType(typeId: 2)
-  class ScheduledShift extends Shift {
-    @HiveField(3)
-    String _assistantID;
-
-    ScheduledShift(super.start, super.end, this._assistantID);
-
-    String get assistantID => _assistantID;
-
-    set assistantID(String assistantID) => _assistantID = assistantID;
-
-    /// override == operator to compare ScheduledShifts by start, end and assistant
-    @override
-    bool operator == (Object other) {
-      if (identical(this, other)) return true;
-      if (other is! ScheduledShift) return false;
-      return _start == other._start &&
-          _end == other._end &&
-          _assistantID == other._assistantID;
-    }
-
-    @override
-    int get hashCode => Object.hash(_start, _end, _assistantID);
-  }
-
 
   //----------------- Availability -----------------
 
