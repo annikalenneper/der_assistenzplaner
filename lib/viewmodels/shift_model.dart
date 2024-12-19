@@ -54,17 +54,22 @@ class ShiftModel extends ChangeNotifier {
     log('shiftModel: currentshift set to $shift');
     notifyListeners();
   }
-
   set start(DateTime start) {
     currentShift?.start = start;
     log('shiftModel: start set to $start');
     notifyListeners();
   }
-
   set end(DateTime end) {
     currentShift?.end = end;
     log('shiftModel: end set to $end');
     notifyListeners();
+  }
+  set assistantID(String assistantID) {
+    if (currentShift != null && currentShift is ScheduledShift){
+      (currentShift as ScheduledShift).assistantID = assistantID;
+      log('shiftModel: assistantID set to $assistantID');
+      notifyListeners();
+    }
   }
 
   //-------------
@@ -122,24 +127,16 @@ class ShiftModel extends ChangeNotifier {
           (shift) => shift.start.day >= start.day && shift.end.day <= end.day).toList();
   }
 
-
-  /// save current shift to shiftbox, only needed for flexible/individual shifts
-  Future<void> saveCurrentShiftAsShift() async {
-    if (currentShift == null) {
-      log('shiftModel: currentshift is null');
-      return;
-    } 
-    await _shiftBox.add(currentShift!);
+  /// save new shift to shiftbox, only needed for flexible/individual shifts
+  Future<void> saveNewShift(Shift newShift) async {
+    await _shiftBox.add(newShift);
     notifyListeners(); 
   }
 
   /// save current shift to scheduledshiftbox and assign assistant via ID
-  Future<void> saveCurrentShiftAsScheduledShift(assistantID) async {
-    if (currentShift == null) {
-      log('shiftModel: currentshift is null');
-      return;
-    } 
-    await _scheduledShiftBox.add(ScheduledShift(currentShift!.start, currentShift!.end, assistantID));
+  Future<void> saveNewShiftAsScheduledShift(Shift newShift, String assistantID) async {
+    await _scheduledShiftBox.add(ScheduledShift(newShift.start, newShift.end, assistantID));
+    log('shiftModel: shift saved as scheduled shift with assistantID $assistantID');
     notifyListeners(); 
   }
 
