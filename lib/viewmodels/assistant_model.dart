@@ -40,6 +40,11 @@ class AssistantModel extends ChangeNotifier {
     log('AssistantModel: contractedHours set to $contractedHours');
     notifyListeners();
   } 
+  set tags(List<Tag> tags) {
+    currentAssistant?.tags = tags;
+    log('AssistantModel: tags set to $tags');
+    notifyListeners();
+  }
   set actualHours(double actualHours) {
     currentAssistant?.actualHours = actualHours;
     log('AssistantModel: actualHours set to $actualHours');
@@ -92,6 +97,10 @@ class AssistantModel extends ChangeNotifier {
     });
   }
 
+  Future<void> saveNewAssistant(Assistant newAssistant) async {
+    await _assistantBox.add(newAssistant);
+    notifyListeners(); 
+  }
 
   Future<void> saveCurrentAssistant() async {
     if (currentAssistant == null) {
