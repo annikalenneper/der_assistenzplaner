@@ -7,11 +7,13 @@ import 'package:flutter/material.dart';
 
 class DynamicStepper extends StatefulWidget {
   final List<StepData> steps;
+  /// callback function to handle user inputs and safe them to the database
+  final void Function(Map<String, dynamic> inputs) onComplete;
 
-  const DynamicStepper({Key? key, required this.steps}) : super(key: key);
+  const DynamicStepper({super.key, required this.steps, required this.onComplete});
 
   @override
-  _DynamicStepperState createState() => _DynamicStepperState();
+  State<DynamicStepper> createState() => _DynamicStepperState();
 }
 
 class _DynamicStepperState extends State<DynamicStepper> {
@@ -20,29 +22,131 @@ class _DynamicStepperState extends State<DynamicStepper> {
 
   @override
   Widget build(BuildContext context) {
-    return Stepper(
-      currentStep: _currentStep,
-      onStepTapped: (step) => setState(() => _currentStep = step),
-      onStepContinue: () {
-        if (_currentStep < widget.steps.length - 1) {
-          setState(() => _currentStep++);
-        } else {
-          log("$_inputs");
-        }
-      },
-      onStepCancel: () {
-        if (_currentStep > 0) {
-          setState(() => _currentStep--);
-        }
-      },
-      steps: widget.steps.map((stepData) {
-        return Step(
-          title: Text(stepData.title),
-          content: stepData.contentBuilder(_inputs),
-          isActive: widget.steps.indexOf(stepData) == _currentStep,
-        );
-      }).toList(),
+    return Material(
+      child: Stepper(
+        currentStep: _currentStep,
+        onStepTapped: (step) => setState(() => _currentStep = step),
+        onStepContinue: () {
+          if (_currentStep < widget.steps.length - 1) {
+            setState(() => _currentStep++);
+          } else {
+            log("$_inputs");
+            widget.onComplete(_inputs);
+            Navigator.pop(context);
+          }
+        },
+        onStepCancel: () {
+          if (_currentStep > 0) {
+            setState(() => _currentStep--);
+          }
+        },
+        /// returns map of user inputs
+        steps: widget.steps.map((stepData) {
+          return Step(
+            title: Text(stepData.title),
+            content: stepData.contentBuilder(_inputs),
+            isActive: widget.steps.indexOf(stepData) == _currentStep,
+          );
+        }).toList(),
+      ),
     );
+  }
+}
+
+
+//---------------- Custom Time Picker Hours and Minutes ----------------
+
+class StepperTimePicker extends StatefulWidget {
+  /// initial date for the time picker, pass from calender
+  final DateTime date; 
+  /// callback function to handle user inputs 
+  final ValueChanged<DateTime> onTimeSelected; 
+
+  const StepperTimePicker({super.key, required this.date, required this.onTimeSelected,});
+
+  @override
+  State<StepperTimePicker> createState() => _StepperTimePickerState();
+}
+
+class _StepperTimePickerState extends State<StepperTimePicker> {
+  late int selectedHour = widget.date.hour;
+  late int selectedMinute = widget.date.minute;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateTime(hour: selectedHour, minute: selectedMinute);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            /// hours dropdown
+            Expanded(
+              child: DropdownButton<int>(
+                value: selectedHour,
+                hint: const Text('Stunde'),
+                items: List.generate(24, (index) {
+                  return DropdownMenuItem<int>(
+                    value: index,
+                    child: Text(index.toString().padLeft(2, '0')),
+                  );
+                }),
+                /// update time when user selects new hour
+                onChanged: (value) {
+                  if (value != null) {
+                    _updateTime(hour: value);
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 16), 
+            /// minutes dropdown
+            Expanded(
+              child: DropdownButton<int>(
+                value: selectedMinute,
+                hint: const Text('Minute'),
+                items: List.generate(60, (index) {
+                  return DropdownMenuItem<int>(
+                    value: index,
+                    child: Text(index.toString().padLeft(2, '0')),
+                  );
+                }),
+                onChanged: (value) {
+                  if (value != null) {
+                    _updateTime(minute: value);
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _updateTime({int? hour, int? minute}) {
+    setState(() {
+      /// set values on changed
+      if (hour != null) selectedHour = hour;
+      if (minute != null) selectedMinute = minute;
+
+      /// create new DateTime object with updated values 
+      final updatedDateTime = DateTime(
+        widget.date.year,
+        widget.date.month,
+        widget.date.day,
+        selectedHour,
+        selectedMinute,
+      );
+
+      /// update inputs map and call callback
+      widget.onTimeSelected(updatedDateTime);
+    });
   }
 }
 
