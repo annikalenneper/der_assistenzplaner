@@ -1,6 +1,6 @@
 
 import 'dart:developer';
-
+import 'package:der_assistenzplaner/views/shared/stepper.dart';
 import 'package:flutter/material.dart';
 
 /// data class for a single step in the stepper
@@ -72,37 +72,30 @@ List<StepData> addShiftStepData(){
   final List<StepData> stepData = [];
 
   final startInput = StepData(
-    title: 'Wann soll die Schicht beginnen?', 
-    contentBuilder: (inputs) {
-      return TextField(
-        decoration: InputDecoration(
-          border: OutlineInputBorder(),
-          labelText: 'Startzeit',
-        ),
-        keyboardType: TextInputType.datetime,
-        onChanged: (value) {
-          inputs['start'] = DateTime.parse(value);
-          log(inputs.toString());
-        },
+  title: 'Wann soll die Schicht beginnen?',
+  contentBuilder: (inputs) {
+    return StepperTimePicker(
+      date: DateTime.now(), 
+      onTimeSelected: (selectedTime) {
+        inputs['start'] = selectedTime;
+        log('Selected start time: ${inputs.toString()}');
+        }
       );
     },
   );
 
+
   final endInput = StepData(
-    title: 'Wann soll die Schicht enden?', 
+    title: 'Wann soll die Schicht enden?',
     contentBuilder: (inputs) {
-      return TextField(
-        decoration: InputDecoration(
-          border: OutlineInputBorder(),
-          labelText: 'Endzeit',
-        ),
-        keyboardType: TextInputType.datetime,
-        onChanged: (value) {
-          inputs['end'] = DateTime.parse(value);
-          log(inputs.toString());
-        },
+    return StepperTimePicker(
+      date: DateTime.now(), 
+      onTimeSelected: (selectedTime) {
+        inputs['end'] = selectedTime;
+        log('Selected end time: ${inputs.toString()}');
+        }
       );
-    }
+    },
   );
 
   final assignTags = StepData(
@@ -116,3 +109,6 @@ List<StepData> addShiftStepData(){
   stepData.add(endInput);
   return stepData;
 }
+
+
+
