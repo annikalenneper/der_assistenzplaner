@@ -1,5 +1,5 @@
 import 'package:der_assistenzplaner/models/shift.dart';
-import 'package:der_assistenzplaner/utils/sort.dart';
+import 'package:der_assistenzplaner/utils/helper_functions.dart';
 
 class Workschedule {
   final DateTime start;
