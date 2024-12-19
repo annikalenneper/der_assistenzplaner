@@ -4,8 +4,9 @@ import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/tag.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+
 class ShiftCard extends StatelessWidget {
-  final ScheduledShift shift;
+  final Shift shift;
   final String assistantID;
 
   ShiftCard({super.key, required this.shift, required this.assistantID});
