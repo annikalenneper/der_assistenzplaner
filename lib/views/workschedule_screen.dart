@@ -1,5 +1,9 @@
+import 'package:der_assistenzplaner/utils/helper_functions.dart';
+import 'package:der_assistenzplaner/utils/step_data.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/views/shared/small_custom_widgets.dart';
+import 'package:der_assistenzplaner/views/shared/stepper.dart';
+import 'package:der_assistenzplaner/views/shared/view_containers.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
@@ -126,36 +130,23 @@ class CalendarViewState extends State<CalendarView> {
           ),
           Padding(
             padding: const EdgeInsets.all(40.0),
-            child: IconButton(
-              
+            child: IconButton(   
               icon: Icon(Icons.add), 
               alignment: Alignment.center, 
               padding: EdgeInsets.all(12),
-              onPressed: (){
-                //TO-DO: implement add shift function
-                showDialog(
+              onPressed: () {
+                  showDialog(
                   context: context, 
                   builder: (context) {
-                    return AlertDialog(
-                      title: Text('Schicht hinzufügen'),
-                      content: Text('TO-DO: implement add shift form'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text('Abbrechen'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            //TO-DO: implement add shift function
-                            Navigator.pop(context);
-                          },
-                          child: Text('Hinzufügen'),
-                        ),
-                      ],
+                    return PopUpBox(
+                      view:  DynamicStepper(
+                        steps: addShiftStepData(),
+                        onComplete: (inputs) => saveToDatabase(context, inputs, Type.shift),
+                      ),
                     );
                   }, 
                 );
-              }
+              },
             ),
           ),
         ],
