@@ -1,4 +1,7 @@
+import 'package:der_assistenzplaner/utils/helper_functions.dart';
+import 'package:der_assistenzplaner/utils/step_data.dart';
 import 'package:der_assistenzplaner/views/settings_screen.dart';
+import 'package:der_assistenzplaner/views/shared/stepper.dart';
 import 'package:der_assistenzplaner/views/shared/view_containers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -62,7 +65,7 @@ class AssistantListView extends StatefulWidget {
   State<AssistantListView> createState() => _AssistantListViewState();
 }
 
-class _AssistantListViewState extends State<AssistantListView> {
+  class _AssistantListViewState extends State<AssistantListView> {
   late AssistantModel assistantModel = Provider.of<AssistantModel>(context);
 
   @override
@@ -102,10 +105,20 @@ class _AssistantListViewState extends State<AssistantListView> {
               bottom: 20,
               right: 20,
               child: FloatingActionButton(
-                onPressed: () {
-                  widget.changePageViewIndex(2);
-                },
                 child: Icon(Icons.add),
+                onPressed: () {
+                  showDialog(
+                  context: context, 
+                  builder: (context) {
+                    return PopUpBox(
+                      view:  DynamicStepper(
+                        steps: addAssistantStepData(),
+                        onComplete: (inputs) => saveToDatabase(context, inputs, Type.assistant),
+                        ),
+                      );
+                    }, 
+                  );
+                },
               ),
             ),
           ],
