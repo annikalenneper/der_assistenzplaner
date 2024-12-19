@@ -27,14 +27,15 @@ class WorkScheduleScreen extends StatelessWidget {
 
 class CalendarView extends StatefulWidget {
   CalendarView({super.key});
+
   @override
-  CalendarViewState createState() => CalendarViewState();
+  State<CalendarView> createState() => CalendarViewState();
 }
 
 class CalendarViewState extends State<CalendarView> {
   DateTime? _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
-  late final ValueNotifier<List<ScheduledShift>> _scheduledShiftsSelectedDay;
+  late final ValueNotifier<List<Shift>> _scheduledShiftsSelectedDay;
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
   /// safe use of provider after build
@@ -42,17 +43,16 @@ class CalendarViewState extends State<CalendarView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final ShiftModel shiftModel = Provider.of<ShiftModel>(context, listen: false);
-    _scheduledShiftsSelectedDay = ValueNotifier(shiftModel.getScheduledShiftsByDay(_selectedDay!));
+    /// listens to changes in selected days shifts
+    _scheduledShiftsSelectedDay = ValueNotifier(shiftModel.getShiftsByDay(_selectedDay!));
   }
   
   @override
   Widget build(BuildContext context) {
-    WorkscheduleModel wsModel = Provider.of<WorkscheduleModel>(context, listen: false);
-    var selectDisplayedShifts = DisplayShifts.scheduled;
     
     final calendar = TableCalendar(
-      firstDay: wsModel.start, //TO-DO: change to oldest shift
-      lastDay: wsModel.end,
+      firstDay: DateTime(2024, 12, 1), //TO-DO: change to oldest shift
+      lastDay: DateTime(2024, 12, 30),
       focusedDay: _focusedDay,
       calendarFormat: _calendarFormat,
       locale: 'de_DE',
@@ -87,13 +87,15 @@ class CalendarViewState extends State<CalendarView> {
         return isSameDay(_selectedDay, day);
       },
 
-      eventLoader: (day) => wsModel.selectDisplayedShifts(context, selectDisplayedShifts),
+      eventLoader: (day) {
+        final shiftModel = Provider.of<ShiftModel>(context);
+        return shiftModel.getShiftsByDay(day);
+      },
 
       onDaySelected: (selectedDay, focusedDay) {
         setState(() {
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
-        _scheduledShiftsSelectedDay.value = wsModel.selectDisplayedShifts(context, selectDisplayedShifts);
         });
       },
 
@@ -114,7 +116,7 @@ class CalendarViewState extends State<CalendarView> {
             padding: const EdgeInsets.all(20.0),
             child: Text('Schichten am ${_selectedDay!.day.toString().padLeft(2, '0')}.${_selectedDay!.month.toString().padLeft(2, '0')}.${_selectedDay!.year}', style: TextStyle(fontSize: 18)),
           ),
-          ValueListenableBuilder<List<ScheduledShift>>(
+          ValueListenableBuilder<List<Shift>>(
             valueListenable: _scheduledShiftsSelectedDay,
             builder: (context, workschedule, child) {
               return workschedule.isEmpty ? Text('Keine Schichten', textAlign: TextAlign.center,)
@@ -179,7 +181,5 @@ class CalendarViewState extends State<CalendarView> {
             ],
           )
         );
-      
-    
   }
 }
