@@ -1,5 +1,4 @@
 import 'package:der_assistenzplaner/models/assistant.dart';
-import 'package:der_assistenzplaner/models/tag.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
@@ -11,8 +10,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/views/assistant_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:der_assistenzplaner/viewmodels/tag_model.dart';
-
 
 
 
@@ -23,13 +20,11 @@ Future<void> main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(AssistantAdapter());
   Hive.registerAdapter(ShiftAdapter());
-  Hive.registerAdapter(TagAdapter());
   //Hive.registerAdapter(NoteAdapter());
 
   /// initialize models 
   final assistantModel = AssistantModel();
   final shiftModel = ShiftModel();
-  final tagModel = TagModel();
   final workscheduleModel = WorkscheduleModel();
 
   /// load data
@@ -41,9 +36,6 @@ Future<void> main() async {
     runApp(
       MultiProvider(
         providers: [
-          ChangeNotifierProvider(
-            create: (_) => tagModel,
-          ),
           ChangeNotifierProvider(
             create: (_) => workscheduleModel,
           ),
