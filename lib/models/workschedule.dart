@@ -5,12 +5,12 @@ class Workschedule {
   final DateTime start;
   final DateTime end;
   /// map of shifts by date
-  final List<Shift> Shifts = [];
+  final List<Shift> shifts = [];
 
   Workschedule(this.start, this.end);
 
   List<Shift> getShiftsByDay(DateTime day) {
-    return Shifts.where((shift) => shift.start.day == day.day).toList();
+    return shifts.where((shift) => shift.start.day == day.day).toList();
   }
 
   void addShift(Shift shift) {
@@ -19,24 +19,24 @@ class Workschedule {
     } 
     /// insert shift sorted by start time (helper function from utils/sort.dart)
     insertSorted<Shift>(
-      Shifts,
+      shifts,
       shift,
       (a, b) => a.start.compareTo(b.start),
     );
 
     /// warning if shifts overlap
-    int index = Shifts.indexOf(shift);
-    if (index > 0 && doesOverlap(shift, Shifts[index - 1])) {
-      print('Hinweis: Die neue Schicht überschneidet sich mit der vorherigen Schicht (Start: ${shift.start} liegt vor Ende: ${Shifts[index - 1].end.toString()}).');
-    } if (index < Shifts.length - 1 && doesOverlap(shift, Shifts[index + 1])) {
-      print('Hinweis: Die neue Schicht überschneidet sich mit der nächsten Schicht (Ende: ${shift.end} liegt nach Start: ${Shifts[index + 1].start.toString()}).');
+    int index = shifts.indexOf(shift);
+    if (index > 0 && doesOverlap(shift, shifts[index - 1])) {
+      print('Hinweis: Die neue Schicht überschneidet sich mit der vorherigen Schicht (Start: ${shift.start} liegt vor Ende: ${shifts[index - 1].end.toString()}).');
+    } if (index < shifts.length - 1 && doesOverlap(shift, shifts[index + 1])) {
+      print('Hinweis: Die neue Schicht überschneidet sich mit der nächsten Schicht (Ende: ${shift.end} liegt nach Start: ${shifts[index + 1].start.toString()}).');
       } else {
         print('Schicht erfolgreich hinzugefügt.');
       }
   }
 
   void removeShift(Shift shift) {
-    bool removed = Shifts.remove(shift);
+    bool removed = shifts.remove(shift);
     if (!removed) {
       print('Schicht nicht gefunden.');
     } else {
