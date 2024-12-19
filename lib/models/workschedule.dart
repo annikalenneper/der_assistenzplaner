@@ -5,38 +5,38 @@ class Workschedule {
   final DateTime start;
   final DateTime end;
   /// map of shifts by date
-  final List<ScheduledShift> scheduledShifts = [];
+  final List<Shift> Shifts = [];
 
   Workschedule(this.start, this.end);
 
-  List<ScheduledShift> getScheduledShiftsByDay(DateTime day) {
-    return scheduledShifts.where((shift) => shift.start.day == day.day).toList();
+  List<Shift> getShiftsByDay(DateTime day) {
+    return Shifts.where((shift) => shift.start.day == day.day).toList();
   }
 
-  void addShift(ScheduledShift shift) {
+  void addShift(Shift shift) {
     if (shift.start.isBefore(start) || shift.end.isAfter(end)) {
       throw ArgumentError('Schicht liegt nicht im ausgewählten Zeitraum.');
     } 
     /// insert shift sorted by start time (helper function from utils/sort.dart)
-    insertSorted<ScheduledShift>(
-      scheduledShifts,
+    insertSorted<Shift>(
+      Shifts,
       shift,
       (a, b) => a.start.compareTo(b.start),
     );
 
     /// warning if shifts overlap
-    int index = scheduledShifts.indexOf(shift);
-    if (index > 0 && doesOverlap(shift, scheduledShifts[index - 1])) {
-      print('Hinweis: Die neue Schicht überschneidet sich mit der vorherigen Schicht (Start: ${shift.start} liegt vor Ende: ${scheduledShifts[index - 1].end.toString()}).');
-    } if (index < scheduledShifts.length - 1 && doesOverlap(shift, scheduledShifts[index + 1])) {
-      print('Hinweis: Die neue Schicht überschneidet sich mit der nächsten Schicht (Ende: ${shift.end} liegt nach Start: ${scheduledShifts[index + 1].start.toString()}).');
+    int index = Shifts.indexOf(shift);
+    if (index > 0 && doesOverlap(shift, Shifts[index - 1])) {
+      print('Hinweis: Die neue Schicht überschneidet sich mit der vorherigen Schicht (Start: ${shift.start} liegt vor Ende: ${Shifts[index - 1].end.toString()}).');
+    } if (index < Shifts.length - 1 && doesOverlap(shift, Shifts[index + 1])) {
+      print('Hinweis: Die neue Schicht überschneidet sich mit der nächsten Schicht (Ende: ${shift.end} liegt nach Start: ${Shifts[index + 1].start.toString()}).');
       } else {
         print('Schicht erfolgreich hinzugefügt.');
       }
   }
 
-  void removeShift(ScheduledShift shift) {
-    bool removed = scheduledShifts.remove(shift);
+  void removeShift(Shift shift) {
+    bool removed = Shifts.remove(shift);
     if (!removed) {
       print('Schicht nicht gefunden.');
     } else {
@@ -47,4 +47,4 @@ class Workschedule {
 }
 
 ///TO-DO: move to utils, make generic
-bool doesOverlap(ScheduledShift newShift, ScheduledShift existingShift) => newShift.start.isBefore(existingShift.end) && newShift.end.isAfter(existingShift.start);
+bool doesOverlap(Shift newShift, Shift existingShift) => newShift.start.isBefore(existingShift.end) && newShift.end.isAfter(existingShift.start);
