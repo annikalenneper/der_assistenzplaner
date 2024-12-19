@@ -49,7 +49,6 @@ class CalendarViewState extends State<CalendarView> {
   
   @override
   Widget build(BuildContext context) {
-    
     final calendar = TableCalendar(
       firstDay: DateTime(2024, 12, 1), //TO-DO: change to oldest shift
       lastDay: DateTime(2024, 12, 30),
@@ -94,8 +93,10 @@ class CalendarViewState extends State<CalendarView> {
 
       onDaySelected: (selectedDay, focusedDay) {
         setState(() {
-        _selectedDay = selectedDay;
-        _focusedDay = focusedDay;
+          _selectedDay = selectedDay;
+          _focusedDay = focusedDay;
+          final shiftModel = Provider.of<ShiftModel>(context, listen: false);
+          _scheduledShiftsSelectedDay.value = shiftModel.getShiftsByDay(_selectedDay!);
         });
       },
 
