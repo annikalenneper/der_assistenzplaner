@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
@@ -20,11 +22,8 @@ void saveToDatabase(context, Map<String, dynamic> inputs, Type type) {
     assistantModel.saveNewAssistant(newAssistant);
   } else if (type == Type.shift) {
     final shiftModel = Provider.of<ShiftModel>(context, listen: false);
-    final newShift = Shift(inputs['start'], inputs['end']);
-    shiftModel.saveNewShift(newShift);
-    if (inputs['assistantID'] != null){
-      shiftModel.saveNewShiftAsScheduledShift(newShift, inputs['assistantID']);
-    }
+    final newShift = Shift(inputs['start'], inputs['end'], inputs['assistantID']);
+    shiftModel.saveShift(newShift);
   }
 }
 
