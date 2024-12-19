@@ -17,18 +17,20 @@ class ShiftAdapter extends TypeAdapter<Shift> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Shift(
-      fields[0] as DateTime,
       fields[1] as DateTime,
-    );
+      fields[2] as DateTime,
+    ).._shiftID = fields[0] as String;
   }
 
   @override
   void write(BinaryWriter writer, Shift obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
-      ..write(obj._start)
+      ..write(obj._shiftID)
       ..writeByte(1)
+      ..write(obj._start)
+      ..writeByte(2)
       ..write(obj._end);
   }
 
@@ -54,22 +56,25 @@ class ScheduledShiftAdapter extends TypeAdapter<ScheduledShift> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return ScheduledShift(
-      fields[0] as DateTime, // start
-      fields[1] as DateTime, // end
-      fields[2] as String,   // assistantID
-    );
+      fields[1] as DateTime, // start
+      fields[2] as DateTime, // end
+      fields[3] as String,   // assistantID
+    ).._shiftID = fields[0] as String;
+      
   }
 
   @override
   void write(BinaryWriter writer, ScheduledShift obj) {
     writer
+      ..writeByte(4)
       ..writeByte(3)
+      ..write(obj._assistantID)
       ..writeByte(0)
-      ..write(obj.start)
+      ..write(obj._shiftID)
       ..writeByte(1)
-      ..write(obj.end)
+      ..write(obj._start)
       ..writeByte(2)
-      ..write(obj._assistantID);
+      ..write(obj._end);
   }
 
   @override
@@ -82,4 +87,3 @@ class ScheduledShiftAdapter extends TypeAdapter<ScheduledShift> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
-

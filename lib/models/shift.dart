@@ -1,4 +1,6 @@
+import 'package:der_assistenzplaner/models/tag.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 part 'shift.g.dart'; 
 
@@ -7,16 +9,21 @@ part 'shift.g.dart';
 @HiveType(typeId: 1)
   class Shift extends HiveObject {
     @HiveField(0)
-    DateTime _start;
+    String _shiftID;
 
     @HiveField(1)
+    DateTime _start;
+
+    @HiveField(2)
     DateTime _end;
 
-    Shift(this._start, this._end);
+    Shift(this._start, this._end) 
+      : _shiftID = Uuid().v4().toString();
 
     DateTime get start => _start;
     DateTime get end => _end;
     Duration get duration => _end.difference(_start);
+    List<Tag> get tags => [];
 
     set start(DateTime start) => (start.isBefore(_end))
         ? _start = start
@@ -34,12 +41,14 @@ part 'shift.g.dart';
 
 @HiveType(typeId: 2)
   class ScheduledShift extends Shift {
-    @HiveField(2)
+    @HiveField(3)
     String _assistantID;
 
     ScheduledShift(super.start, super.end, this._assistantID);
 
-    get assistantID => _assistantID;
+    String get assistantID => _assistantID;
+
+    set assistantID(String assistantID) => _assistantID = assistantID;
 
     /// override == operator to compare ScheduledShifts by start, end and assistant
     @override
