@@ -68,14 +68,14 @@ List<StepData> addAssistantStepData(){
 }
 
 /// returns a list of step data for adding a new shift
-List<StepData> addShiftStepData(){
+List<StepData> addShiftStepData(selectedDay){
   final List<StepData> stepData = [];
 
   final startInput = StepData(
   title: 'Wann soll die Schicht beginnen?',
   contentBuilder: (inputs) {
     return StepperTimePicker(
-      date: DateTime.now(), 
+      date: selectedDay, 
       onTimeSelected: (selectedTime) {
         inputs['start'] = selectedTime;
         log('Selected start time: ${inputs.toString()}');
