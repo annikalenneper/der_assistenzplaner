@@ -21,6 +21,11 @@ part 'shift.g.dart';
     String? _assistantID;
 
     Shift(this._start, this._end, this._assistantID); 
+
+    @override
+      String toString() {
+      return 'Shift(start: $start, end: $end, assistantID: $assistantID)';
+    }
       
     DateTime get start => _start;
     DateTime get end => _end;
