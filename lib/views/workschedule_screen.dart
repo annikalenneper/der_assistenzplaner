@@ -1,5 +1,7 @@
+import 'dart:developer';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/utils/step_data.dart';
+import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/views/shared/small_custom_widgets.dart';
 import 'package:der_assistenzplaner/views/shared/stepper.dart';
@@ -7,23 +9,8 @@ import 'package:der_assistenzplaner/views/shared/view_containers.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
-import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
 import 'package:provider/provider.dart';
 
-///WorkScheduleScreen
-class WorkScheduleScreen extends StatelessWidget {
-  //TO-DO: implement methods to pass different parameters to WorkScheduleView
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          CalendarView(),  
-        ]
-      ),
-    );
-  }
-}
 
 class CalendarView extends StatefulWidget {
   CalendarView({super.key});
@@ -38,17 +25,25 @@ class CalendarViewState extends State<CalendarView> {
   late final ValueNotifier<List<Shift>> _scheduledShiftsSelectedDay;
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
+  @override
+  void initState() {
+    super.initState();
+    /// initialize as empty list
+    _scheduledShiftsSelectedDay = ValueNotifier([]);
+  }
+
   /// safe use of provider after build
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final ShiftModel shiftModel = Provider.of<ShiftModel>(context, listen: false);
     /// listens to changes in selected days shifts
-    _scheduledShiftsSelectedDay = ValueNotifier(shiftModel.getShiftsByDay(_selectedDay!));
+    _scheduledShiftsSelectedDay.value = shiftModel.getShiftsByDay(_selectedDay!);
   }
   
   @override
   Widget build(BuildContext context) {
+    final AssistantModel assistantModel = Provider.of<AssistantModel>(context, listen: false);
     final calendar = TableCalendar(
       firstDay: DateTime(2024, 12, 1), //TO-DO: change to first day of month of oldest shift
       lastDay: DateTime(2024, 12, 30),
@@ -100,6 +95,64 @@ class CalendarViewState extends State<CalendarView> {
         });
       },
 
+      calendarBuilders: CalendarBuilders(
+        markerBuilder: (context, day, events) {
+          if (events.isNotEmpty) {
+            ///extract shifts with and without assistantID
+            final withAssistantID = events
+                .where((event) => event is Shift && event.assistantID != '')
+                .map((event) => (event as Shift).assistantID)
+                .toSet();
+            final withoutAssistantID = events
+                .where((event) => event is Shift && event.assistantID == '')
+                .toList();
+            log('withAssistantID: $withAssistantID, withoutAssistantID: $withoutAssistantID');
+
+            return Stack(
+              children: [
+                /// TO-DO: marker shifts with assistants
+                if (withAssistantID.isNotEmpty)
+                  Positioned(
+                    right: 1,
+                    bottom: 1,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      child: Text(
+                        'Besetzte Schicht', /// TO-DO
+                        style: TextStyle(color: Colors.white, fontSize: 10),
+                      ),
+                    ),
+                  ),
+
+                /// marker shifts without assistants
+                if (withoutAssistantID.isNotEmpty)
+                  Positioned(
+                    left: 1,
+                    bottom: 1,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      child: Text(
+                        'Unbesetzte Schicht', 
+                        style: TextStyle(color: Colors.white, fontSize: 10),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }
+          return const SizedBox.shrink();
+        },
+      ),
+
+
       onFormatChanged: (format) {
         if (_calendarFormat != format) {
           setState(() {
@@ -112,20 +165,20 @@ class CalendarViewState extends State<CalendarView> {
     /// shows scheduled shifts for selected day
     final scheduledShiftsView = Center(
       child: Column(
-        children:[ 
+        children:[
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: Text('Schichten am ${_selectedDay!.day.toString().padLeft(2, '0')}.${_selectedDay!.month.toString().padLeft(2, '0')}.${_selectedDay!.year}', style: TextStyle(fontSize: 18)),
           ),
           ValueListenableBuilder<List<Shift>>(
             valueListenable: _scheduledShiftsSelectedDay,
-            builder: (context, workschedule, child) {
-              return workschedule.isEmpty ? Text('Keine Schichten', textAlign: TextAlign.center,)
+            builder: (context, shifts, child) {
+              return shifts.isEmpty ? Text('Keine Schichten', textAlign: TextAlign.center,)
               : ListView.builder(
                 shrinkWrap: true,
-                itemCount: workschedule.length,
+                itemCount: shifts.length,
                 itemBuilder: (context, index) {
-                  final shift = workschedule[index];
+                  final shift = shifts[index];
                   return ShiftCard(shift: shift, assistantID: shift.assistantID);
                 },
               );
@@ -137,13 +190,12 @@ class CalendarViewState extends State<CalendarView> {
               icon: Icon(Icons.add), 
               alignment: Alignment.center, 
               padding: EdgeInsets.all(12),
-              onPressed: () {
-                  showDialog(
-                  context: context, 
-                  builder: (context) {
-                    return PopUpBox(
-                      view:  DynamicStepper(
-                        steps: addShiftStepData(),
+              onPressed: () { showDialog(
+                context: context, 
+                builder: (context) {
+                  return PopUpBox(
+                    view:  DynamicStepper(
+                        steps: addShiftStepData(_selectedDay!),
                         onComplete: (inputs) => saveToDatabase(context, inputs, Type.shift),
                       ),
                     );
@@ -159,7 +211,7 @@ class CalendarViewState extends State<CalendarView> {
     return 
       Padding(
         padding: const EdgeInsets.all(12.0),
-        child: Column(
+        child: Row(
           children: [
             Expanded(
               child: Row(
@@ -173,14 +225,30 @@ class CalendarViewState extends State<CalendarView> {
               children: [
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(12.0),
+                    padding: const EdgeInsets.all(6.0),
                     child: Text("Dein Team hat noch X Tage Zeit für die Abgabe der Verfügbarkeiten für \$nextMonth. \nZahl der eingegangenen Verfügbarkeiten: X"),
                   ),
                 ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: List.generate(
+                      assistantModel.assistants.length,
+                      (index) => Padding(
+                        padding: const EdgeInsets.only(right: 8.0), // Abstand zwischen den Markern
+                        child: AssistantMarker(
+                          color: Colors.purple,
+                          name: assistantModel.assistants[index].name,
+                          screenWidth: MediaQuery.of(context).size.width,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),             
               ],
-             ),
-            ],
-          )
-        );
+            )
+          ],
+        ),
+      );
   }
 }
