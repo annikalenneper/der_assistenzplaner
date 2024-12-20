@@ -58,25 +58,7 @@ class AssistantCard extends StatelessWidget {
         margin: EdgeInsets.all(8.0),
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: color,
-                ),
-                child: Center(
-                  child: Text(
-                    name[0].toUpperCase(),
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.035,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            AssistantMarker(color: color, name: name, screenWidth: screenWidth),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               child: Column(
@@ -125,6 +107,42 @@ class AssistantCard extends StatelessWidget {
               ),
             ) 
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class AssistantMarker extends StatelessWidget {
+  const AssistantMarker({
+    super.key,
+    required this.color,
+    required this.name,
+    required this.screenWidth,
+  });
+
+  final MaterialColor color;
+  final String name;
+  final double screenWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color,
+        ),
+        child: Center(
+          child: Text(
+            name[0].toUpperCase(),
+            style: TextStyle(
+              fontSize: screenWidth * 0.035,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
         ),
       ),
     );
