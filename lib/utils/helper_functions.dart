@@ -1,10 +1,8 @@
-import 'dart:developer';
-
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
-import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 
 
