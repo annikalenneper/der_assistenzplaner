@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/tag.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+
+import '../../viewmodels/workschedule_model.dart';
 
 
 class ShiftCard extends StatelessWidget {
@@ -58,7 +61,7 @@ class AssistantCard extends StatelessWidget {
         margin: EdgeInsets.all(8.0),
         child: Column(
           children: [
-            AssistantMarker(color: color, name: name, screenWidth: screenWidth),
+            AssistantMarker(color: color, name: name, size: 50),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               child: Column(
@@ -114,34 +117,37 @@ class AssistantCard extends StatelessWidget {
 }
 
 class AssistantMarker extends StatelessWidget {
-  const AssistantMarker({
-    super.key,
-    required this.color,
-    required this.name,
-    required this.screenWidth,
-  });
+  const AssistantMarker({super.key, required this.color, required this.name, required this.size, this.assistantID});
 
   final MaterialColor color;
+  final String? assistantID;
+  final double size;
   final String name;
-  final double screenWidth;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Container(
+      child: GestureDetector(
+        onTap: () {
+          final workscheduleModel = Provider.of<WorkscheduleModel>(context, listen: false);
+          workscheduleModel.updateDisplayOption(ShiftDisplayOptions.assistant, assistantID);
+        },
+        child: Container(
+          width: size,
+          height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: color,
         ),
         child: Center(
-          child: Text(
-            name[0].toUpperCase(),
-            style: TextStyle(
-              fontSize: screenWidth * 0.035,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              name[0].toUpperCase(),
+              style: TextStyle(fontSize: size * 0.6,color: Colors.white, height: 1),
+              ),
+          ),
           ),
         ),
       ),
@@ -204,4 +210,69 @@ class _TagWidgetViewState extends State<TagWidget> {
     );
   }
 }
+
+
+class CalendarDayMarkers extends StatelessWidget {
+  const CalendarDayMarkers({
+    super.key,
+    required this.withAssistantID,
+    required this.withoutAssistantID,
+  });
+
+  final Set<String> withAssistantID;
+  final Set<Object?> withoutAssistantID;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+        children: [
+          /// marker for shifts with assistantID
+          if (withAssistantID.isNotEmpty)
+            Positioned.fill(
+              right: 1,
+              bottom: 1,
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  child: Text(
+                    withAssistantID
+                        .map((event) => (event as Shift).assistantID)
+                        .join(', '), /// TO-DO: add assistant name instead of ID
+                    style: const TextStyle(color: Colors.white, fontSize: 10),
+                  ),
+                ),
+              ),
+            ),
+          /// marker for shifts without assistantID
+          if (withoutAssistantID.isNotEmpty)
+            Positioned.fill(
+              left: 1,
+              bottom: 1,
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  child: Text(
+                    '${withoutAssistantID.length} unbesetzt',
+                    style: const TextStyle(color: Colors.white, fontSize: 10),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      );
+    }    
+  }
+
+
 
