@@ -10,9 +10,11 @@ enum ShiftDisplayOptions {scheduled, unscheduled, all, assistant}
 /// needs no database, uses lists from scheduledShiftModel
 class WorkscheduleModel extends ChangeNotifier {
   var _selectedDisplayOption = ShiftDisplayOptions.scheduled;
+  String? selectedAssistantID;
 
-  void updateDisplayOption(ShiftDisplayOptions option) {
+  void updateDisplayOption(ShiftDisplayOptions option, String? assistantID) {
     _selectedDisplayOption = option;
+    selectedAssistantID = assistantID;
     notifyListeners();
   }
 
@@ -20,7 +22,7 @@ class WorkscheduleModel extends ChangeNotifier {
 
   /// returns list of scheduled shifts, depending on selected display option
   /// hand over function to calendar event loader to display selected shifts
-  List<Shift> selectDisplayedShifts (context, ShiftDisplayOptions selected, {String? assistantID}) {
+  List<Shift> selectDisplayedShifts (context, ShiftDisplayOptions selected) {
     late ShiftModel shiftModel = Provider.of<ShiftModel>(context, listen: false);
     switch (selected) {
       case ShiftDisplayOptions.scheduled:
@@ -30,7 +32,7 @@ class WorkscheduleModel extends ChangeNotifier {
       case ShiftDisplayOptions.all:
         return shiftModel.shifts;
       case ShiftDisplayOptions.assistant:
-        return shiftModel.getMapOfShiftsByAssistants()[assistantID] ?? [];
+        return shiftModel.getMapOfShiftsByAssistants()[selectedAssistantID] ?? [];
     }
   }
 }
