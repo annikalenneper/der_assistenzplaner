@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
@@ -15,6 +17,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
 
   /// initialize Hive database
   await Hive.initFlutter();
@@ -103,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height * 0.08,
-        title: Text('Der Assistenzplaner'),
+        title: Text('Willkommen beim Assistenzplaner'),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
