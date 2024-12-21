@@ -1,5 +1,6 @@
 
 import 'dart:developer';
+import 'package:der_assistenzplaner/utils/cache.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
@@ -10,6 +11,7 @@ import 'package:der_assistenzplaner/models/shift.dart';
 class ShiftModel extends ChangeNotifier {
   late Box<Shift> _shiftBox;
   List<Shift> shifts = [];
+  final MarkerCache markerCache = MarkerCache();
 
   Shift? currentShift;
 
@@ -69,6 +71,7 @@ class ShiftModel extends ChangeNotifier {
     _shiftBox.watch().listen((event) {
       shifts = _shiftBox.values.toList();
       notifyListeners();
+      markerCache.clearCache();
       log('shiftModel: shifts list updated');
     });
   }
@@ -76,7 +79,6 @@ class ShiftModel extends ChangeNotifier {
   /// save shift in shiftbox
   Future<void> saveShift(Shift newShift) async {
     await _shiftBox.add(newShift);
-    notifyListeners();
     log('shiftModel: saved shift to database');
   }
 
@@ -85,7 +87,6 @@ class ShiftModel extends ChangeNotifier {
     if (currentShift != null && currentShift!.key != null) {
       await _shiftBox.put(currentShift!.key, updatedShift);
       log('shiftModel: shift updated with key ${currentShift!.key}');
-      notifyListeners();
     } else {
       log('shiftModel: currentShift is null or has no key');
     }
