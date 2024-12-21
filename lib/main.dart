@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height * 0.08,
-        title: Text('Willkommen beim Assistenzplaner'),
+        title: Text('Der Assistenzplaner'),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
