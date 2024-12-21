@@ -1,8 +1,10 @@
 import 'dart:developer';
+import 'package:der_assistenzplaner/utils/cache.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/utils/step_data.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
+import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
 import 'package:der_assistenzplaner/views/shared/small_custom_widgets.dart';
 import 'package:der_assistenzplaner/views/shared/stepper.dart';
 import 'package:der_assistenzplaner/views/shared/view_containers.dart';
@@ -24,6 +26,7 @@ class CalendarViewState extends State<CalendarView> {
   DateTime _focusedDay = DateTime.now();
   late final ValueNotifier<List<Shift>> _scheduledShiftsSelectedDay;
   CalendarFormat _calendarFormat = CalendarFormat.month;
+        final MarkerCache markerCache = MarkerCache();
 
   @override
   void initState() {
@@ -82,9 +85,14 @@ class CalendarViewState extends State<CalendarView> {
       },
 
       eventLoader: (day) {
-        final shiftModel = Provider.of<ShiftModel>(context);
-        return shiftModel.getShiftsByDay(day);
+        final workscheduleModel = Provider.of<WorkscheduleModel>(context, listen: false);
+        return workscheduleModel.selectDisplayedShifts(
+          context,
+          workscheduleModel.selectedDisplayOption
+          /// filter given list by day
+        ).where((shift) => isSameDay(shift.start, day)).toList();
       },
+
 
       onDaySelected: (selectedDay, focusedDay) {
         setState(() {
@@ -95,68 +103,26 @@ class CalendarViewState extends State<CalendarView> {
         });
       },
 
-      calendarBuilders: CalendarBuilders(
-        markerBuilder: (context, day, events) {
-          if (events.isNotEmpty) {
-            ///extract shifts with and without assistantID
-            final withAssistantID = events
-                .where((event) => event is Shift && event.assistantID != '')
-                .map((event) => (event as Shift).assistantID)
-                .toSet();
-            final withoutAssistantID = events
-                .where((event) => event is Shift && event.assistantID == '')
-                .toList();
-            log('withAssistantID: $withAssistantID, withoutAssistantID: $withoutAssistantID');
+    calendarBuilders: CalendarBuilders(
+      markerBuilder: (context, day, events) {
+        if (events.isNotEmpty) {      
+          final withAssistantID = events
+              .where((event) => event is Shift && event.assistantID != '')
+              .map((event) => (event as Shift).assistantID)
+              .toSet();
+          final withoutAssistantID = events
+              .where((event) => event is Shift && event.assistantID == '')
+              .toSet();
+          return markerCache.getMarker(day, withAssistantID, withoutAssistantID);
+        }
+        return const SizedBox.shrink();
+      },
+    ),
 
-            return Stack(
-              children: [
-                /// TO-DO: marker shifts with assistants
-                if (withAssistantID.isNotEmpty)
-                  Positioned(
-                    right: 1,
-                    bottom: 1,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                      child: Text(
-                        'Besetzte Schicht', /// TO-DO
-                        style: TextStyle(color: Colors.white, fontSize: 10),
-                      ),
-                    ),
-                  ),
-
-                /// marker shifts without assistants
-                if (withoutAssistantID.isNotEmpty)
-                  Positioned(
-                    left: 1,
-                    bottom: 1,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                      child: Text(
-                        'Unbesetzte Schicht', 
-                        style: TextStyle(color: Colors.white, fontSize: 10),
-                      ),
-                    ),
-                  ),
-              ],
-            );
-          }
-          return const SizedBox.shrink();
-        },
-      ),
-
-
-      onFormatChanged: (format) {
-        if (_calendarFormat != format) {
-          setState(() {
-            _calendarFormat = format;
+    onFormatChanged: (format) {
+      if (_calendarFormat != format) {
+        setState(() {
+          _calendarFormat = format;
           });
         }
       },
@@ -209,46 +175,55 @@ class CalendarViewState extends State<CalendarView> {
     );
 
     return 
-      Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Row(
-          children: [
-            Expanded(
-              child: Row(
-                children: [
-                  Flexible(flex: 3, child: calendar),
-                  Flexible(flex:2, child: scheduledShiftsView),
-                ],
-              ),
-            ),
-            Row(
+      Row(
+        children: [
+          /// left side
+          Expanded(
+            flex: 3,
+            child: Column(
               children: [
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(6.0),
-                    child: Text("Dein Team hat noch X Tage Zeit für die Abgabe der Verfügbarkeiten für \$nextMonth. \nZahl der eingegangenen Verfügbarkeiten: X"),
-                  ),
+                  child: calendar
                 ),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: List.generate(
-                      assistantModel.assistants.length,
-                      (index) => Padding(
-                        padding: const EdgeInsets.only(right: 8.0), // Abstand zwischen den Markern
-                        child: AssistantMarker(
-                          color: Colors.purple,
-                          name: assistantModel.assistants[index].name,
-                          screenWidth: MediaQuery.of(context).size.width,
-                        ),
-                      ),
-                    ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Text ('Dein Team hat noch X Tage Zeit für die Abgabe der Verfügbarkeiten. \nZahl der eingetragenen Verfügbarkeiten: X', style: TextStyle(fontSize: 12),),
                   ),
-                ),             
+                )
               ],
             )
-          ],
-        ),
-      );
+          ),
+          /// right side
+          Expanded(
+            flex: 2,
+            child: Column(
+              children: [
+                Expanded(
+                  child: scheduledShiftsView,
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal, 
+                    child: Row(
+                      children: assistantModel.assistants.map((assistant) {
+                        return AssistantMarker(
+                          color: Colors.blue,
+                          size: 40, 
+                          name: assistant.name,
+                        );
+                      }
+                    ).toList(),                      
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),      
+      ],
+    );
   }
 }
+
