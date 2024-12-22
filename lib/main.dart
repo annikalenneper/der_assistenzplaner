@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
+import 'package:der_assistenzplaner/styles/styles.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
 import 'package:der_assistenzplaner/views/settings_screen.dart';
@@ -63,9 +64,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Der Assistenzplaner',
       // TO-DO: add theme
-      theme: ThemeData(
-        primarySwatch: Colors.amber,
-      ),
+      theme: ModernBusinessTheme.themeData,
       home: HomeScreen(),
       routes: {
         '/assistantTab': (context) => HomeScreen(initialTabIndex: 1),
