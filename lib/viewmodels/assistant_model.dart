@@ -7,6 +7,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 class AssistantModel extends ChangeNotifier {
   late Box<Assistant> _assistantBox;
   List<Assistant> assistants = [];
+  Map<String, Assistant> assistantMap = {};
+  Map<String, Color> assistantColorMap = {}; /// TO-DO: implement color assignment to assistants and save in shared preferences
   Assistant? currentAssistant;
   
   AssistantModel();
@@ -21,6 +23,7 @@ class AssistantModel extends ChangeNotifier {
   List<double> get futureSurchargeCounter => currentAssistant?.futureSurchargeCounter ?? [];
   List<Note> get notes => currentAssistant?.notes ?? [];
   List<Tag> get tags => currentAssistant?.tags ?? [];
+
 
   //----------------- Setter methods -----------------
 
@@ -49,6 +52,13 @@ class AssistantModel extends ChangeNotifier {
     currentAssistant?.actualHours = actualHours;
     log('AssistantModel: actualHours set to $actualHours');
     notifyListeners();
+  }
+
+  //----------------- Overridden methods -----------------
+
+  @override
+  String toString() {
+    return 'Assistant: $name, $contractedHours, $deviation, $tags';
   }
 
   //----------------- User interaction methods -----------------
@@ -92,6 +102,9 @@ class AssistantModel extends ChangeNotifier {
   /// listen to changes in database and update assistants list accordingly
     _assistantBox.watch().listen((event) {
       assistants = getAllAssistants();
+      assistantMap = {
+        for (var assistant in assistants) assistant.assistantID: assistant
+      };
       notifyListeners(); 
       log('AssistantModel: assistants list updated');
     });
