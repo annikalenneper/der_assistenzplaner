@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 
 
+
 /// ------------------------- Enumerations -------------------------
 enum Type {assistant, shift}
 
@@ -40,5 +41,8 @@ void insertSorted<T>(List<T> list, T element, int Function(T a, T b) compare) {
     list.insert(index, element);
   }
 }
+
+
+
 
 
