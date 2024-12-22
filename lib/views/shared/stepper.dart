@@ -56,19 +56,19 @@ class _DynamicStepperState extends State<DynamicStepper> {
 
 //---------------- Custom Time Picker Hours and Minutes ----------------
 
-class StepperTimePicker extends StatefulWidget {
+class DropDownTimePicker extends StatefulWidget {
   /// initial date for the time picker, pass from calender
   final DateTime date; 
   /// callback function to handle user inputs 
   final ValueChanged<DateTime> onTimeSelected; 
 
-  const StepperTimePicker({super.key, required this.date, required this.onTimeSelected,});
+  const DropDownTimePicker({super.key, required this.date, required this.onTimeSelected,});
 
   @override
-  State<StepperTimePicker> createState() => _StepperTimePickerState();
+  State<DropDownTimePicker> createState() => _DropDownTimePickerState();
 }
 
-class _StepperTimePickerState extends State<StepperTimePicker> {
+class _DropDownTimePickerState extends State<DropDownTimePicker> {
   late int selectedHour = widget.date.hour;
   late int selectedMinute = widget.date.minute;
 
@@ -150,3 +150,51 @@ class _StepperTimePickerState extends State<StepperTimePicker> {
   }
 }
 
+
+
+class DropDownColorPicker extends StatefulWidget {
+  final List<Color> colors;
+  final ValueChanged<Color> onColorSelected;
+
+  const DropDownColorPicker({
+    super.key,
+    required this.colors,
+    required this.onColorSelected,
+  });
+
+  @override
+  State<DropDownColorPicker> createState() => _DropDownColorPickerState();
+}
+
+class _DropDownColorPickerState extends State<DropDownColorPicker> {
+  late Color selectedColor = widget.colors.first;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButton<Color>(
+      value: selectedColor,
+      items: widget.colors.map((color) {
+        return DropdownMenuItem<Color>(
+          value: color,
+          child: Container(
+            height: 24,
+            width: 24,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.black12),
+            ),
+          ),
+        );
+      }).toList(),
+      onChanged: (value) {
+        if (value != null) {
+          setState(() {
+            selectedColor = value;
+            widget.onColorSelected(selectedColor);
+          });
+        }
+      },
+    );
+  }
+}
