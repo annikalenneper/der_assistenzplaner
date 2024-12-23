@@ -63,6 +63,12 @@ class AssistantModel extends ChangeNotifier {
 
   //----------------- User interaction methods -----------------
   
+  void assignColor(String assistentID, Color color) {
+    assistantColorMap[assistentID] = color;
+    log('AssistantModel: assigned color $color to assistant $assistentID');
+    notifyListeners();
+  }
+
   void addNote(String title, String text) {
     currentAssistant?.addNote(title, text);
     log('AssistantModel: added note with title $title and text $text');
