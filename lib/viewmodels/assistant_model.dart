@@ -8,7 +8,7 @@ class AssistantModel extends ChangeNotifier {
   late Box<Assistant> _assistantBox;
   List<Assistant> assistants = [];
   Map<String, Assistant> assistantMap = {};
-  Map<String, Color> assistantColorMap = {}; /// TO-DO: implement color assignment to assistants and save in shared preferences
+  Map<String, Color> assistantColorMap = {}; /// TO-DO: save in shared preferences
   Assistant? currentAssistant;
   
   AssistantModel();
