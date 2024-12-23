@@ -20,27 +20,37 @@ class ShiftCard extends StatelessWidget {
     return Card(
       child: Padding(
         padding: EdgeInsets.all(20.0),
-        child: Row(        
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, 
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(assistantID),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(shift.start.toString()),
-                    Text(' - '),
-                    Text(shift.end.toString()),
-                  ],
-                ),
-              ],
+            AssistantMarker(size: 60),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    assistantID,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    shift.toString(),
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                ],
+              ),
+            ),
+            Wrap(
+              spacing: 8, 
+              runSpacing: 4, 
+              children: shift.tags.map((tag) => TagWidget(tag)).toList(),
             ),
           ],
         ),
       ),
     );
   }
+
 }
 
 
@@ -52,8 +62,9 @@ class AssistantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final assistantID = assistant.assistantID;
     final name = assistant.name;
-    final deviation = assistant.deviation.toString();
+    final deviation = assistant.formattedDeviation;
     final tags = assistant.tags;
     final color = Provider.of<AssistantModel>(context).assistantColorMap[assistant.assistantID] ?? Colors.grey;
 
@@ -64,7 +75,7 @@ class AssistantCard extends StatelessWidget {
         margin: EdgeInsets.all(8.0),
         child: Column(
           children: [
-            AssistantMarker(color: color, name: name, size: 50),
+            AssistantMarker(size: 50, assistantID: assistantID),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               child: Column(
@@ -79,7 +90,7 @@ class AssistantCard extends StatelessWidget {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Deviation: $deviation',
+                    deviation,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[700],
@@ -120,15 +131,16 @@ class AssistantCard extends StatelessWidget {
 }
 
 class AssistantMarker extends StatelessWidget {
-  const AssistantMarker({super.key, required this.color, required this.name, required this.size, this.assistantID});
+  const AssistantMarker({super.key, required this.size, this.assistantID});
 
-  final Color color;
   final String? assistantID;
   final double size;
-  final String name;
 
   @override
   Widget build(BuildContext context) {
+    final assistantModel = Provider.of<AssistantModel>(context);
+    final color = assistantModel.assistantColorMap[assistantID] ?? Colors.grey;
+    final name = assistantModel.assistantMap[assistantID]?.name ?? '';
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: GestureDetector(
@@ -147,10 +159,10 @@ class AssistantMarker extends StatelessWidget {
           child: FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              name[0].toUpperCase(),
-              style: TextStyle(fontSize: size * 0.6,color: Colors.white, height: 1),
+              name.isNotEmpty ? name[0].toUpperCase() : '?',
+              style: TextStyle(fontSize: size * 0.6, color: Colors.white, height: 1),
               ),
-          ),
+            ),
           ),
         ),
       ),
@@ -227,6 +239,7 @@ class CalendarDayMarkers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AssistantModel assistantModel = Provider.of<AssistantModel>(context);
     return Stack(
         children: [
           /// marker for shifts with assistantID
@@ -236,18 +249,24 @@ class CalendarDayMarkers extends StatelessWidget {
               bottom: 1,
               child: Align(
                 alignment: Alignment.bottomLeft,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                  child: Text(
-                    withAssistantID
-                        .map((event) => (event as Shift).assistantID)
-                        .join(', '), /// TO-DO: add assistant name instead of ID
-                    style: const TextStyle(color: Colors.white, fontSize: 10),
-                  ),
+                child: Wrap(
+                  spacing: 4, 
+                  runSpacing: 2, 
+                  children: withAssistantID.map((assistantID) {
+                    final color = assistantModel.assistantColorMap[assistantID] ?? Colors.grey;
+                    final assistantName = assistantModel.assistantMap[assistantID]?.name ?? 'Unbekannt';
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      child: Text(
+                        assistantName, // Zeige den Namen statt der ID an
+                        style: const TextStyle(color: Colors.white, fontSize: 10),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
             ),
