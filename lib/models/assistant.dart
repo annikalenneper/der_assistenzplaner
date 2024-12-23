@@ -46,6 +46,7 @@ part 'assistant.g.dart';
     double get contractedHours => _contractedHours;
     double get actualHours => _actualHours;
     double get deviation => _contractedHours - _actualHours;
+    String get formattedDeviation => (deviation >= 0 ? '-' : '+') + deviation.toStringAsFixed(2);
     List<double> get surchargeCounter => List.unmodifiable(_surchargeCounter);
     List<double> get futureSurchargeCounter =>
         List.unmodifiable(_futureSurchargeCounter);
