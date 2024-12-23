@@ -47,6 +47,37 @@ void insertSorted<T>(List<T> list, T element, int Function(T a, T b) compare) {
 }
 
 
+//------------------------- Time Formatting -------------------------
 
 
+String getWeekdayName(int weekday) {
+    switch (weekday) {
+      case DateTime.monday:
+        return 'Mo';
+      case DateTime.tuesday:
+        return 'Di';
+      case DateTime.wednesday:
+        return 'Mi';
+      case DateTime.thursday:
+        return 'Do';
+      case DateTime.friday:
+        return 'Fr';
+      case DateTime.saturday:
+        return 'Sa';
+      case DateTime.sunday:
+        return 'So';
+      default:
+        return '';
+    }
+  }
 
+  // Formatierte Strings für Start- und Endzeit
+  String formatDateTime(DateTime dateTime) {
+    final weekday = getWeekdayName(dateTime.weekday);
+    final day = dateTime.day.toString().padLeft(2, '0');
+    final month = dateTime.month.toString().padLeft(2, '0');
+    final year = dateTime.year;
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    return '$weekday, $day.$month.$year $hour:$minute Uhr';
+  }
