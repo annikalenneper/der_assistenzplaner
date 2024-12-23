@@ -1,8 +1,9 @@
+import 'dart:developer';
+
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
-
 import 'package:provider/provider.dart';
 
 
@@ -14,11 +15,14 @@ enum Type {assistant, shift}
 
 /// ------------------------- Dynamic Database Methods -------------------------
 
-void saveToDatabase(context, Map<String, dynamic> inputs, Type type) {
+void saveStepperInput(context, Map<String, dynamic> inputs, Type type) {
   if (type == Type.assistant) {
     final assistantModel = Provider.of<AssistantModel>(context, listen: false);
     final newAssistant = Assistant(inputs['name'],inputs['contractedHours']);
     assistantModel.saveNewAssistant(newAssistant);
+    final color = inputs['color'];
+    assistantModel.assignColor(newAssistant.assistantID, color);
+    log('Assistant saved to database: $newAssistant, color: $color');
   } else if (type == Type.shift) {
     final shiftModel = Provider.of<ShiftModel>(context, listen: false);
     final newShift = Shift(inputs['start'], inputs['end'], inputs['assistantID']);
