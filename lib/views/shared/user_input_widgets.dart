@@ -1,6 +1,7 @@
 
 
 import 'dart:developer';
+import 'package:der_assistenzplaner/styles.dart';
 import 'package:der_assistenzplaner/utils/step_data.dart';
 import 'package:flutter/material.dart';
 
@@ -153,37 +154,41 @@ class _DropDownTimePickerState extends State<DropDownTimePicker> {
 
 
 class DropDownColorPicker extends StatefulWidget {
-  final List<Color> colors;
+  final List<Map<String, dynamic>> colors = ModernBusinessTheme.assistantColors;
+
   final ValueChanged<Color> onColorSelected;
 
-  const DropDownColorPicker({
-    super.key,
-    required this.colors,
-    required this.onColorSelected,
-  });
+  DropDownColorPicker({super.key, required this.onColorSelected});
 
   @override
   State<DropDownColorPicker> createState() => _DropDownColorPickerState();
 }
 
 class _DropDownColorPickerState extends State<DropDownColorPicker> {
-  late Color selectedColor = widget.colors.first;
+  late Map<String, dynamic> selectedColor = widget.colors.first;
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton<Color>(
+    return DropdownButton<Map<String, dynamic>>(
       value: selectedColor,
-      items: widget.colors.map((color) {
-        return DropdownMenuItem<Color>(
-          value: color,
-          child: Container(
-            height: 24,
-            width: 24,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.black12),
-            ),
+      isExpanded: true, // Sorgt dafür, dass das Dropdown die volle Breite einnimmt
+      items: widget.colors.map((colorData) {
+        return DropdownMenuItem<Map<String, dynamic>>(
+          value: colorData,
+          child: Row(
+            children: [
+              Container(
+                height: 24,
+                width: 24,
+                decoration: BoxDecoration(
+                  color: colorData['color'],
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.black12),
+                ),
+              ),
+              const SizedBox(width: 8), // Abstand zwischen dem Kreis und dem Text
+              Text(colorData['label']),
+            ],
           ),
         );
       }).toList(),
@@ -191,7 +196,7 @@ class _DropDownColorPickerState extends State<DropDownColorPicker> {
         if (value != null) {
           setState(() {
             selectedColor = value;
-            widget.onColorSelected(selectedColor);
+            widget.onColorSelected(value['color']);
           });
         }
       },
