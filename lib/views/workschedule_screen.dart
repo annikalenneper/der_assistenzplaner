@@ -210,9 +210,8 @@ class CalendarViewState extends State<CalendarView> {
                     child: Row(
                       children: assistantModel.assistants.map((assistant) {
                         return AssistantMarker(
-                          color: assistantModel.assistantColorMap[assistant.assistantID] ?? Colors.grey,
+                          assistantID: assistant.assistantID,
                           size: 40, 
-                          name: assistant.name,
                         );
                       }
                     ).toList(),                      
