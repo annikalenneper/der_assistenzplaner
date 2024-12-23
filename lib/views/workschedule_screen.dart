@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'package:der_assistenzplaner/styles.dart';
 import 'package:der_assistenzplaner/utils/cache.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/utils/step_data.dart';
@@ -6,7 +6,7 @@ import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
 import 'package:der_assistenzplaner/views/shared/small_custom_widgets.dart';
-import 'package:der_assistenzplaner/views/shared/stepper.dart';
+import 'package:der_assistenzplaner/views/shared/user_input_widgets.dart';
 import 'package:der_assistenzplaner/views/shared/view_containers.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -52,6 +52,7 @@ class CalendarViewState extends State<CalendarView> {
       lastDay: DateTime(2024, 12, 30),
       focusedDay: _focusedDay,
       calendarFormat: _calendarFormat,
+      startingDayOfWeek: StartingDayOfWeek.monday,
       locale: 'de_DE',
       
       shouldFillViewport: true,
@@ -68,17 +69,16 @@ class CalendarViewState extends State<CalendarView> {
       
       calendarStyle: CalendarStyle(
         todayDecoration: BoxDecoration(
-          color: Colors.pink.withOpacity(0.5),
+          color: ModernBusinessTheme.primaryColor.withOpacity(0.5), 
           shape: BoxShape.circle,
         ),
-        selectedDecoration: const BoxDecoration(
-          color: Colors.pink,
+        selectedDecoration: BoxDecoration(
+          color: ModernBusinessTheme.primaryColor, 
           shape: BoxShape.circle,
         ),
         markersMaxCount: 1,
         canMarkersOverflow: true,
       ),
-
 
       selectedDayPredicate: (day) {
         return isSameDay(_selectedDay, day);
@@ -162,7 +162,7 @@ class CalendarViewState extends State<CalendarView> {
                   return PopUpBox(
                     view:  DynamicStepper(
                         steps: addShiftStepData(_selectedDay!),
-                        onComplete: (inputs) => saveToDatabase(context, inputs, Type.shift),
+                        onComplete: (inputs) => saveStepperInput(context, inputs, Type.shift),
                       ),
                     );
                   }, 
@@ -210,7 +210,7 @@ class CalendarViewState extends State<CalendarView> {
                     child: Row(
                       children: assistantModel.assistants.map((assistant) {
                         return AssistantMarker(
-                          color: Colors.blue,
+                          color: assistantModel.assistantColorMap[assistant.assistantID] ?? Colors.grey,
                           size: 40, 
                           name: assistant.name,
                         );
