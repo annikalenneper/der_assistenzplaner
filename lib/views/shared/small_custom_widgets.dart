@@ -1,4 +1,5 @@
 import 'package:der_assistenzplaner/models/shift.dart';
+import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/tag.dart';
@@ -41,7 +42,9 @@ class ShiftCard extends StatelessWidget {
     );
   }
 }
-  
+
+
+/// TO-DO: refactor with assistantID instead of assistant
 class AssistantCard extends StatelessWidget {
   final Assistant assistant;
 
@@ -52,7 +55,7 @@ class AssistantCard extends StatelessWidget {
     final name = assistant.name;
     final deviation = assistant.deviation.toString();
     final tags = assistant.tags;
-    final color = Colors.purple;
+    final color = Provider.of<AssistantModel>(context).assistantColorMap[assistant.assistantID] ?? Colors.grey;
 
     var screenWidth = MediaQuery.of(context).size.width;
 
@@ -119,7 +122,7 @@ class AssistantCard extends StatelessWidget {
 class AssistantMarker extends StatelessWidget {
   const AssistantMarker({super.key, required this.color, required this.name, required this.size, this.assistantID});
 
-  final MaterialColor color;
+  final Color color;
   final String? assistantID;
   final double size;
   final String name;
