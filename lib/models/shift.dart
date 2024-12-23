@@ -1,6 +1,8 @@
 import 'package:der_assistenzplaner/models/tag.dart';
+import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
+
 
 part 'shift.g.dart'; 
 
@@ -24,8 +26,11 @@ part 'shift.g.dart';
 
     @override
       String toString() {
-      return 'Shift(start: $start, end: $end, assistantID: $assistantID)';
-    }
+        final formattedStart = formatDateTime(start);
+        final formattedEnd = formatDateTime(end);
+        return '$formattedStart - $formattedEnd';
+      }
+
       
     DateTime get start => _start;
     DateTime get end => _end;
