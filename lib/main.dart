@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
-import 'package:der_assistenzplaner/styles/styles.dart';
+import 'package:der_assistenzplaner/styles.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
 import 'package:der_assistenzplaner/views/settings_screen.dart';
