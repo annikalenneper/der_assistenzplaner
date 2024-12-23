@@ -1,6 +1,7 @@
 
 import 'dart:developer';
-import 'package:der_assistenzplaner/views/shared/stepper.dart';
+import 'package:der_assistenzplaner/styles.dart';
+import 'package:der_assistenzplaner/views/shared/user_input_widgets.dart';
 import 'package:flutter/material.dart';
 
 /// data class for a single step in the stepper
@@ -54,16 +55,27 @@ List<StepData> addAssistantStepData(){
     }
   );
 
-  final assignTags = StepData(
-    title: 'Welche Tags soll deine Assistenzkraft haben?', 
+  final assignColor = StepData(
+    title: 'Welche Farbe möchtest du deiner Assistenzkraft zuordnen?',
     contentBuilder: (inputs) {
-      return Text('Hier werden später Tags angezeigt');
-    }
+      // Set a default color (safe only color from map)
+      inputs['color'] = ModernBusinessTheme.assistantColors[0]['color']; 
+
+      return DropDownColorPicker(
+        onColorSelected: (color) {
+          inputs['color'] = color; 
+          log('Selected color: $color');
+        },
+      );
+    },
   );
+
+
+
 
   stepData.add(nameInput);
   stepData.add(hoursInput);
-  stepData.add(assignTags);
+  stepData.add(assignColor);
   return stepData;
 }
 
@@ -74,7 +86,7 @@ List<StepData> addShiftStepData(selectedDay){
   final startInput = StepData(
   title: 'Wann soll die Schicht beginnen?',
   contentBuilder: (inputs) {
-    return StepperTimePicker(
+    return DropDownTimePicker(
       date: selectedDay, 
       onTimeSelected: (selectedTime) {
         inputs['start'] = selectedTime;
@@ -88,7 +100,7 @@ List<StepData> addShiftStepData(selectedDay){
   final endInput = StepData(
     title: 'Wann soll die Schicht enden?',
     contentBuilder: (inputs) {
-    return StepperTimePicker(
+    return DropDownTimePicker(
       date: DateTime.now(), 
       onTimeSelected: (selectedTime) {
         inputs['end'] = selectedTime;
