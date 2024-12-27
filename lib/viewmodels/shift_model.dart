@@ -82,7 +82,7 @@ class ShiftModel extends ChangeNotifier {
     log('shiftModel: saved shift to database');
   }
 
-  /// update shift using key to find it in database
+  /// update shift by replacing with new shift, using key to find targeted shift in database 
   Future<void> updateShift(Shift updatedShift) async {
     if (currentShift != null && currentShift!.key != null) {
       await _shiftBox.put(currentShift!.key, updatedShift);
