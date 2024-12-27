@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:der_assistenzplaner/views/shared/small_custom_widgets.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
-import 'package:der_assistenzplaner/models/assistant.dart';
 import 'dart:developer';
 import 'package:der_assistenzplaner/utils/nav.dart';
 
@@ -17,6 +16,7 @@ import 'package:der_assistenzplaner/utils/nav.dart';
 /// main view for the assistant management
 class AssistantPage extends StatefulWidget {
   const AssistantPage({super.key});
+  
   @override
   State<AssistantPage> createState() => _AssistantPageState();
 }
