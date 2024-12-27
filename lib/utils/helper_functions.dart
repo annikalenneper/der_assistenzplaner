@@ -4,6 +4,7 @@ import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 
@@ -27,7 +28,9 @@ void saveStepperInput(context, Map<String, dynamic> inputs, Type type) {
     final shiftModel = Provider.of<ShiftModel>(context, listen: false);
     final newShift = Shift(inputs['start'], inputs['end'], inputs['assistantID']);
     shiftModel.saveShift(newShift);
-  }
+  // } else if (type == Type.settings) {
+    
+   }
 }
 
 
@@ -71,13 +74,45 @@ String getWeekdayName(int weekday) {
     }
   }
 
-  // Formatierte Strings für Start- und Endzeit
-  String formatDateTime(DateTime dateTime) {
-    final weekday = getWeekdayName(dateTime.weekday);
-    final day = dateTime.day.toString().padLeft(2, '0');
-    final month = dateTime.month.toString().padLeft(2, '0');
-    final year = dateTime.year;
-    final hour = dateTime.hour.toString().padLeft(2, '0');
-    final minute = dateTime.minute.toString().padLeft(2, '0');
-    return '$weekday, $day.$month.$year $hour:$minute Uhr';
+/// fotmatted as 'Mo, 01.01.2021 08:00 Uhr'
+String formatDateTime(DateTime dateTime) {
+  final weekday = getWeekdayName(dateTime.weekday);
+  final day = dateTime.day.toString().padLeft(2, '0');
+  final month = dateTime.month.toString().padLeft(2, '0');
+  final year = dateTime.year;
+  final hour = dateTime.hour.toString().padLeft(2, '0');
+  final minute = dateTime.minute.toString().padLeft(2, '0');
+  return '$weekday, $day.$month.$year $hour:$minute Uhr';
+}
+
+/// convert TimeOfDay to DateTime
+DateTime timeOfDayToDateTime(TimeOfDay time, DateTime date) {
+  return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+}
+
+/// convert DateTime to TimeOfDay
+TimeOfDay dateTimeToTimeOfDay(DateTime dateTime) {
+  return TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
+}
+
+
+//------------------------- Comparators -------------------------
+
+
+bool isBefore(TimeOfDay first, TimeOfDay second) {
+  if (first.hour < second.hour) {
+    return true;
+  } else if (first.hour == second.hour && first.minute < second.minute) {
+    return true;
   }
+  return false;
+}
+
+bool isAfter(TimeOfDay first, TimeOfDay second) {
+  if (first.hour > second.hour) {
+    return true;
+  } else if (first.hour == second.hour && first.minute > second.minute) {
+    return true;
+  }
+  return false;
+}
