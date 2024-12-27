@@ -14,10 +14,10 @@ class DynamicStepper extends StatefulWidget {
   const DynamicStepper({super.key, required this.steps, required this.onComplete});
 
   @override
-  State<DynamicStepper> createState() => _DynamicStepperState();
+  State<DynamicStepper> createState() => DynamicStepperState();
 }
 
-class _DynamicStepperState extends State<DynamicStepper> {
+class DynamicStepperState extends State<DynamicStepper> {
   int _currentStep = 0;
   final Map<String, dynamic> _inputs = {};
 
@@ -66,10 +66,10 @@ class DropDownTimePicker extends StatefulWidget {
   const DropDownTimePicker({super.key, required this.date, required this.onTimeSelected,});
 
   @override
-  State<DropDownTimePicker> createState() => _DropDownTimePickerState();
+  State<DropDownTimePicker> createState() => DropDownTimePickerState();
 }
 
-class _DropDownTimePickerState extends State<DropDownTimePicker> {
+class DropDownTimePickerState extends State<DropDownTimePicker> {
   late int selectedHour = widget.date.hour;
   late int selectedMinute = widget.date.minute;
 
@@ -152,7 +152,6 @@ class _DropDownTimePickerState extends State<DropDownTimePicker> {
 }
 
 
-
 class DropDownColorPicker extends StatefulWidget {
   final List<Map<String, dynamic>> colors = ModernBusinessTheme.assistantColors;
 
@@ -161,17 +160,17 @@ class DropDownColorPicker extends StatefulWidget {
   DropDownColorPicker({super.key, required this.onColorSelected});
 
   @override
-  State<DropDownColorPicker> createState() => _DropDownColorPickerState();
+  State<DropDownColorPicker> createState() => DropDownColorPickerState();
 }
 
-class _DropDownColorPickerState extends State<DropDownColorPicker> {
+class DropDownColorPickerState extends State<DropDownColorPicker> {
   late Map<String, dynamic> selectedColor = widget.colors.first;
 
   @override
   Widget build(BuildContext context) {
     return DropdownButton<Map<String, dynamic>>(
       value: selectedColor,
-      isExpanded: true, // Sorgt dafür, dass das Dropdown die volle Breite einnimmt
+      isExpanded: true, 
       items: widget.colors.map((colorData) {
         return DropdownMenuItem<Map<String, dynamic>>(
           value: colorData,
@@ -186,7 +185,7 @@ class _DropDownColorPickerState extends State<DropDownColorPicker> {
                   border: Border.all(color: Colors.black12),
                 ),
               ),
-              const SizedBox(width: 8), // Abstand zwischen dem Kreis und dem Text
+              const SizedBox(width: 8), 
               Text(colorData['label']),
             ],
           ),
@@ -203,3 +202,52 @@ class _DropDownColorPickerState extends State<DropDownColorPicker> {
     );
   }
 }
+
+
+/// generic dropdown widget 
+class DropDownOptionPicker<T> extends StatefulWidget {
+  final List<T> options; 
+  final ValueChanged<T> onOptionSelected; 
+  final T? initialValue; 
+
+  const DropDownOptionPicker({super.key, required this.options, required this.onOptionSelected, this.initialValue});
+
+  @override
+  State<DropDownOptionPicker<T>> createState() => _DropDownOptionPickerState<T>();
+}
+
+class _DropDownOptionPickerState<T> extends State<DropDownOptionPicker<T>> {
+  late T selectedOption;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedOption = widget.initialValue ?? widget.options.first; 
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButton<T>(
+      value: selectedOption,
+      isExpanded: true,
+      items: widget.options.map((option) {
+        return DropdownMenuItem<T>(
+          value: option,
+          /// use enum name if option is enum, else use toString
+          child: Text(
+            option is Enum ? option.name : option.toString(), 
+          ),
+        );
+      }).toList(),
+      onChanged: (value) {
+        if (value != null) {
+          setState(() {
+            selectedOption = value;
+          });
+          widget.onOptionSelected(value);
+        }
+      },
+    );
+  }
+}
+
