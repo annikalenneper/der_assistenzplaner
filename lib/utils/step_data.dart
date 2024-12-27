@@ -10,11 +10,7 @@ class StepData {
   final String information;
   final Widget Function(Map<String, dynamic> inputs) contentBuilder;
 
-  StepData({
-    required this.title,
-    this.information = '',
-    required this.contentBuilder,
-  });
+  StepData({required this.title, this.information = '', required this.contentBuilder});
 }
 
 /// returns a list of step data for adding a new assistant
