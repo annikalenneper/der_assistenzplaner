@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:der_assistenzplaner/models/assistant.dart';
 import 'package:der_assistenzplaner/models/shift.dart';
 import 'package:der_assistenzplaner/styles.dart';
+import 'package:der_assistenzplaner/viewmodels/settings_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
 import 'package:der_assistenzplaner/views/settings_screen.dart';
@@ -30,6 +31,7 @@ Future<void> main() async {
   final assistantModel = AssistantModel();
   final shiftModel = ShiftModel();
   final workscheduleModel = WorkscheduleModel();
+  final SettingsModel settingsModel = SettingsModel();
 
   /// load data
   await assistantModel.initialize();
@@ -48,6 +50,9 @@ Future<void> main() async {
           ),
           ChangeNotifierProvider(
             create: (_) => assistantModel,
+          ),
+          ChangeNotifierProvider(
+            create: (_) => settingsModel,
           ),
         ],   
         child: MyApp(),
