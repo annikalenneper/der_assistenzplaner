@@ -38,16 +38,19 @@ class AssistantModel extends ChangeNotifier {
     log('AssistantModel: name set to $name');
     notifyListeners();
   }
+
   set contractedHours(double contractedHours) {
     currentAssistant?.contractedHours = contractedHours;
     log('AssistantModel: contractedHours set to $contractedHours');
     notifyListeners();
   } 
+
   set tags(List<Tag> tags) {
     currentAssistant?.tags = tags;
     log('AssistantModel: tags set to $tags');
     notifyListeners();
   }
+  
   set actualHours(double actualHours) {
     currentAssistant?.actualHours = actualHours;
     log('AssistantModel: actualHours set to $actualHours');
