@@ -23,10 +23,10 @@ class ShiftCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, 
           children: [
-            AssistantMarker(size: 60),
+            AssistantMarker(size: 40),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     assistantID,
@@ -37,13 +37,13 @@ class ShiftCard extends StatelessWidget {
                     shift.toString(),
                     style: TextStyle(color: Colors.black54),
                   ),
+                  Wrap(
+                    spacing: 8, 
+                    runSpacing: 4, 
+                    children: shift.tags.map((tag) => TagWidget(tag)).toList(),
+                  ),
                 ],
               ),
-            ),
-            Wrap(
-              spacing: 8, 
-              runSpacing: 4, 
-              children: shift.tags.map((tag) => TagWidget(tag)).toList(),
             ),
           ],
         ),
