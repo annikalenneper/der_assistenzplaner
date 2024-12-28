@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:der_assistenzplaner/models/assistant.dart';
+import 'package:der_assistenzplaner/utils/shared_preferences_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/models/tag.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -57,17 +58,11 @@ class AssistantModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  //----------------- Overridden methods -----------------
-
-  @override
-  String toString() {
-    return 'Assistant: $name, $contractedHours, $deviation, $tags';
-  }
-
   //----------------- User interaction methods -----------------
   
   void assignColor(String assistentID, Color color) {
     assistantColorMap[assistentID] = color;
+    SharedPreferencesHelper.saveValue(assistentID, color);
     log('AssistantModel: assigned color $color to assistant $assistentID');
     notifyListeners();
   }
@@ -107,7 +102,9 @@ class AssistantModel extends ChangeNotifier {
     _assistantBox = await Hive.openBox<Assistant>('assistantBox');
     
     assistants = getAllAssistants();
-  
+
+    _loadAssistantColors();
+    
   /// listen to changes in database and update assistants list accordingly
     _assistantBox.watch().listen((event) {
       assistants = getAllAssistants();
@@ -154,5 +151,19 @@ class AssistantModel extends ChangeNotifier {
       log('AssistantModel: currentAssistant is null');
     }
     notifyListeners(); 
+  }
+
+  Future<void> _loadAssistantColors() async {
+  for (final assistant in assistants) {
+    final color = await SharedPreferencesHelper.loadValue(assistant.assistantID, type: Color);
+    if (color != null) {
+      assistantColorMap[assistant.assistantID] = color;
+    } else {
+      assistantColorMap[assistant.assistantID] = Colors.grey;
+    }
+  }
+  
+  log('AssistantModel: assistantColorMap geladen: $assistantColorMap');
+  notifyListeners();
   }
 }
