@@ -5,7 +5,7 @@ import 'package:der_assistenzplaner/views/shared/user_input_widgets.dart';
 import 'package:der_assistenzplaner/views/shared/view_containers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:der_assistenzplaner/views/shared/small_custom_widgets.dart';
+import 'package:der_assistenzplaner/views/shared/cards_and_markers.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'dart:developer';
 import 'package:der_assistenzplaner/utils/nav.dart';
