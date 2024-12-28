@@ -37,6 +37,7 @@ Future<void> main() async {
   await assistantModel.initialize();
   await shiftModel.initialize();
 
+
   /// initialize date formatting and make providers available before running the app
   initializeDateFormatting().then((_) {
     runApp(
