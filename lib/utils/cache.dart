@@ -1,4 +1,4 @@
-import 'package:der_assistenzplaner/views/shared/small_custom_widgets.dart';
+import 'package:der_assistenzplaner/views/shared/cards_and_markers.dart';
 import 'package:flutter/material.dart';
 
 
