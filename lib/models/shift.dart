@@ -3,7 +3,6 @@ import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 
-
 part 'shift.g.dart'; 
 
 //----------------- Shift -----------------
@@ -25,19 +24,29 @@ part 'shift.g.dart';
     Shift(this._start, this._end, this._assistantID); 
 
     @override
-      String toString() {
-        final formattedStart = formatDateTime(start);
-        final formattedEnd = formatDateTime(end);
-        return '$formattedStart - $formattedEnd';
-      }
+    String toString() {
+      final formattedStart = formatDateTime(start);
+      final formattedEnd = formatDateTime(end);
+      return '$formattedStart - $formattedEnd';
+    }
 
-      
+    String get shiftID => _shiftID;  
     DateTime get start => _start;
     DateTime get end => _end;
     Duration get duration => _end.difference(_start);
     String get assistantID => _assistantID ?? '';
     bool get isScheduled => _assistantID != '';
     List<Tag> get tags => [];
+
+    String get formattedDuration {
+      double hours = duration.inMinutes / 60.0;
+      double quarterHour = (hours * 4).round() / 4.0;
+      String hoursString = quarterHour.toStringAsFixed(2);
+      hoursString = hoursString.replaceAll(RegExp(r'0+$'), '');
+      hoursString = hoursString.replaceAll(RegExp(r'\.$'), '');
+      return '$hoursString Stunden';
+    }
+
 
     set start(DateTime start) => (start.isBefore(_end))
         ? _start = start
