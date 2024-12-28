@@ -58,7 +58,7 @@ class DynamicStepperState extends State<DynamicStepper> {
 //---------------- Custom Time Picker Hours and Minutes ----------------
 
 class DropDownTimePicker extends StatefulWidget {
-  /// initial date for the time picker, pass from calender
+  /// date for time picker, pass from calender
   final DateTime date; 
   /// callback function to handle user inputs 
   final ValueChanged<DateTime> onTimeSelected; 
