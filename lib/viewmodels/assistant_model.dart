@@ -103,9 +103,13 @@ class AssistantModel extends ChangeNotifier {
     
     assistants = getAllAssistants();
 
+    assistantMap = {
+      for (var assistant in assistants) assistant.assistantID: assistant
+    };
+
     _loadAssistantColors();
     
-  /// listen to changes in database and update assistants list accordingly
+    /// listen to changes in database and update assistants list accordingly
     _assistantBox.watch().listen((event) {
       assistants = getAllAssistants();
       assistantMap = {
