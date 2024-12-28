@@ -95,6 +95,28 @@ TimeOfDay dateTimeToTimeOfDay(DateTime dateTime) {
   return TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
 }
 
+/// convert DateTime.weekday (int) to String
+String dayOfWeekToString(int day)
+{
+  switch (day) {
+    case 1:
+      return 'Montag';
+    case 2:
+      return 'Dienstag';
+    case 3:
+      return 'Mittwoch';
+    case 4:
+      return 'Donnerstag';
+    case 5:
+      return 'Freitag';
+    case 6:
+      return 'Samstag';
+    case 7:
+      return 'Sonntag';
+    default:
+      return '';
+  }
+}
 
 //------------------------- Comparators -------------------------
 
