@@ -27,6 +27,7 @@ class ShiftModel extends ChangeNotifier {
   List<Shift> get unscheduledShifts => shifts.where((shift) => !shift.isScheduled).toList();
 
 
+
   //------------------ Filter Methods ------------------
 
   List<Shift> getShiftsByDay(DateTime day) {
@@ -90,5 +91,12 @@ class ShiftModel extends ChangeNotifier {
     } else {
       log('shiftModel: currentShift is null or has no key');
     }
+  }
+
+  /// delete shift from database
+  Future<void> deleteShift(String shiftID) async {
+    final shift = shifts.firstWhere((shift) => shift.shiftID == shiftID);
+    await _shiftBox.delete(shift.key);
+    log('shiftModel: deleted shift with key ${shift.key}');
   }
 }
