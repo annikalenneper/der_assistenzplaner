@@ -79,7 +79,10 @@ part 'assistant.g.dart';
       : _tags.removeAt(index);
 
     @override
-    String toString() => 'Assistant: $_name'; /// TO-DO: implement toString for all fields
+    String toString() {
+      return 'Assistant: $name, $contractedHours, $deviation, $tags';
+    } 
+
 }
 
 
