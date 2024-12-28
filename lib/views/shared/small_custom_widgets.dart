@@ -18,12 +18,13 @@ class ShiftCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 2,
       child: Padding(
         padding: EdgeInsets.all(20.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, 
           children: [
-            AssistantMarker(size: 40),
+            AssistantMarker(size: 40, assistantID: assistantID),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -72,6 +73,7 @@ class AssistantCard extends StatelessWidget {
 
     return SizedBox(
       child: Card(
+        elevation: 15,
         margin: EdgeInsets.all(8.0),
         child: Column(
           children: [
