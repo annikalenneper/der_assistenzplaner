@@ -5,7 +5,7 @@ import 'package:der_assistenzplaner/utils/step_data.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
-import 'package:der_assistenzplaner/views/shared/small_custom_widgets.dart';
+import 'package:der_assistenzplaner/views/shared/cards_and_markers.dart';
 import 'package:der_assistenzplaner/views/shared/user_input_widgets.dart';
 import 'package:der_assistenzplaner/views/shared/view_containers.dart';
 import 'package:flutter/material.dart';
@@ -128,21 +128,29 @@ class CalendarViewState extends State<CalendarView> {
       },
     );
 
+    /// headline
+    final headingForSelectedDay = Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Text(formatDateTime(_selectedDay!), style: const TextStyle(fontSize: 20)),
+    );
+          
+
     /// shows scheduled shifts for selected day
-    final scheduledShiftsView = Center(
+    final scrollableListOfShifts = SingleChildScrollView(
       child: Column(
         children:[
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Text('Schichten am ${_selectedDay!.day.toString().padLeft(2, '0')}.${_selectedDay!.month.toString().padLeft(2, '0')}.${_selectedDay!.year}', style: TextStyle(fontSize: 18)),
-          ),
+
+          /// list of shifts
           ValueListenableBuilder<List<Shift>>(
             valueListenable: _scheduledShiftsSelectedDay,
             builder: (context, shifts, child) {
-              return shifts.isEmpty ? Text('Keine Schichten', textAlign: TextAlign.center,)
-              : ListView.builder(
-                shrinkWrap: true,
+              if (shifts.isEmpty) {
+                return const Center(child: Text('Keine Schichten'));
+              }
+              return ListView.builder(
                 itemCount: shifts.length,
+                shrinkWrap: true,            
+                physics: const NeverScrollableScrollPhysics(), 
                 itemBuilder: (context, index) {
                   final shift = shifts[index];
                   return ShiftCard(shift: shift, assistantID: shift.assistantID);
@@ -150,17 +158,20 @@ class CalendarViewState extends State<CalendarView> {
               );
             },            
           ),
+
+          /// + Button 
           Padding(
             padding: const EdgeInsets.all(40.0),
             child: IconButton(   
-              icon: Icon(Icons.add), 
+              icon: const Icon(Icons.add), 
               alignment: Alignment.center, 
-              padding: EdgeInsets.all(12),
-              onPressed: () { showDialog(
-                context: context, 
-                builder: (context) {
-                  return PopUpBox(
-                    view:  DynamicStepper(
+              padding: const EdgeInsets.all(12),
+              onPressed: () { 
+                showDialog(
+                  context: context, 
+                  builder: (context) {
+                    return PopUpBox(
+                      view:  DynamicStepper(
                         steps: addShiftStepData(_selectedDay!),
                         onComplete: (inputs) => saveStepperInput(context, inputs, Type.shift),
                       ),
@@ -174,9 +185,18 @@ class CalendarViewState extends State<CalendarView> {
       ),
     );
 
+    final scheduledShiftsView = Column(
+      children: [
+        headingForSelectedDay,         
+        Expanded(child: scrollableListOfShifts), 
+      ],
+    );
+
+
     return 
       Row(
         children: [
+
           /// left side
           Expanded(
             flex: 3,
@@ -189,12 +209,16 @@ class CalendarViewState extends State<CalendarView> {
                   padding: const EdgeInsets.all(8.0),
                   child: Align(
                     alignment: Alignment.bottomLeft,
-                    child: Text ('Dein Team hat noch X Tage Zeit für die Abgabe der Verfügbarkeiten. \nZahl der eingetragenen Verfügbarkeiten: X', style: TextStyle(fontSize: 12),),
+                    child: Text (
+                      'Dein Team hat noch X Tage Zeit für die Abgabe der Verfügbarkeiten. \nZahl der eingetragenen Verfügbarkeiten: X',
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ),
                 )
               ],
             )
           ),
+
           /// right side
           Expanded(
             flex: 2,
@@ -213,16 +237,15 @@ class CalendarViewState extends State<CalendarView> {
                           assistantID: assistant.assistantID,
                           size: 40, 
                         );
-                      }
-                    ).toList(),                      
+                      }).toList(),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),      
-      ],
-    );
+        ],      
+      );
   }
 }
 
