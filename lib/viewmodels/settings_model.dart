@@ -1,5 +1,6 @@
 
 import 'dart:developer';
+import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/utils/shared_preferences_helper.dart';
 import 'package:flutter/material.dart';
 
@@ -10,8 +11,10 @@ class SettingsModel extends ChangeNotifier {
   TimeOfDay _defaultShiftStart = const TimeOfDay(hour: 8, minute: 0);
   TimeOfDay _defaultShiftEnd = const TimeOfDay(hour: 16, minute: 0);
   ShiftSettings _shiftSettings = ShiftSettings.daily;
+  Set<int> selectedWeekdays = {};
+  
 
-  /// const keys for SharedPreferences 
+  /// keys for SharedPreferences 
   static const String keyIs24hShift = 'is24hShift';
   static const String keyDefaultShiftStart = 'defaultShiftStart';
   static const String keyDefaultShiftEnd = 'defaultShiftEnd';
@@ -27,6 +30,18 @@ class SettingsModel extends ChangeNotifier {
   TimeOfDay get defaultShiftEnd => _defaultShiftEnd;
   ShiftSettings get shiftSettings => _shiftSettings;
 
+  bool isWeekdaySelected(int day) => selectedWeekdays.contains(day);
+
+  void toggleWeekday(int day) {
+    if (selectedWeekdays.contains(day)) {
+      selectedWeekdays.remove(day);
+      log("settings_model: removed ${dayOfWeekToString(day)} from selectedWeekdays");
+    } else {
+      selectedWeekdays.add(day);
+      log("settings_model: added ${dayOfWeekToString(day)} to selectedWeekdays");
+    }
+    notifyListeners();
+  }
 
 //----------------- Setter methods -----------------
 
@@ -61,28 +76,23 @@ class SettingsModel extends ChangeNotifier {
 //------------------ load settings from SharedPreferences ------------------	
 
   Future<void> _loadFromPrefs() async {
+
     final loadedIs24h = await SharedPreferencesHelper.loadValue(keyIs24hShift, type: bool);
     if (loadedIs24h is bool) {
       _is24hShift = loadedIs24h;
     }
-    final loadedStartTime = await SharedPreferencesHelper.loadValue(
-      keyDefaultShiftStart, 
-      type: TimeOfDay,
-    );
+
+    final loadedStartTime = await SharedPreferencesHelper.loadValue(keyDefaultShiftStart, type: TimeOfDay);
     if (loadedStartTime is TimeOfDay) {
       _defaultShiftStart = loadedStartTime;
     }
-    final loadedEndTime = await SharedPreferencesHelper.loadValue(
-      keyDefaultShiftEnd, 
-      type: TimeOfDay,
-    );
+
+    final loadedEndTime = await SharedPreferencesHelper.loadValue(keyDefaultShiftEnd, type: TimeOfDay);
     if (loadedEndTime is TimeOfDay) {
       _defaultShiftEnd = loadedEndTime;
     }
-    final loadedShiftStettings = await SharedPreferencesHelper.loadValue(
-      keyShiftSettings,
-      type: String,
-    );
+
+    final loadedShiftStettings = await SharedPreferencesHelper.loadValue(keyShiftSettings, type: String);
     if (loadedShiftStettings is String) {
       final found = ShiftSettings.values.firstWhere(
         (e) => e.name == loadedShiftStettings,
@@ -90,6 +100,7 @@ class SettingsModel extends ChangeNotifier {
       );
       _shiftSettings = found;
     }
+
     notifyListeners();
   }
 }
