@@ -21,6 +21,8 @@ class SharedPreferencesHelper {
     } else if (value is TimeOfDay) {
       await prefs.setInt('${key}_hour', value.hour);
       await prefs.setInt('${key}_minute', value.minute);
+    } else if (value is Color) {
+      await prefs.setInt(key, value.value);
     } else {
       throw ArgumentError('Unsupported type for Shared Preferences');
     }
@@ -45,6 +47,16 @@ class SharedPreferencesHelper {
         int? minute = prefs.getInt('${key}_minute');
         if (hour != null && minute != null) {
           return TimeOfDay(hour: hour, minute: minute);
+        }
+      }
+
+      // handle Color
+      if (type == Color) {
+        final int? colorValue = prefs.getInt(key);
+        if (colorValue != null) {
+          return Color(colorValue);
+        } else {
+          return null;
         }
       }
 
