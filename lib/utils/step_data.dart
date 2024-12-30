@@ -66,9 +66,6 @@ List<StepData> addAssistantStepData(){
     },
   );
 
-
-
-
   stepData.add(nameInput);
   stepData.add(hoursInput);
   stepData.add(assignColor);

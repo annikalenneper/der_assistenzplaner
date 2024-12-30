@@ -69,7 +69,6 @@ class AssistantModel extends ChangeNotifier {
 
   //----------------- Data Manipulation Methods -----------------
 
-  
 
   Future<void> saveNewAssistant(Assistant newAssistant) async {
     await assistantRepository.saveNewAssistant(newAssistant);
