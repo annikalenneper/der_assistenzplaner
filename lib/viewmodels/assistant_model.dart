@@ -8,8 +8,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 class AssistantModel extends ChangeNotifier {
   late Box<Assistant> _assistantBox;
   List<Assistant> assistants = [];
-  Map<String, Assistant> assistantMap = {};
-  Map<String, Color> assistantColorMap = {}; /// TO-DO: save in shared preferences
+  Map<String, Assistant> assistantMap = {}; /// effizienter Zugriff auf Assistenten per ID (O(1) statt O(n))
+  Map<String, Color> assistantColorMap = {}; 
   Assistant? currentAssistant;
   
   AssistantModel();
@@ -66,16 +66,16 @@ class AssistantModel extends ChangeNotifier {
     log('AssistantModel: assigned color $color to assistant $assistentID');
     notifyListeners();
   }
-
-  void addNote(String title, String text) {
-    currentAssistant?.addNote(title, text);
-    log('AssistantModel: added note with title $title and text $text');
-    notifyListeners();
-  }
   
   void assignTag(Tag tag) {
     currentAssistant?.assignTag(tag);
     log('AssistantModel: assigned tag $tag');
+    notifyListeners();
+  }
+
+    void addNote(String title, String text) {
+    currentAssistant?.addNote(title, text);
+    log('AssistantModel: added note with title $title and text $text');
     notifyListeners();
   }
 
@@ -101,17 +101,18 @@ class AssistantModel extends ChangeNotifier {
   Future<void> initialize() async {
     _assistantBox = await Hive.openBox<Assistant>('assistantBox');
     
-    assistants = getAllAssistants();
-
+    _loadAssistants();
+    _loadAssistantColors();
     assistantMap = {
       for (var assistant in assistants) assistant.assistantID: assistant
     };
 
-    _loadAssistantColors();
+    
     
     /// listen to changes in database and update assistants list accordingly
     _assistantBox.watch().listen((event) {
-      assistants = getAllAssistants();
+      _loadAssistants();
+      _loadAssistantColors();
       assistantMap = {
         for (var assistant in assistants) assistant.assistantID: assistant
       };
@@ -138,25 +139,6 @@ class AssistantModel extends ChangeNotifier {
     notifyListeners(); 
   }
 
-  Future<void> updateAssistant(int index, Assistant updatedAssistant) async {
-    await _assistantBox.putAt(index, updatedAssistant); 
-    notifyListeners(); 
-  }
-
-  List<Assistant> getAllAssistants() {
-    return _assistantBox.values.toList();
-  }
-
-  Future<void> deleteAssistant() async {
-    if (currentAssistant != null) {
-      await _assistantBox.delete(currentAssistant!.key);
-      notifyListeners();
-    } else {
-      log('AssistantModel: currentAssistant is null');
-    }
-    notifyListeners(); 
-  }
-
   Future<void> _loadAssistantColors() async {
   for (final assistant in assistants) {
     final color = await SharedPreferencesHelper.loadValue(assistant.assistantID, type: Color);
@@ -169,5 +151,18 @@ class AssistantModel extends ChangeNotifier {
   
   log('AssistantModel: assistantColorMap geladen: $assistantColorMap');
   notifyListeners();
+  }
+   void _loadAssistants() {
+    assistants = _assistantBox.values.toList();
+  }
+
+  Future<void> deleteAssistant() async {
+    if (currentAssistant != null) {
+      await _assistantBox.delete(currentAssistant!.key);
+      notifyListeners();
+    } else {
+      log('AssistantModel: currentAssistant is null');
+    }
+    notifyListeners(); 
   }
 }

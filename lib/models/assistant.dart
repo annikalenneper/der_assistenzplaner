@@ -62,6 +62,8 @@ part 'assistant.g.dart';
         (actualHours > 0) ? _actualHours = actualHours : throw ArgumentError('actualHours darf nicht negativ sein.');
     set tags(List<Tag> tags) => _tags = tags;
 
+
+
     void addNote(String title, String text) =>
 
       _notes.add(Note(title, text)); 
@@ -82,7 +84,6 @@ part 'assistant.g.dart';
     String toString() {
       return 'Assistant: $name, $contractedHours, $deviation, $tags';
     } 
-
 }
 
 
