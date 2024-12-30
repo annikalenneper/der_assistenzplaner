@@ -40,9 +40,9 @@ class SettingsScreen extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: RadioListTile<ShiftSettings>(
+                    child: RadioListTile<ShiftFrequency>(
                       title: const Text('Meine Assistenz findet täglich statt'),
-                      value: ShiftSettings.daily,
+                      value: ShiftFrequency.daily,
                       groupValue: settings.shiftSettings,
                       onChanged: (val) {
                         if (val != null) settings.shiftSettings = val;
@@ -50,9 +50,9 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),            
                   Expanded(
-                    child: RadioListTile<ShiftSettings>(
+                    child: RadioListTile<ShiftFrequency>(
                       title: const Text('Ich habe regelmäßige Schichten (z.B. 4x pro Woche)'),
-                      value: ShiftSettings.recurring,
+                      value: ShiftFrequency.weekly,
                       groupValue: settings.shiftSettings,
                       onChanged: (val) {
                         if (val != null) settings.shiftSettings = val;
@@ -60,9 +60,9 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: RadioListTile<ShiftSettings>(
+                    child: RadioListTile<ShiftFrequency>(
                       title: const Text('Meine Schichten sind flexibel'),
-                      value: ShiftSettings.flexible,
+                      value: ShiftFrequency.flexible,
                       groupValue: settings.shiftSettings,
                       onChanged: (val) {
                         if (val != null) settings.shiftSettings = val;

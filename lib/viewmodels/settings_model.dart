@@ -4,13 +4,13 @@ import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/utils/shared_preferences_helper.dart';
 import 'package:flutter/material.dart';
 
-enum ShiftSettings { daily, recurring, flexible }
+enum ShiftFrequency { daily, weekly, flexible }
 
 class SettingsModel extends ChangeNotifier {
   bool _is24hShift = false;
   TimeOfDay _defaultShiftStart = const TimeOfDay(hour: 8, minute: 0);
   TimeOfDay _defaultShiftEnd = const TimeOfDay(hour: 16, minute: 0);
-  ShiftSettings _shiftSettings = ShiftSettings.daily;
+  ShiftFrequency _shiftSettings = ShiftFrequency.daily;
   Set<int> selectedWeekdays = {};
   
 
@@ -28,7 +28,7 @@ class SettingsModel extends ChangeNotifier {
   bool get is24hShift => _is24hShift;
   TimeOfDay get defaultShiftStart => _defaultShiftStart;
   TimeOfDay get defaultShiftEnd => _defaultShiftEnd;
-  ShiftSettings get shiftSettings => _shiftSettings;
+  ShiftFrequency get shiftSettings => _shiftSettings;
 
   bool isWeekdaySelected(int day) => selectedWeekdays.contains(day);
 
@@ -66,7 +66,7 @@ class SettingsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  set shiftSettings(ShiftSettings value) {
+  set shiftSettings(ShiftFrequency value) {
     _shiftSettings = value;
     SharedPreferencesHelper.saveValue(keyShiftSettings, value.name);
     log("settings_model: shiftSettings set to $value");
@@ -94,9 +94,9 @@ class SettingsModel extends ChangeNotifier {
 
     final loadedShiftStettings = await SharedPreferencesHelper.loadValue(keyShiftSettings, type: String);
     if (loadedShiftStettings is String) {
-      final found = ShiftSettings.values.firstWhere(
+      final found = ShiftFrequency.values.firstWhere(
         (e) => e.name == loadedShiftStettings,
-        orElse: () => ShiftSettings.daily,
+        orElse: () => ShiftFrequency.daily,
       );
       _shiftSettings = found;
     }
