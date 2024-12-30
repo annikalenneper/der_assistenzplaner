@@ -4,13 +4,13 @@ import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/utils/shared_preferences_helper.dart';
 import 'package:flutter/material.dart';
 
-enum ShiftFrequency { daily, weekly, flexible }
+enum ShiftFrequency { daily, recurring, flexible }
 
 class SettingsModel extends ChangeNotifier {
   bool _is24hShift = false;
   TimeOfDay _defaultShiftStart = const TimeOfDay(hour: 8, minute: 0);
   TimeOfDay _defaultShiftEnd = const TimeOfDay(hour: 16, minute: 0);
-  ShiftFrequency _shiftSettings = ShiftFrequency.daily;
+  ShiftFrequency _shiftFrequency = ShiftFrequency.daily;
   Set<int> selectedWeekdays = {};
   
 
@@ -18,7 +18,7 @@ class SettingsModel extends ChangeNotifier {
   static const String keyIs24hShift = 'is24hShift';
   static const String keyDefaultShiftStart = 'defaultShiftStart';
   static const String keyDefaultShiftEnd = 'defaultShiftEnd';
-  static const String keyShiftSettings = 'shiftSettings';
+  static const String keyShiftSettings = 'shiftFrequency';
 
   /// load settings from SharedPreferences
   SettingsModel() {
@@ -28,7 +28,7 @@ class SettingsModel extends ChangeNotifier {
   bool get is24hShift => _is24hShift;
   TimeOfDay get defaultShiftStart => _defaultShiftStart;
   TimeOfDay get defaultShiftEnd => _defaultShiftEnd;
-  ShiftFrequency get shiftSettings => _shiftSettings;
+  ShiftFrequency get shiftFrequency => _shiftFrequency;
 
   bool isWeekdaySelected(int day) => selectedWeekdays.contains(day);
 
@@ -66,8 +66,8 @@ class SettingsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  set shiftSettings(ShiftFrequency value) {
-    _shiftSettings = value;
+  set shiftFrequency(ShiftFrequency value) {
+    _shiftFrequency = value;
     SharedPreferencesHelper.saveValue(keyShiftSettings, value.name);
     log("settings_model: shiftSettings set to $value");
     notifyListeners();
@@ -98,7 +98,7 @@ class SettingsModel extends ChangeNotifier {
         (e) => e.name == loadedShiftStettings,
         orElse: () => ShiftFrequency.daily,
       );
-      _shiftSettings = found;
+      _shiftFrequency = found;
     }
 
     notifyListeners();
