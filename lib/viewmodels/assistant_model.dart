@@ -1,12 +1,14 @@
 import 'dart:developer';
-import 'package:der_assistenzplaner/models/assistant.dart';
+import 'package:der_assistenzplaner/data/models/assistant.dart';
+import 'package:der_assistenzplaner/data/repositories/assistant_repository.dart';
 import 'package:der_assistenzplaner/utils/shared_preferences_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:der_assistenzplaner/models/tag.dart';
+import 'package:der_assistenzplaner/data/models/tag.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class AssistantModel extends ChangeNotifier {
   late Box<Assistant> _assistantBox;
+  AssistantRepository assistantRepository = AssistantRepository();
   List<Assistant> assistants = [];
   Map<String, Assistant> assistantMap = {}; /// effizienter Zugriff auf Assistenten per ID (O(1) statt O(n))
   Map<String, Color> assistantColorMap = {}; 
@@ -58,111 +60,90 @@ class AssistantModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  //----------------- User interaction methods -----------------
+  //----------------- UI methods -----------------
   
-  void assignColor(String assistentID, Color color) {
+
+
+  ///TO-DO: implement removeTag(Tag tag) method
+
+
+  //----------------- Data Manipulation Methods -----------------
+
+  
+
+  Future<void> saveNewAssistant(Assistant newAssistant) async {
+    await assistantRepository.saveNewAssistant(newAssistant);
+    log('Assistant saved to database: $newAssistant');
+    notifyListeners(); 
+  }
+
+  Future<void> assignColor(String assistentID, Color color) async {
     assistantColorMap[assistentID] = color;
-    SharedPreferencesHelper.saveValue(assistentID, color);
+    await assistantRepository.saveAssistantColor(assistentID, color);
     log('AssistantModel: assigned color $color to assistant $assistentID');
     notifyListeners();
   }
   
-  void assignTag(Tag tag) {
-    currentAssistant?.assignTag(tag);
-    log('AssistantModel: assigned tag $tag');
-    notifyListeners();
-  }
-
-    void addNote(String title, String text) {
-    currentAssistant?.addNote(title, text);
-    log('AssistantModel: added note with title $title and text $text');
-    notifyListeners();
-  }
-
-  //----------------- Application specific methods -----------------
-
-  ///TO-DO: listen to changes in workschedules and update actualHours and surchargeCounters accordingly
-  void updateActualHours() {
-    //TO-DO: Implement this method
-    //for each scheduledShift assigned to this assistant -> (if shiftend < current date) add duration to var actualHours 
-  }
-  void updateSurchargeCounter() {
-    //TO-DO: Implement this method
-    //for each scheduledShift assigned to this assistant -> (if shiftend < current date) add surcharges to var surchargeCounter 
-  }
-  void updateFutureSurchargeCounter() {
-    //TO-DO: Implement this method
-    //for each scheduledShift assigned to this assistant -> (if shiftstart > current date) add surcharges to var futureSurchargeCounter 
-  }
-
-  //----------------- Database methods -----------------
-
-  /// initialize box for assistant objects and keep assistants list synchronized with database
-  Future<void> initialize() async {
-    _assistantBox = await Hive.openBox<Assistant>('assistantBox');
+  void addNote(String title, String text) {
+    if (currentAssistant == null) {
+      log('currentAssistant is null');
+    } else {
+      currentAssistant!.notes.add(Note(title, text));
+      assistantRepository.saveAssistantNote(currentAssistant!.assistantID, currentAssistant!.notes.last);
+    }
+  } 
     
+
+  void removeNotebyIndex(int index) {
+    if (currentAssistant == null) {
+      log('currentAssistant is null');
+    } else if (index < 0 || index >= currentAssistant!.notes.length) {
+      log('Index $index out of bounds for notes list.');
+    } else {
+      currentAssistant!.notes.removeAt(index);
+    } 
+  }
+
+  void assignTag(Tag tag) {
+    if (currentAssistant == null) {
+      log('currentAssistant is null');
+    } else if (currentAssistant!.tags.contains(tag)) {
+      log('Tag $tag bereits zugeordnet.');
+    } else {
+      currentAssistant!.tags.add(tag);
+    }
+  } 
+
+  Future<void> deleteAssistant() async {
+    if (currentAssistant != null) {
+      await assistantRepository.deleteAssistant(currentAssistant!.assistantID);
+      notifyListeners();
+    } else {
+      log('AssistantModel: currentAssistant is null');
+    }
+  }
+
+  //----------------- Initializaton Methods -----------------
+
+  Future<void> initialize() async {
     _loadAssistants();
     _loadAssistantColors();
     assistantMap = {
       for (var assistant in assistants) assistant.assistantID: assistant
     };
-
-    
-    
-    /// listen to changes in database and update assistants list accordingly
-    _assistantBox.watch().listen((event) {
-      _loadAssistants();
-      _loadAssistantColors();
-      assistantMap = {
-        for (var assistant in assistants) assistant.assistantID: assistant
-      };
-      notifyListeners(); 
-      log('AssistantModel: assistants list updated');
-    });
+    log('AssistantModel: initialized');
   }
 
-  Future<void> saveNewAssistant(Assistant newAssistant) async {
-    await _assistantBox.add(newAssistant);
-    notifyListeners(); 
-  }
-
-  Future<void> saveCurrentAssistant() async {
-    if (currentAssistant == null) {
-      log('AssistantModel: currentAssistant is null');
-      return;
-    } 
-    if (assistants.contains(currentAssistant)) {
-      log('AssistantModel: currentAssistant already exists in database');
-      return;
-    } 
-    await _assistantBox.add(currentAssistant!);
-    notifyListeners(); 
-  }
-
-  Future<void> _loadAssistantColors() async {
-  for (final assistant in assistants) {
-    final color = await SharedPreferencesHelper.loadValue(assistant.assistantID, type: Color);
-    if (color != null) {
-      assistantColorMap[assistant.assistantID] = color;
-    } else {
-      assistantColorMap[assistant.assistantID] = Colors.grey;
-    }
+  Future<void> _loadAssistants() async {
+    assistants = await assistantRepository.fetchAllAssistants();
+    log('AssistantModel: assistants lists loaded: $assistants');
+    notifyListeners();
   }
   
-  log('AssistantModel: assistantColorMap geladen: $assistantColorMap');
-  notifyListeners();
-  }
-   void _loadAssistants() {
-    assistants = _assistantBox.values.toList();
+  Future<void> _loadAssistantColors() async {
+    assistantColorMap = await assistantRepository.fetchAssistantColorMap();
+    log('AssistantModel: assistantColorMap geladen: $assistantColorMap');
+    notifyListeners();
   }
 
-  Future<void> deleteAssistant() async {
-    if (currentAssistant != null) {
-      await _assistantBox.delete(currentAssistant!.key);
-      notifyListeners();
-    } else {
-      log('AssistantModel: currentAssistant is null');
-    }
-    notifyListeners(); 
-  }
 }
