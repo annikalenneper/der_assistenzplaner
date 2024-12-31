@@ -1,39 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:developer';
 
 class SharedPreferencesHelper {
+  const SharedPreferencesHelper();
 
-  /// save a value to Shared Preferences
-  static Future<void> saveValue(String key, dynamic value) async {
+  /// save value to SharedPreferences based on type
+  static Future<void> saveValue(String key, dynamic type) async {
     final prefs = await SharedPreferences.getInstance();
-    if (value is String) {
-      await prefs.setString(key, value);
-    } else if (value is int) {
-      await prefs.setInt(key, value);
-    } else if (value is double) {
-      await prefs.setDouble(key, value);
-    } else if (value is bool) {
-      await prefs.setBool(key, value);
-    } else if (value is List<String>) {
-      await prefs.setStringList(key, value);
-    } else if (value is DateTime) {
-      await prefs.setString(key, value.toIso8601String());
-    } else if (value is TimeOfDay) {
-      await prefs.setInt('${key}_hour', value.hour);
-      await prefs.setInt('${key}_minute', value.minute);
-    } else if (value is Color) {
-      await prefs.setInt(key, value.value);
+    if (type is String) {
+      await prefs.setString(key, type);
+    } else if (type is int) {
+      await prefs.setInt(key, type);
+    } else if (type is double) {
+      await prefs.setDouble(key, type);
+    } else if (type is bool) {
+      await prefs.setBool(key, type);
+    } else if (type is List<String>) {
+      await prefs.setStringList(key, type);
+    } else if (type is List<int>) {
+      await prefs.setStringList(key, type.map((e) => e.toString()).toList());
+    } else if (type is Set<int>) {
+      await prefs.setStringList(key, type.map((e) => e.toString()).toList());
+    } else if (type is DateTime) {
+      await prefs.setString(key, type.toIso8601String());
+    } else if (type is TimeOfDay) {
+      await prefs.setInt('${key}_hour', type.hour);
+      await prefs.setInt('${key}_minute', type.minute);
+    } else if (type is Color) {
+      await prefs.setInt(key, type.value);
     } else {
       throw ArgumentError('Unsupported type for Shared Preferences');
     }
   }
 
-  /// load a value from Shared Preferences
-  static Future<dynamic> loadValue(String key, {Type? type}) async {
+  /// load value from SharedPreferences based on type
+  static Future<dynamic> loadValue(String key, Type? type) async {
     final prefs = await SharedPreferences.getInstance();
 
     if (prefs.containsKey(key)) {
-      // handle DateTime
       if (type == DateTime) {
         String? dateTimeString = prefs.getString(key);
         if (dateTimeString != null) {
@@ -41,45 +46,64 @@ class SharedPreferencesHelper {
         }
       }
 
-      // handle TimeOfDay
       if (type == TimeOfDay) {
         int? hour = prefs.getInt('${key}_hour');
         int? minute = prefs.getInt('${key}_minute');
         if (hour != null && minute != null) {
           return TimeOfDay(hour: hour, minute: minute);
-        }
-      }
-
-      // handle Color
-      if (type == Color) {
-        final int? colorValue = prefs.getInt(key);
-        if (colorValue != null) {
-          return Color(colorValue);
         } else {
+          log('SharedPreferencesHelper: TimeOfDay values incomplete for key $key');
           return null;
         }
       }
 
-      // default handling for other types
-      return prefs.get(key); /// returns value if key exists
+      if (type == Color) {
+        final int? colorValue = prefs.getInt(key);
+        if (colorValue != null) {
+          return Color(colorValue);
+        }
+      }
+
+      if (type == List<int>) {
+        final stringList = prefs.getStringList(key);
+        if (stringList != null) {
+          try {
+            return stringList.map((e) => int.parse(e)).toList();
+          } catch (e) {
+            log('SharedPreferencesHelper: Error parsing List<int>: $e');
+            return [];
+          }
+        }
+      }
+
+      if (type == Set<int>) {
+        final stringList = prefs.getStringList(key);
+        if (stringList != null) {
+          try {
+            return stringList.map((e) => int.parse(e)).toSet();
+          } catch (e) {
+            log('SharedPreferencesHelper: Error parsing Set<int>: $e');
+            return {};
+          }
+        }
+      }
+
+      return prefs.get(key);
     }
-    return null; /// returns null if key does not exist
+
+    return null; // return null if key not found, handle in model
   }
 
-  /// remove a value from Shared Preferences
   static Future<void> removeValue(String key) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(key);
-
-    /// remove associated keys for TimeOfDay
     await prefs.remove('${key}_hour');
     await prefs.remove('${key}_minute');
   }
 
-   /// does key exist in Shared Preferences?
   static Future<bool> containsKey(String key) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.containsKey(key) ||
-        prefs.containsKey('${key}_hour') && prefs.containsKey('${key}_minute');
+        (prefs.containsKey('${key}_hour') && prefs.containsKey('${key}_minute'));
   }
 }
