@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:der_assistenzplaner/data/repositories/settings_repository.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/data/shared-preferences/shared_preferences_helper.dart';
+import 'package:der_assistenzplaner/views/shared/user_input_widgets.dart';
 import 'package:flutter/material.dart';
 
 enum ShiftFrequency { daily, recurring, flexible }
@@ -90,12 +91,46 @@ class SettingsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void deselectWeekday(int day) {
-    if (selectedWeekdays.contains(day)) {
-      selectedWeekdays.remove(day);
-      _saveToPreferences(keySelectedWeekdays, selectedWeekdays.toSet());
-      log("settings_model: removed ${dayOfWeekToString(day)} from selectedWeekdays");
-      notifyListeners();
+  void updateCustomShiftStart(TimeOfDay time) {
+    customShiftStart = time;
+    _saveToPreferences(keyCustomShiftStart, time);
+    log("settings_model: customShiftStart set to $time");
+    notifyListeners();
+  }
+
+  void updateCustomShiftEnd(TimeOfDay time) {
+    customShiftEnd = time;
+    _saveToPreferences(keyCustomShiftEnd, time);
+    log("settings_model: customShiftEnd set to $time");
+    notifyListeners();
+  }
+
+  /// open time picker from shared input widgets for shift start and end
+  void openShiftStartPicker(BuildContext context) async {
+    pickTime(
+      context: context, 
+      initialTime: customShiftStart, 
+      onTimeSelected: (pickedTime) => updateCustomShiftStart(pickedTime)
+    );
+  }
+
+  void openShiftEndPicker(BuildContext context) async {
+    pickTime(
+      context: context, 
+      initialTime: customShiftEnd, 
+      onTimeSelected: (pickedTime) => updateCustomShiftEnd(pickedTime)
+    );
+  }
+
+  /// returns title for shift frequency selection in settings screen
+  String getShiftFrequencyTitle(ShiftFrequency frequency) {
+    switch (frequency) {
+      case ShiftFrequency.daily:
+        return 'Meine Assistenz findet täglich statt';
+      case ShiftFrequency.recurring:
+        return 'Ich habe regelmäßige Schichten (z.B. 4x pro Woche)';
+      case ShiftFrequency.flexible:
+        return 'Meine Schichten sind flexibel';
     }
   }
 
