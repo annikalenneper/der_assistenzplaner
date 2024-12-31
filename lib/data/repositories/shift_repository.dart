@@ -5,25 +5,23 @@ import 'package:hive/hive.dart';
 
 
 class ShiftRepository {
-
   const ShiftRepository();
-
 
   //----------------- Fetch data -----------------
 
-  Future<List<Shift>> fetchAllShifts() async {
+  Future<Set<Shift>> fetchAllShifts() async {
     try {
       final shiftBox = await Hive.openBox<Shift>('shifts');
       log('shiftRepository: fetched all shifts');
-      return List.unmodifiable(shiftBox.values); // Return unmodifiable list
+      return Set.unmodifiable(shiftBox.values); // return unmodifiable set
     } catch (e, stackTrace) {
       log('shiftRepository: Failed to fetch all shifts: $e', stackTrace: stackTrace);
-      return [];
+      return <Shift>{}; // return empty set on failure
     }
   }
 
 
-  //----------------- Manipulate Data -----------------
+  //----------------- Manipulate data -----------------
 
   Future<void> saveShift(Shift newShift) async {
     try {
