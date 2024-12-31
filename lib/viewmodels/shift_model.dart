@@ -1,16 +1,18 @@
 
 import 'dart:developer';
+import 'package:der_assistenzplaner/data/repositories/shift_repository.dart';
 import 'package:der_assistenzplaner/utils/cache.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'package:der_assistenzplaner/models/shift.dart';
+import 'package:der_assistenzplaner/data/models/shift.dart';
 
 
 /// handels shifts and scheduled shifts, saves them to database
 /// used by WorkScheduleModel to generate work schedule and display shifts in calendar
 class ShiftModel extends ChangeNotifier {
-  late Box<Shift> _shiftBox;
+  ShiftRepository shiftRepository = ShiftRepository();
   List<Shift> shifts = [];
+  Map<DateTime, List<Shift>> mapOfShiftsByDay = {}; 
+  Map<String, List<Shift>> mapOfShiftsByAssistant = {}; 
   final MarkerCache markerCache = MarkerCache();
 
   Shift? currentShift;
@@ -23,9 +25,17 @@ class ShiftModel extends ChangeNotifier {
   DateTime get end => currentShift?.end ?? DateTime.now();
   Duration get duration => currentShift?.duration ?? Duration.zero;
 
-  List<Shift> get scheduledShifts => shifts.where((shift) => shift.isScheduled).toList();
-  List<Shift> get unscheduledShifts => shifts.where((shift) => !shift.isScheduled).toList();
+  /// removing unscheduledShifts is more efficient, because only few unscheduledShifts will be saved in database
+  List<Shift> get scheduledShifts =>
+      shifts.toList()..removeWhere((shift) => !shift.isScheduled);
 
+  List<Shift> get unscheduledShifts => 
+      shifts.where((shift) => !shift.isScheduled).toList();
+
+
+  //----------------- Setter methods -----------------
+
+  //TO-DO: implement setter methods with checks for valid input
 
 
   //------------------ Filter Methods ------------------
@@ -39,64 +49,71 @@ class ShiftModel extends ChangeNotifier {
   }
 
   List<Shift> getShiftsByDateRange(DateTime start, DateTime end) {
-    return shifts
-        .where((shift) =>
+    return shifts.where((shift) =>
             (shift.start.isAfter(start) || shift.start.isAtSameMomentAs(start)) &&
             (shift.end.isBefore(end) || shift.end.isAtSameMomentAs(end)))
         .toList();
   }
   
-  Map<String, List<Shift>> getMapOfShiftsByAssistants() {
-    Map<String, List<Shift>> map = {};
-    for (var shift in scheduledShifts) {
-      if (shift.assistantID != '') {
-        /// creates new key if current assistantID is no key yet
-        map.putIfAbsent(shift.assistantID, () => []);
-        /// inserts shift according to key
-        map[shift.assistantID]!.add(shift);
-      }
-    }
-    return map;
-  }
 
-
-  //----------------- Database Methods -----------------
-
-  Future<void> initialize() async {
-    _shiftBox = await Hive.openBox<Shift>('shiftBox');
-
-    /// load inital data from database
-    shifts = _shiftBox.values.toList();
-
-    /// watch database changes
-    _shiftBox.watch().listen((event) {
-      shifts = _shiftBox.values.toList();
-      notifyListeners();
-      markerCache.clearCache();
-      log('shiftModel: shifts list updated');
-    });
-  }
-
-  /// save shift in shiftbox
+  //----------------- Data Manipulation Methods -----------------
+  
+  /// save new shift or update existing in shiftbox through shiftRepository
   Future<void> saveShift(Shift newShift) async {
-    await _shiftBox.add(newShift);
-    log('shiftModel: saved shift to database');
-  }
-
-  /// update shift by replacing with new shift, using key to find targeted shift in database 
-  Future<void> updateShift(Shift updatedShift) async {
-    if (currentShift != null && currentShift!.key != null) {
-      await _shiftBox.put(currentShift!.key, updatedShift);
-      log('shiftModel: shift updated with key ${currentShift!.key}');
-    } else {
-      log('shiftModel: currentShift is null or has no key');
-    }
+    await shiftRepository.saveShift(newShift);
+    notifyListeners();
   }
 
   /// delete shift from database
   Future<void> deleteShift(String shiftID) async {
-    final shift = shifts.firstWhere((shift) => shift.shiftID == shiftID);
-    await _shiftBox.delete(shift.key);
-    log('shiftModel: deleted shift with key ${shift.key}');
+    shiftRepository.deleteShift(shiftID);
+    notifyListeners();
   }
+
+
+  //----------------- Initialization Methods -----------------
+  
+  Future<void> initialize() async {
+    /// load data from database on initialization
+    _loadShifts();
+    _loadMapOfShiftsByAssistants();
+    _loadMapOfShiftsByDay();
+    log('shiftModel: initialized with ${shifts.length} shifts');
+  }
+
+  Future<void> _loadShifts() async {
+    shifts = await shiftRepository.fetchAllShifts();
+  }
+
+  Future<void> _loadMapOfShiftsByDay() async {
+    mapOfShiftsByDay.clear();
+    for (final shift in shifts) {
+      /// add shift to every day it is scheduled
+      DateTime currentDay = DateTime(shift.start.year, shift.start.month, shift.start.day);
+      /// loop through days until end of shift
+      while (currentDay.isBefore(shift.end) || currentDay.isAtSameMomentAs(shift.end)) {
+        mapOfShiftsByDay.putIfAbsent(currentDay, () => []);
+        mapOfShiftsByDay[currentDay]!.add(shift);
+        currentDay = currentDay.add(Duration(days: 1));
+      }
+    }
+    log('ShiftModel: Loaded mapOfShiftsByDay with ${mapOfShiftsByDay.length} days and their shifts.');
+    notifyListeners();
+  }
+
+
+  Future<void> _loadMapOfShiftsByAssistants() async {
+    mapOfShiftsByAssistant.clear();
+    for (final shift in shifts) {
+      if (shift.assistantID != null) {
+        mapOfShiftsByAssistant.putIfAbsent(shift.assistantID!, () => []);
+        mapOfShiftsByAssistant[shift.assistantID!]!.add(shift);
+      } else {
+        log('ShiftModel: Shift with ID ${shift.shiftID} has no assistant assigned.');
+      }
+    }
+    log('ShiftModel: Loaded mapOfShiftsByAssistant with ${mapOfShiftsByAssistant.length} assistants and their shifts.');
+    notifyListeners();
+  }
+
 }
