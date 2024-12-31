@@ -7,7 +7,7 @@ import 'package:der_assistenzplaner/data/models/tag.dart';
 class AssistantModel extends ChangeNotifier {
   AssistantRepository assistantRepository = AssistantRepository();
   List<Assistant> assistants = [];
-  Map<String, Assistant> assistantMap = {}; /// effizienter Zugriff auf Assistenten per ID (O(1) statt O(n))
+  Map<String, Assistant> assistantMap = {}; /// efficient lookup per ID (O(1) instead of O(n))
   Map<String, Color> assistantColorMap = {}; 
   Assistant? currentAssistant;
   
@@ -60,9 +60,21 @@ class AssistantModel extends ChangeNotifier {
 
   //----------------- UI methods -----------------
   
+  void selectAssistant(String assistantID) {
+    if (assistantMap.containsKey(assistantID)) {
+      currentAssistant = assistantMap[assistantID];
+      log('AssistantModel: selected assistant $currentAssistant');
+      notifyListeners();
+    } else {
+      log('AssistantModel: selectAssistant: assistantID $assistantID not found');
+    }
+  }
 
-
-
+  void deselectAssistant() {
+    currentAssistant = null;
+    log('AssistantModel: deselected assistant');
+    notifyListeners();
+  }
 
 
   //----------------- Data Manipulation Methods -----------------
@@ -98,7 +110,7 @@ class AssistantModel extends ChangeNotifier {
 
   //----------------- Initializaton Methods -----------------
 
-  /// loads all assistants from database and assigns them to the assistantMap, creates a map of assistantID to color
+  /// loads all assistants from database, creates a map of assistantID to color and assigns it to assistantMap property
   Future<void> initialize() async {
     _loadAssistants();
     _loadAssistantColors();
