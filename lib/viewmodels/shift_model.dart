@@ -6,13 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/data/models/shift.dart';
 
 
-/// handels shifts and scheduled shifts, saves them to database
-/// used by WorkScheduleModel to generate work schedule and display shifts in calendar
 class ShiftModel extends ChangeNotifier {
   ShiftRepository shiftRepository = ShiftRepository();
-  List<Shift> shifts = [];
-  Map<DateTime, List<Shift>> mapOfShiftsByDay = {}; 
-  Map<String, List<Shift>> mapOfShiftsByAssistant = {}; 
+  Set<Shift> shifts = [] as Set<Shift>;
+  Map<DateTime, Set<Shift>> mapOfShiftsByDay = {}; 
+  Map<String, Set<Shift>> mapOfShiftsByAssistant = {}; 
   final MarkerCache markerCache = MarkerCache();
 
   Shift? currentShift;
@@ -25,12 +23,12 @@ class ShiftModel extends ChangeNotifier {
   DateTime get end => currentShift?.end ?? DateTime.now();
   Duration get duration => currentShift?.duration ?? Duration.zero;
 
-  /// removing unscheduledShifts is more efficient, because only few unscheduledShifts will be saved in database
-  List<Shift> get scheduledShifts =>
-      shifts.toList()..removeWhere((shift) => !shift.isScheduled);
+  /// removing unscheduledShifts more efficient: only few unscheduledShifts in database
+  Set<Shift> get scheduledShifts =>
+      shifts.toSet()..removeWhere((shift) => !shift.isScheduled);
 
-  List<Shift> get unscheduledShifts => 
-      shifts.where((shift) => !shift.isScheduled).toList();
+  Set<Shift> get unscheduledShifts => 
+      shifts.where((shift) => !shift.isScheduled).toSet();
 
 
   //----------------- Setter methods -----------------
@@ -40,21 +38,33 @@ class ShiftModel extends ChangeNotifier {
 
   //------------------ Filter Methods ------------------
 
-  List<Shift> getShiftsByDay(DateTime day) {
-    return shifts.where((shift) =>
-            shift.start.year == day.year &&
-            shift.start.month == day.month &&
-            shift.start.day == day.day)
-        .toList();
+  Set<Shift> getShiftsByDay(DateTime day) {
+    final normalizedDay = DateTime(day.year, day.month, day.day);
+    return mapOfShiftsByDay[normalizedDay] ?? [] as Set<Shift>; 
   }
 
-  List<Shift> getShiftsByDateRange(DateTime start, DateTime end) {
-    return shifts.where((shift) =>
-            (shift.start.isAfter(start) || shift.start.isAtSameMomentAs(start)) &&
-            (shift.end.isBefore(end) || shift.end.isAtSameMomentAs(end)))
-        .toList();
+  Set<Shift> getShiftsByDateRange(DateTime start, DateTime end) {
+    final normalizedStart = DateTime(start.year, start.month, start.day);
+    final normalizedEnd = DateTime(end.year, end.month, end.day);
+    Set<Shift> result = [] as Set<Shift>;
+    DateTime currentDay = normalizedStart;
+    while (currentDay.isBefore(normalizedEnd) || currentDay.isAtSameMomentAs(normalizedEnd)) {
+      if (mapOfShiftsByDay.containsKey(currentDay)) {
+        result.addAll(mapOfShiftsByDay[currentDay]!);
+      }
+      currentDay = currentDay.add(Duration(days: 1));
+    }
+    return result;
   }
-  
+
+  Set<Shift> getShiftsByAssistant(String assistantID) {
+    if (mapOfShiftsByAssistant.containsKey(assistantID)) {
+      return mapOfShiftsByAssistant[assistantID]!;
+    }
+    return [] as Set<Shift>;
+  }
+
+
 
   //----------------- Data Manipulation Methods -----------------
   
@@ -92,7 +102,7 @@ class ShiftModel extends ChangeNotifier {
       DateTime currentDay = DateTime(shift.start.year, shift.start.month, shift.start.day);
       /// loop through days until end of shift
       while (currentDay.isBefore(shift.end) || currentDay.isAtSameMomentAs(shift.end)) {
-        mapOfShiftsByDay.putIfAbsent(currentDay, () => []);
+        mapOfShiftsByDay.putIfAbsent(currentDay, () => [] as Set<Shift>);
         mapOfShiftsByDay[currentDay]!.add(shift);
         currentDay = currentDay.add(Duration(days: 1));
       }
@@ -106,7 +116,7 @@ class ShiftModel extends ChangeNotifier {
     mapOfShiftsByAssistant.clear();
     for (final shift in shifts) {
       if (shift.assistantID != null) {
-        mapOfShiftsByAssistant.putIfAbsent(shift.assistantID!, () => []);
+        mapOfShiftsByAssistant.putIfAbsent(shift.assistantID!, () => [] as Set<Shift>);
         mapOfShiftsByAssistant[shift.assistantID!]!.add(shift);
       } else {
         log('ShiftModel: Shift with ID ${shift.shiftID} has no assistant assigned.');
