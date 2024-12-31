@@ -1,19 +1,19 @@
 import 'dart:developer';
 
 import 'package:der_assistenzplaner/data/models/assistant.dart';
-import 'package:der_assistenzplaner/utils/shared_preferences_helper.dart';
+import 'package:der_assistenzplaner/data/shared-preferences/shared_preferences_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 class AssistantRepository {
   const AssistantRepository();
 
-  //----------------- Fetch data -----------------
+  //----------------- Fetch Data -----------------
 
-  Future<List<Assistant>> fetchAllAssistants() async {
+  Future<Set<Assistant>> fetchAllAssistants() async {
     try {
       final assistantBox = await Hive.openBox<Assistant>('assistants');
-      final assistants = assistantBox.values.toList();
+      final assistants = assistantBox.values.toSet();
       if (assistants.isEmpty) {
         log('AssistantRepository: No assistants found in the database.');
       } else {
@@ -22,7 +22,7 @@ class AssistantRepository {
       return assistants;
     } catch (e, stackTrace) {
       log('AssistantRepository: Error fetching assistants: $e', stackTrace: stackTrace);
-      return []; // Return empty list on failure
+      return <Assistant>{}; // return empty list on failure
     }
   }
 
@@ -40,7 +40,7 @@ class AssistantRepository {
           log('AssistantRepository: Skipped assistant with empty assistantID.');
           continue;
         }
-        final color = await SharedPreferencesHelper.loadValue(assistant.assistantID, type: Color);
+        final color = await SharedPreferencesHelper.loadValue(assistant.assistantID, Color);
         if (color != null) {
           assistantColorMap[assistant.assistantID] = color;
           log('AssistantRepository: Color found for assistant ${assistant.name} with ID ${assistant.assistantID}');
@@ -52,7 +52,7 @@ class AssistantRepository {
       return assistantColorMap;
     } catch (e, stackTrace) {
       log('AssistantRepository: Error fetching assistant color map: $e', stackTrace: stackTrace);
-      return {}; // Return empty map on failure
+      return {}; // return empty map on failure
     }
   }
 
