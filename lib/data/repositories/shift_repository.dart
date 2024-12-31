@@ -3,9 +3,11 @@ import 'dart:developer';
 import 'package:der_assistenzplaner/data/models/shift.dart';
 import 'package:hive/hive.dart';
 
+
 class ShiftRepository {
 
   const ShiftRepository();
+
 
   //----------------- Fetch data -----------------
 
@@ -20,20 +22,19 @@ class ShiftRepository {
     }
   }
 
+
   //----------------- Manipulate Data -----------------
 
-  /// Saves or updates a shift in the database
   Future<void> saveShift(Shift newShift) async {
     try {
       final shiftBox = await Hive.openBox<Shift>('shifts');
-      await shiftBox.put(newShift.shiftID, newShift); // Save or update
+      await shiftBox.put(newShift.shiftID, newShift); // save or update
       log('shiftRepository: saved or updated shift with ID ${newShift.shiftID}');
     } catch (e, stackTrace) {
       log('shiftRepository: Failed to save or update shift with ID ${newShift.shiftID}: $e', stackTrace: stackTrace);
     }
   }
 
-  /// Deletes a shift from the database
   Future<void> deleteShift(String shiftID) async {
     try {
       final shiftBox = await Hive.openBox<Shift>('shifts');
