@@ -1,26 +1,40 @@
 import 'dart:developer';
 
-import 'package:der_assistenzplaner/models/assistant.dart';
-import 'package:der_assistenzplaner/models/shift.dart';
+import 'package:der_assistenzplaner/data/models/assistant.dart';
+import 'package:der_assistenzplaner/data/models/shift.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 
+//------------------------- Shared Calculations -------------------------
+
+Duration calculateTimeOfDayDuration(TimeOfDay start, TimeOfDay end) {
+  int hours = end.hour - start.hour;
+  int minutes = end.minute - start.minute;
+  /// add 24 hours if end time is before start time
+  if (hours < 0 || (hours == 0 && minutes < 0)) {
+    hours += 24;
+  }
+  /// add 60 minutes if end minutes are before start minutes
+  if (minutes < 0) {
+    hours -= 1;
+    minutes += 60;
+  }
+  return Duration(hours: hours, minutes: minutes);
+}
 
 
-/// ------------------------- Enumerations -------------------------
+//------------------------- Shared Methods -------------------------
+
 enum Type {assistant, shift}
-
-
-/// ------------------------- Dynamic Database Methods -------------------------
 
 void saveStepperInput(context, Map<String, dynamic> inputs, Type type) {
   if (type == Type.assistant) {
     final assistantModel = Provider.of<AssistantModel>(context, listen: false);
     final newAssistant = Assistant(inputs['name'],inputs['contractedHours']);
-    assistantModel.saveNewAssistant(newAssistant);
+    assistantModel.saveAssistant(newAssistant);
     final color = inputs['color'];
     assistantModel.assignColor(newAssistant.assistantID, color);
     log('Assistant saved to database: $newAssistant, color: $color');
@@ -34,11 +48,12 @@ void saveStepperInput(context, Map<String, dynamic> inputs, Type type) {
 }
 
 
+
+
 //------------------------- Generic Sorting Algorithm -------------------------
 
 /// inserts elements sorted into a list
 void insertSorted<T>(List<T> list, T element, int Function(T a, T b) compare) {
-
   /// find index where to insert element
   int index = list.indexWhere((e) => compare(element, e) < 0);
   /// if no element found that is greater than the current element, insert at end
@@ -51,8 +66,6 @@ void insertSorted<T>(List<T> list, T element, int Function(T a, T b) compare) {
 
 
 //------------------------- Time Formatting -------------------------
-
-
 
 /// fotmatted as 'Mo, 01.01.2021 08:00 Uhr'
 String formatDateTime(DateTime dateTime) {
