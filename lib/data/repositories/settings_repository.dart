@@ -7,7 +7,7 @@ import 'package:der_assistenzplaner/viewmodels/settings_model.dart';
 class SettingsRepository {
   const SettingsRepository();
 
-  //----------------- Get data -----------------
+  //----------------- Get Data -----------------
 
   Future<DateTime?> getAvailabilitiesDueDate() async {
     try {
