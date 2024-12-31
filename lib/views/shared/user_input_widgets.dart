@@ -54,6 +54,24 @@ class DynamicStepperState extends State<DynamicStepper> {
   }
 }
 
+//------------------------- Generic TimePicker -------------------------
+
+Future<void> pickTime({
+  required BuildContext context, 
+  required TimeOfDay initialTime, 
+  required void Function(TimeOfDay) onTimeSelected
+  }) async {
+
+  TimeOfDay? pickedTime = await showTimePicker(
+    context: context,
+    initialTime: initialTime,
+  );
+  /// call callback function to save time
+  if (pickedTime != null) {
+    onTimeSelected(pickedTime);
+  }
+}
+
 
 //---------------- Custom Time Picker Hours and Minutes ----------------
 
