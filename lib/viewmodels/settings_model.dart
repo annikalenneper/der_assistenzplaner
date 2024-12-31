@@ -1,5 +1,6 @@
 
 import 'dart:developer';
+import 'package:der_assistenzplaner/data/repositories/settings_repository.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/utils/shared_preferences_helper.dart';
 import 'package:flutter/material.dart';
@@ -7,17 +8,23 @@ import 'package:flutter/material.dart';
 enum ShiftFrequency { daily, recurring, flexible }
 
 class SettingsModel extends ChangeNotifier {
-  bool _is24hShift = false;
-  TimeOfDay _defaultShiftStart = const TimeOfDay(hour: 8, minute: 0);
-  TimeOfDay _defaultShiftEnd = const TimeOfDay(hour: 16, minute: 0);
-  ShiftFrequency _shiftFrequency = ShiftFrequency.daily;
-  Set<int> selectedWeekdays = {};
-  
+  SettingsRepository settingsRepository = SettingsRepository();
+
+  late DateTime _availabilitesStartDate;
+  late DateTime _availabilitesDueDate;
+  late bool _allShiftsAre24hShifts = false;
+  late TimeOfDay _customShiftStart;
+  late TimeOfDay _customShiftEnd;
+  late ShiftFrequency _shiftFrequency;
+  late Set<int> selectedWeekdays;
 
   /// keys for SharedPreferences 
-  static const String keyIs24hShift = 'is24hShift';
-  static const String keyDefaultShiftStart = 'defaultShiftStart';
-  static const String keyDefaultShiftEnd = 'defaultShiftEnd';
+  static const String key24hShift = 'is24hShift';
+  static const String keyCustomShiftStart = 'customShiftStart';
+  static const String keyCustomShiftEnd = 'customShiftEnd';
+  static const String keyAvailabilitiesDueDate = 'availabilitiesDueDate';
+  static const String keyAvailabilitiesStartDate = 'availabilitiesStartDate';
+  static const String keySelectedWeekdays = 'selectedWeekdays';
   static const String keyShiftSettings = 'shiftFrequency';
 
   /// load settings from SharedPreferences
@@ -25,13 +32,55 @@ class SettingsModel extends ChangeNotifier {
     _loadFromPrefs();
   }
 
-  bool get is24hShift => _is24hShift;
-  TimeOfDay get defaultShiftStart => _defaultShiftStart;
-  TimeOfDay get defaultShiftEnd => _defaultShiftEnd;
+  DateTime get availabilitiesStartDate => _availabilitesStartDate;
+  DateTime get availabilitiesDueDate => _availabilitesDueDate;
+  bool get allShiftsAre24hShifts => _allShiftsAre24hShifts;
+  TimeOfDay get customShiftStart => _customShiftStart;
+  TimeOfDay get customShiftEnd => _customShiftEnd;
   ShiftFrequency get shiftFrequency => _shiftFrequency;
 
   bool isWeekdaySelected(int day) => selectedWeekdays.contains(day);
 
+
+  //----------------- Setter methods -----------------
+
+  /// saving values to SharedPreferences directly from setters and without using the repository (no boilerplate code)
+
+  set allShiftsAre24hShifts(bool value) {
+    _allShiftsAre24hShifts = value;
+    SharedPreferencesHelper.saveValue(key24hShift, value);
+    log("settings_model: is24hShift set to $value");
+    notifyListeners();
+  }
+
+  set customShiftStart(TimeOfDay value) {
+    _customShiftStart = value;
+    SharedPreferencesHelper.saveValue(keyCustomShiftStart, value);
+    log("settings_model: customShiftStart set to $value");
+    notifyListeners();
+  }
+
+  set customShiftEnd(TimeOfDay value) {
+    _customShiftEnd = value;
+    SharedPreferencesHelper.saveValue(keyCustomShiftEnd, value);
+    log("settings_model: customShiftEnd set to $value");
+    notifyListeners();
+  }
+
+  set shiftFrequency(ShiftFrequency value) {
+    _shiftFrequency = value;
+    SharedPreferencesHelper.saveValue(keyShiftSettings, value.name);
+    log("settings_model: shiftSettings set to $value");
+    notifyListeners();
+  }
+
+
+  //----------------- UI methods -----------------
+
+  void toggle24hShift() {
+    allShiftsAre24hShifts = !allShiftsAre24hShifts;
+  }
+  
   void toggleWeekday(int day) {
     if (selectedWeekdays.contains(day)) {
       selectedWeekdays.remove(day);
@@ -43,64 +92,25 @@ class SettingsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-//----------------- Setter methods -----------------
 
-  set is24hShift(bool value) {
-    _is24hShift = value;
-    SharedPreferencesHelper.saveValue(keyIs24hShift, value);
-    log("settings_model: is24hShift set to $value");
-    notifyListeners();
-  }
-
-  set defaultShiftStart(TimeOfDay value) {
-    _defaultShiftStart = value;
-    SharedPreferencesHelper.saveValue(keyDefaultShiftStart, value);
-    log("settings_model: defaultShiftStart set to $value");
-    notifyListeners();
-  }
-
-  set defaultShiftEnd(TimeOfDay value) {
-    _defaultShiftEnd = value;
-    SharedPreferencesHelper.saveValue(keyDefaultShiftEnd, value);
-    log("settings_model: defaultShiftEnd set to $value");
-    notifyListeners();
-  }
-
-  set shiftFrequency(ShiftFrequency value) {
-    _shiftFrequency = value;
-    SharedPreferencesHelper.saveValue(keyShiftSettings, value.name);
-    log("settings_model: shiftSettings set to $value");
-    notifyListeners();
-  }
-
-//------------------ load settings from SharedPreferences ------------------	
+  //------------------ load settings from SharedPreferences ------------------	
 
   Future<void> _loadFromPrefs() async {
+    /// default values
+    DateTime defaultAvailabilityStartDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
+    DateTime defaultAvailabilityDueDate = DateTime(DateTime.now().year, DateTime.now().month, 15);
+    TimeOfDay defaultShiftStart = const TimeOfDay(hour: 8, minute: 0);
+    TimeOfDay defaultShiftEnd = const TimeOfDay(hour: 16, minute: 0);
 
-    final loadedIs24h = await SharedPreferencesHelper.loadValue(keyIs24hShift, bool);
-    if (loadedIs24h is bool) {
-      _is24hShift = loadedIs24h;
-    }
+    /// load settings from SharedPreferences using the repository
+    _availabilitesStartDate = await settingsRepository.getAvailabilitiesStartDate() ?? defaultAvailabilityStartDate;
+    _availabilitesDueDate = await settingsRepository.getAvailabilitiesDueDate() ?? defaultAvailabilityDueDate;
+    _allShiftsAre24hShifts = await SharedPreferencesHelper.loadValue(key24hShift, bool) ?? false;
+    _customShiftStart = await SharedPreferencesHelper.loadValue(keyCustomShiftStart, TimeOfDay) ?? defaultShiftStart;
+    _customShiftEnd = await SharedPreferencesHelper.loadValue(keyCustomShiftEnd, TimeOfDay) ?? defaultShiftEnd;
+    _shiftFrequency = await settingsRepository.getShiftFrequency();
+    selectedWeekdays = await settingsRepository.getSelectedWeekdays();    
 
-    final loadedStartTime = await SharedPreferencesHelper.loadValue(keyDefaultShiftStart, TimeOfDay);
-    if (loadedStartTime is TimeOfDay) {
-      _defaultShiftStart = loadedStartTime;
-    }
-
-    final loadedEndTime = await SharedPreferencesHelper.loadValue(keyDefaultShiftEnd, TimeOfDay);
-    if (loadedEndTime is TimeOfDay) {
-      _defaultShiftEnd = loadedEndTime;
-    }
-
-    final loadedShiftStettings = await SharedPreferencesHelper.loadValue(keyShiftSettings, String);
-    if (loadedShiftStettings is String) {
-      final found = ShiftFrequency.values.firstWhere(
-        (e) => e.name == loadedShiftStettings,
-        orElse: () => ShiftFrequency.daily,
-      );
-      _shiftFrequency = found;
-    }
-
-    notifyListeners();
   }
 }
+
