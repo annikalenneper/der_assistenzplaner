@@ -77,22 +77,22 @@ class SettingsModel extends ChangeNotifier {
 
   Future<void> _loadFromPrefs() async {
 
-    final loadedIs24h = await SharedPreferencesHelper.loadValue(keyIs24hShift, type: bool);
+    final loadedIs24h = await SharedPreferencesHelper.loadValue(keyIs24hShift, bool);
     if (loadedIs24h is bool) {
       _is24hShift = loadedIs24h;
     }
 
-    final loadedStartTime = await SharedPreferencesHelper.loadValue(keyDefaultShiftStart, type: TimeOfDay);
+    final loadedStartTime = await SharedPreferencesHelper.loadValue(keyDefaultShiftStart, TimeOfDay);
     if (loadedStartTime is TimeOfDay) {
       _defaultShiftStart = loadedStartTime;
     }
 
-    final loadedEndTime = await SharedPreferencesHelper.loadValue(keyDefaultShiftEnd, type: TimeOfDay);
+    final loadedEndTime = await SharedPreferencesHelper.loadValue(keyDefaultShiftEnd, TimeOfDay);
     if (loadedEndTime is TimeOfDay) {
       _defaultShiftEnd = loadedEndTime;
     }
 
-    final loadedShiftStettings = await SharedPreferencesHelper.loadValue(keyShiftSettings, type: String);
+    final loadedShiftStettings = await SharedPreferencesHelper.loadValue(keyShiftSettings, String);
     if (loadedShiftStettings is String) {
       final found = ShiftFrequency.values.firstWhere(
         (e) => e.name == loadedShiftStettings,
