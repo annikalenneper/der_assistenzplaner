@@ -8,20 +8,6 @@ import 'package:provider/provider.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
-  /// set time in settings model when user picks one
-  Future<void> _pickTime(BuildContext context, bool isStart) async {
-    final settingsModel = Provider.of<SettingsModel>(context, listen: false);
-    final currentTime = isStart? settingsModel.customShiftStart : settingsModel.customShiftEnd;
-    final picked = await showTimePicker(context: context, initialTime: currentTime);
-    if (picked != null) {
-      if (isStart) {
-        settingsModel.customShiftStart = picked;
-      } else {
-        settingsModel.customShiftEnd = picked;
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,82 +22,52 @@ class SettingsScreen extends StatelessWidget {
 
               Text('Wie regelmäßig findet deine Assistanz statt?', style: Theme.of(context).textTheme.titleLarge),
               Row(
-                children: [
-                  Expanded(
+                /// create radio buttons for each frequency
+                children: ShiftFrequency.values.map((frequency) {
+                  return Expanded(
                     child: RadioListTile<ShiftFrequency>(
-                      title: const Text('Meine Assistenz findet täglich statt'),
-                      value: ShiftFrequency.daily,
+                      title: Text(settings.getShiftFrequencyTitle(frequency)),
+                      value: frequency,
                       groupValue: settings.shiftFrequency,
                       onChanged: (val) => settings.updateShiftFrequency(val!),
                     ),
-                  ),            
-                  Expanded(
-                    child: RadioListTile<ShiftFrequency>(
-                      title: const Text('Ich habe regelmäßige Schichten (z.B. 4x pro Woche)'),
-                      value: ShiftFrequency.recurring,
-                      groupValue: settings.shiftFrequency,
-                      onChanged: (val) => settings.updateShiftFrequency(val!)
-                    ),
-                  ),
-                  Expanded(
-                    child: RadioListTile<ShiftFrequency>(
-                      title: const Text('Meine Schichten sind flexibel'),
-                      value: ShiftFrequency.flexible,
-                      groupValue: settings.shiftFrequency,
-                      onChanged: (val) => settings.updateShiftFrequency(val!)
-                    ),
-                  ),
-                ],
+                  );
+                }).toList(),
               ),
 
               Text('An welchen Tagen findet deine Assistanz statt?', style: Theme.of(context).textTheme.titleLarge),
               Wrap(
                 alignment: WrapAlignment.spaceAround,
+                /// generate checkboxes for each day of the week (int 1-7)
                 children: List.generate(7, (index) {
-                  /// index 0 = Monday, index 6 = Sunday
                   final day = index + 1;
                   return Row(
                     mainAxisSize: MainAxisSize.min, 
                     children: [
                       Checkbox(
                         value: settings.isWeekdaySelected(day),
-                        onChanged: (bool? val) {
-                          if (val == true) {
-                            settings.toggleWeekday(day);
-                          } else {
-                            settings.deselectWeekday(day);
-                          }
-                        },
+                        onChanged: (val) => settings.toggleWeekday(day),
                       ),
                       Text(dayOfWeekToString(day), style: Theme.of(context).textTheme.bodyLarge,), 
                     ],
                   );
                 }),
               ),
-              
 
               Text('Findet deine Assistenz rund um die Uhr statt? (24-Stunden-Schichten)', style: Theme.of(context).textTheme.titleLarge,),
               Row(
                 children: [
-                  Expanded(
-                    child: RadioListTile<bool>(
-                      title: const Text('Ja'),
-                      value: true,
-                      groupValue: settings.allShiftsAre24hShifts,
-                      onChanged: (val) {
-                        if (val != null) settings.allShiftsAre24hShifts = val;
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: RadioListTile<bool>(
-                      title: const Text('Nein'),
-                      value: false,
-                      groupValue: settings.allShiftsAre24hShifts,
-                      onChanged: (val) {
-                        if (val != null) settings.allShiftsAre24hShifts = val;
-                      },
-                    ),
+                  Row(
+                    children: [true, false].map((is24h) {
+                      return Expanded(
+                        child: RadioListTile<bool>(
+                          title: Text(is24h ? 'Ja' : 'Nein'),
+                          value: is24h,
+                          groupValue: settings.allShiftsAre24hShifts,
+                          onChanged: (val) => settings.toggle24hShift(val),
+                        ),
+                      );
+                    }).toList(),
                   ),
                   Spacer()
                 ],
@@ -124,22 +80,20 @@ class SettingsScreen extends StatelessWidget {
                     child: ListTile(
                       leading: const Icon(Icons.access_time),
                       title: const Text('Startzeit'),
-                      subtitle: Text(
-                        settings.customShiftStart.format(context),
-                      ),
-                      onTap: () => _pickTime(context, true),
+                      subtitle: Text(''),
+                      onTap: () => settings.openShiftStartPicker(context),
                     ),
                   ),
+
                   Expanded(
                     child: ListTile(
                       leading: const Icon(Icons.access_time),
                       title: const Text('Endzeit'),
-                      subtitle: Text(
-                        settings.customShiftEnd.format(context),
-                      ),
-                      onTap: () => _pickTime(context, false),
+                      subtitle: Text(''),
+                      onTap: () => settings.openShiftEndPicker(context),
                     ),
                   ),
+
                   Spacer()
                 ],
               ),
