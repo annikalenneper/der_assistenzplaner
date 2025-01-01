@@ -28,206 +28,174 @@ class CalendarViewState extends State<CalendarView> {
 
   @override
   Widget build(BuildContext context) {
-    Consumer<ShiftModel>(
-      builder: (context, shifts, child) {
+    return Consumer<ShiftModel>(
+      builder: (context, shiftModel, child) {
+        final assistantModel = Provider.of<AssistantModel>(context);
 
-      final calendar = TableCalendar(
-        firstDay: DateTime(2024, 12, 1), //TO-DO: change to first day of month of oldest shift
-        lastDay: DateTime(2024, 12, 30),
-        focusedDay: _focusedDay,
-        calendarFormat: _calendarFormat,
-        startingDayOfWeek: StartingDayOfWeek.monday,
-        locale: 'de_DE',
-        
-        shouldFillViewport: true,
-        headerVisible: true,
-        headerStyle: const HeaderStyle(
-          titleCentered: true,
-          formatButtonVisible: false,
-        ),
-
-        daysOfWeekStyle: const DaysOfWeekStyle(
-          weekdayStyle: TextStyle(color: Colors.black),
-          weekendStyle: TextStyle(color: Colors.black),
-        ),
-        
-        calendarStyle: CalendarStyle(
-          todayDecoration: BoxDecoration(
-            color: ModernBusinessTheme.primaryColor.withOpacity(0.5), 
-            shape: BoxShape.circle,
-          ),
-          selectedDecoration: BoxDecoration(
-            color: ModernBusinessTheme.primaryColor, 
-            shape: BoxShape.circle,
-          ),
-          markersMaxCount: 1,
-          canMarkersOverflow: true,
-        ),
-
-        selectedDayPredicate: (day) {
-          return isSameDay(_selectedDay, day);
-        },
-
-        eventLoader: (day) => [],
-
-        onDaySelected: (selectedDay, focusedDay) {
-          setState(() {
-            _selectedDay = selectedDay;
-            _focusedDay = focusedDay;
-          });
-        },
-
-        calendarBuilders: CalendarBuilders(
-          markerBuilder: (context, day, events) {
-            if (events.isNotEmpty) {      
-              final withAssistantID = events
-                  .where((event) => event is Shift && event.assistantID != null)
-                  .toSet() as Set<Shift>;
-              final withoutAssistantID = events
-                  .where((event) => event is Shift && event.assistantID == null)
-                  .toSet() as Set<Shift>;
-              return markerCache.getMarker(day, withAssistantID, withoutAssistantID);
-            }
-            return const SizedBox.shrink();
-          },
-        ),
-
-        onFormatChanged: (format) {
-          if (_calendarFormat != format) {
-            setState(() {
-              _calendarFormat = format;
-              });
-            }
-          },
-        );
-
-
-
-
-        return Row(
-        
-        children: [
-
-          /// left side
-            Expanded(
-              flex: 3,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: calendar
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Text (
-                        'Dein Team hat noch X Tage Zeit für die Abgabe der Verfügbarkeiten. \nZahl der eingetragenen Verfügbarkeiten: X',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                  )
-                ],
-              )
-            ),
-
-            /// right side
-            Expanded(
-              flex: 2,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: scheduledShiftsView,
-                  ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal, 
-                      child: Row(
-                        children: assistantModel.assistants.map((assistant) {
-                          return AssistantMarker(
-                            assistantID: assistant.assistantID,
-                            size: 40, 
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],      
-        );
-      
-
-      },
-    );
-
-    
-
-    /// headline
-    final headingForSelectedDay = Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Text(formatDateTime(_selectedDay!), style: const TextStyle(fontSize: 20)),
-    );
+        final calendar = TableCalendar(
+          firstDay: DateTime(2024, 12, 1), //TO-DO: change to first day of month of oldest shift
+          lastDay: DateTime(2024, 12, 30),
+          focusedDay: _focusedDay,
+          calendarFormat: _calendarFormat,
+          startingDayOfWeek: StartingDayOfWeek.monday,
+          locale: 'de_DE',
           
-
-    /// shows scheduled shifts for selected day
-    final scrollableListOfShifts = SingleChildScrollView(
-      child: Column(
-        children:[
-
-          /// list of shifts
-          ValueListenableBuilder<List<Shift>>(
-            valueListenable: _scheduledShiftsSelectedDay,
-            builder: (context, shifts, child) {
-              if (shifts.isEmpty) {
-                return const Center(child: Text('Keine Schichten'));
-              }
-              return ListView.builder(
-                itemCount: shifts.length,
-                shrinkWrap: true,            
-                physics: const NeverScrollableScrollPhysics(), 
-                itemBuilder: (context, index) {
-                  final shift = shifts[index];
-                  return ShiftCard(shift: shift, assistantID: shift.assistantID ?? '',);
-                },
-              );
-            },            
+          shouldFillViewport: true,
+          headerVisible: true,
+          headerStyle: const HeaderStyle(
+            titleCentered: true,
+            formatButtonVisible: false,
           ),
 
-          /// + Button 
-          Padding(
-            padding: const EdgeInsets.all(40.0),
-            child: IconButton(   
-              icon: const Icon(Icons.add), 
-              alignment: Alignment.center, 
-              padding: const EdgeInsets.all(12),
-              onPressed: () { 
-                showDialog(
-                  context: context, 
-                  builder: (context) {
-                    return PopUpBox(
-                      view:  DynamicStepper(
-                        steps: addShiftStepData(_selectedDay!),
-                        onComplete: (inputs) => saveStepperInput(context, inputs, Type.shift),
-                      ),
-                    );
-                  }, 
-                );
-              },
+          daysOfWeekStyle: const DaysOfWeekStyle(
+            weekdayStyle: TextStyle(color: Colors.black),
+            weekendStyle: TextStyle(color: Colors.black),
+          ),
+          
+          calendarStyle: CalendarStyle(
+            todayDecoration: BoxDecoration(
+              color: ModernBusinessTheme.primaryColor.withValues(), 
+              shape: BoxShape.circle,
             ),
+            selectedDecoration: BoxDecoration(
+              color: ModernBusinessTheme.primaryColor, 
+              shape: BoxShape.circle,
+            ),
+            markersMaxCount: 1,
+            canMarkersOverflow: true,
           ),
-        ],
-      ),
-    );
 
-    final scheduledShiftsView = Column(
-      children: [
-        headingForSelectedDay,         
-        Expanded(child: scrollableListOfShifts), 
-      ],
-    );
+          selectedDayPredicate: (day) {
+            return isSameDay(_selectedDay, day);
+          },
 
+          eventLoader: (day) => [],
+
+          onDaySelected: (selectedDay, focusedDay) {
+            setState(() {
+              _selectedDay = selectedDay;
+              _focusedDay = focusedDay;
+            });
+          },
+
+          calendarBuilders: CalendarBuilders(),
+
+          onFormatChanged: (format) {
+            if (_calendarFormat != format) {
+              setState(() {
+                _calendarFormat = format;
+                });
+              }
+            },
+          );
+
+          /// headline
+          final headingForSelectedDay = Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Text(formatDateTime(_selectedDay!), style: const TextStyle(fontSize: 20)),
+          );
+                
+
+          /// shows scheduled shifts for selected day
+          final scrollableListOfShifts = SingleChildScrollView(
+            child: Column(
+              children: [
+                ListView.builder(
+                  itemCount: shiftModel.shifts.length,
+                  shrinkWrap: true,            
+                  physics: const NeverScrollableScrollPhysics(), 
+                  itemBuilder: (context, index) {
+                    final shift = shiftModel.shifts.elementAt(index);
+                    return ShiftCard(shift: shift, assistantID: shift.assistantID ?? '',);
+                  },            
+                ),
+
+                /// + Button 
+                Padding(
+                  padding: const EdgeInsets.all(40.0),
+                  child: IconButton(   
+                    icon: const Icon(Icons.add), 
+                    alignment: Alignment.center, 
+                    padding: const EdgeInsets.all(12),
+                    onPressed: () { 
+                      showDialog(
+                        context: context, 
+                        builder: (context) {
+                          return PopUpBox(
+                            view:  DynamicStepper(
+                              steps: addShiftStepData(_selectedDay!),
+                              onComplete: (inputs) => saveStepperInput(context, inputs, Type.shift),
+                            ),
+                          );
+                        }, 
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+
+          final scheduledShiftsView = Column(
+            children: [
+              headingForSelectedDay,         
+              Expanded(child: scrollableListOfShifts), 
+            ],
+          );
+
+          return Row(     
+            children: [
+              /// left side
+              Expanded(
+                flex: 3,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: calendar
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Text (
+                          'Dein Team hat noch X Tage Zeit für die Abgabe der Verfügbarkeiten. \nZahl der eingetragenen Verfügbarkeiten: X',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    )
+                  ],
+                )
+              ),
+
+              /// right side
+              Expanded(
+                flex: 2,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: scheduledShiftsView,
+                    ),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal, 
+                        child: Row(
+                          children: assistantModel.assistants.map((assistant) {
+                            return AssistantMarker(
+                              assistantID: assistant.assistantID,
+                              size: 40, 
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],      
+          );   
+        },
+      );
+    }
   }
-}
 
