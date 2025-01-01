@@ -5,23 +5,29 @@ import 'package:der_assistenzplaner/utils/cache.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/data/models/shift.dart';
 
+enum ShiftDisplayOptions {scheduled, unscheduled, all, assistant}
 
 class ShiftModel extends ChangeNotifier {
   ShiftRepository shiftRepository = ShiftRepository();
+
   Set<Shift> shifts = [] as Set<Shift>;
   Map<DateTime, Set<Shift>> mapOfShiftsByDay = {}; 
   Map<String, Set<Shift>> mapOfShiftsByAssistant = {}; 
+
+  ShiftDisplayOptions _selectedShiftDisplayOption = ShiftDisplayOptions.scheduled;
+  String? _selectedAssistantID;
   final MarkerCache markerCache = MarkerCache();
 
-  Shift? currentShift;
+  Shift? _currentShift;
 
   ShiftModel();
 
   //----------------- Getter methods -----------------
 
-  DateTime get start => currentShift?.start ?? DateTime.now();
-  DateTime get end => currentShift?.end ?? DateTime.now();
-  Duration get duration => currentShift?.duration ?? Duration.zero;
+  Shift? get currentShift => _currentShift;
+  DateTime get start => _currentShift?.start ?? DateTime.now();
+  DateTime get end => _currentShift?.end ?? DateTime.now();
+  Duration get duration => _currentShift?.duration ?? Duration.zero;
 
   /// removing unscheduledShifts more efficient: only few unscheduledShifts in database
   Set<Shift> get scheduledShifts =>
@@ -33,7 +39,55 @@ class ShiftModel extends ChangeNotifier {
 
   //----------------- Setter methods -----------------
 
-  //TO-DO: implement setter methods with checks for valid input
+  set currentShift(Shift? shift) {
+    _currentShift = shift;
+    notifyListeners();
+  }
+
+  set start(DateTime start) =>
+      (start.isBefore(end)) 
+      ? currentShift?.start = start 
+      : currentShift?.start = end;
+
+  set end(DateTime end) =>
+      (end.isAfter(start)) 
+      ? currentShift?.end = end 
+      : currentShift?.end = start;
+
+    
+
+  //----------------- UI methods -----------------
+  
+  /// only one parameter required to update display option
+  void updateDisplayOption(ShiftDisplayOptions? option, String? assistantID) {
+    if (option != null) {
+      _selectedShiftDisplayOption = option;
+      log('ShiftModel: Display option set to $_selectedShiftDisplayOption');
+      notifyListeners();
+    } 
+    if (assistantID != null) {
+      _selectedShiftDisplayOption = ShiftDisplayOptions.assistant;
+      _selectedAssistantID = assistantID;
+      log('ShiftModel: Selected assistant set to $_selectedAssistantID');
+      notifyListeners();
+    } 
+    else {
+      log('ShiftModel: _selectedShiftDisplayOption not set, parameter required.');
+    }
+  }
+
+  Set<Shift> selectDisplayedShifts (context, ShiftDisplayOptions selected) {
+    switch (selected) {
+      case ShiftDisplayOptions.scheduled:
+        return scheduledShifts;
+      case ShiftDisplayOptions.unscheduled:
+        return unscheduledShifts;
+      case ShiftDisplayOptions.all:
+        return shifts;
+      case ShiftDisplayOptions.assistant:
+        return mapOfShiftsByAssistant[_selectedAssistantID] ?? <Shift>{};
+    }
+  }
 
 
   //------------------ Filter Methods ------------------
@@ -57,13 +111,10 @@ class ShiftModel extends ChangeNotifier {
     return result;
   }
 
-  Set<Shift> getShiftsByAssistant(String assistantID) {
-    if (mapOfShiftsByAssistant.containsKey(assistantID)) {
-      return mapOfShiftsByAssistant[assistantID]!;
-    }
-    return [] as Set<Shift>;
-  }
+  Set<Shift> getShiftsByAssistant(String assistantID) => 
+      mapOfShiftsByAssistant[assistantID] ?? <Shift>{};
 
+  
 
 
   //----------------- Data Manipulation Methods -----------------
