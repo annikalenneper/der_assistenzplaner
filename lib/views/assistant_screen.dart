@@ -59,70 +59,74 @@ class _AssistantPageState extends State<AssistantPage> {
 class AssistantListView extends StatefulWidget {
   /// pass callback function from AssistantPage to AssistantListView
   final Function(int) changePageViewIndex;
+
   const AssistantListView({required this.changePageViewIndex, super.key});
+
   @override
   State<AssistantListView> createState() => _AssistantListViewState();
 }
 
-  class _AssistantListViewState extends State<AssistantListView> {
-  late AssistantModel assistantModel = Provider.of<AssistantModel>(context);
+class _AssistantListViewState extends State<AssistantListView> {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SizedBox(
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                Expanded(
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 6,
-                      childAspectRatio: 0.8,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
+      body: Consumer<AssistantModel>(
+        builder: (context, assistantModel, child) {
+          return SizedBox(
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  Expanded(
+                    child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 6,
+                        childAspectRatio: 0.8,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                      ),
+                      itemCount: assistantModel.assistants.length,
+                      itemBuilder: (context, index) {
+                        /// get individual assistants from assistantModel assistants list
+                        var assistant = assistantModel.assistants.elementAt(index);
+                        return GestureDetector(
+                          onTap: () {
+                            assistantModel.currentAssistant = assistant;
+                            /// navigate to AssistantDetailView
+                            widget.changePageViewIndex(1);
+                          },
+                          child: AssistantCard(assistantID: assistant.assistantID,)
+                        );
+                      },
                     ),
-                    itemCount: assistantModel.assistants.length,
-                    itemBuilder: (context, index) {
-                      /// get individual assistants from assistantModel assistants list
-                      var assistant = assistantModel.assistants[index];
-                      return GestureDetector(
-                        onTap: () {
-                          assistantModel.currentAssistant = assistant;
-                          /// navigate to AssistantDetailView
-                          widget.changePageViewIndex(1);
-                        },
-                        child: AssistantCard(assistant: assistant)
-                      );
-                    },
                   ),
-                ),
-              ],
-            ),
-            Positioned(
-              bottom: 20,
-              right: 20,
-              child: FloatingActionButton(
-                child: Icon(Icons.add),
-                onPressed: () {
-                  showDialog(
-                  context: context, 
-                  builder: (context) {
-                    return PopUpBox(
-                      view:  DynamicStepper(
-                        steps: addAssistantStepData(),
-                        onComplete: (inputs) => saveStepperInput(context, inputs, Type.assistant),
-                        ),
-                      );
-                    }, 
-                  );
-                },
+                ],
               ),
-            ),
-          ],
-        ),
-      ),
+              Positioned(
+                bottom: 20,
+                right: 20,
+                child: FloatingActionButton(
+                  child: Icon(Icons.add),
+                  onPressed: () {
+                    showDialog(
+                    context: context, 
+                    builder: (context) {
+                      return PopUpBox(
+                        view:  DynamicStepper(
+                          steps: addAssistantStepData(),
+                          onComplete: (inputs) => saveStepperInput(context, inputs, Type.assistant),
+                          ),
+                        );
+                      }, 
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 }
@@ -154,7 +158,6 @@ class AssistantDetailView extends StatelessWidget {
             Icon(Icons.person, size: 100),
             Text(assistant.tags.toString()),
             Text(assistant.deviation.toString()),
-            Text(assistant.notes.toString()),
             ElevatedButton(
               onPressed: () => showDialog<String>(
                 context: context,
@@ -177,7 +180,7 @@ class AssistantDetailView extends StatelessWidget {
                   actions: [
                     TextButton(
                       onPressed: () { 
-                        assistant.deleteAssistant();
+                        assistant.deleteAssistant(assistant.assistantID);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('${assistant.name} erfolgreich gelöscht.')),
                         );
