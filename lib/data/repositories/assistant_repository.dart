@@ -22,14 +22,14 @@ class AssistantRepository {
       return assistants;
     } catch (e, stackTrace) {
       log('AssistantRepository: Error fetching assistants: $e', stackTrace: stackTrace);
-      return <Assistant>{}; // return empty list on failure
+      return <Assistant>{}; // return empty set on failure
     }
   }
 
   Future<Map<String, Color>> fetchAssistantColorMap() async {
     try {
       final assistantBox = await Hive.openBox<Assistant>('assistants');
-      final assistants = assistantBox.values.toList();
+      final assistants = assistantBox.values.toSet();
       if (assistants.isEmpty) {
         log('AssistantRepository: No assistants found for fetching color map.');
         return {};
