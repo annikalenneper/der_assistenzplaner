@@ -1,4 +1,4 @@
-import 'package:der_assistenzplaner/models/tag.dart';
+import 'package:der_assistenzplaner/data/models/tag.dart';
 import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 
@@ -50,7 +50,7 @@ part 'assistant.g.dart';
     List<double> get surchargeCounter => List.unmodifiable(_surchargeCounter);
     List<double> get futureSurchargeCounter =>
         List.unmodifiable(_futureSurchargeCounter);
-    List<Note> get notes => List.unmodifiable(_notes);
+    List<Note> get notes => _notes;
     List<Tag> get tags => List.unmodifiable(_tags);
 
     set name(String name) => (name.isNotEmpty)
@@ -61,24 +61,6 @@ part 'assistant.g.dart';
     set actualHours(double actualHours) =>
         (actualHours > 0) ? _actualHours = actualHours : throw ArgumentError('actualHours darf nicht negativ sein.');
     set tags(List<Tag> tags) => _tags = tags;
-
-
-
-    void addNote(String title, String text) =>
-
-      _notes.add(Note(title, text)); 
-
-    void removeNotebyIndex(int index) => (index < 0 || index >= _notes.length)
-      ? throw RangeError('Index $index out of bounds for notes list.')
-      : _notes.removeAt(index);
-
-    void assignTag(Tag tag) => (_tags.contains(tag))
-      ? throw ArgumentError('Tag $tag bereits zugeordnet.')
-      : _tags.add(tag);
-
-    void removeTagByIndex(int index) => (index < 0 || index >= _tags.length)
-      ? throw RangeError('Index $index out of bounds for tags list.')
-      : _tags.removeAt(index);
 
     @override
     String toString() {
