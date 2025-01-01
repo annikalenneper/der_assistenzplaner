@@ -1,3 +1,5 @@
+
+
 import 'package:der_assistenzplaner/data/models/tag.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -34,7 +36,7 @@ part 'shift.g.dart';
     DateTime get start => _start;
     DateTime get end => _end;
     Duration get duration => _end.difference(_start);
-    String? get assistantID => _assistantID;
+    String? get assistantID => _assistantID ?? null ;
     bool get isScheduled => _assistantID != '';
     List<Tag> get tags => [];
 

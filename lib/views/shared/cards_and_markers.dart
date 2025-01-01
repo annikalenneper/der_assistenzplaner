@@ -182,7 +182,6 @@ class AssistantCard extends StatelessWidget {
                 ],
               ),
             ),
-
             /// tags
             Expanded(
               child: Padding(
@@ -195,7 +194,6 @@ class AssistantCard extends StatelessWidget {
                 ),
               ),
             ),
-
             /// colored bottom section
             Container(
               height: 40,
