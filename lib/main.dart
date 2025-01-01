@@ -5,7 +5,6 @@ import 'package:der_assistenzplaner/data/repositories/assistant_repository.dart'
 import 'package:der_assistenzplaner/styles.dart';
 import 'package:der_assistenzplaner/viewmodels/settings_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
-import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
 import 'package:der_assistenzplaner/views/settings_screen.dart';
 import 'package:der_assistenzplaner/views/workschedule_screen.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +29,6 @@ Future<void> main() async {
   /// initialize models 
   final assistantModel = AssistantModel();
   final shiftModel = ShiftModel();
-  final workscheduleModel = WorkscheduleModel();
   final settingsModel = SettingsModel();
 
   /// load data
@@ -42,9 +40,6 @@ Future<void> main() async {
     runApp(
       MultiProvider(
         providers: [
-          ChangeNotifierProvider(
-            create: (_) => workscheduleModel,
-          ),
           ChangeNotifierProvider(
             create: (_) => shiftModel,
           ),
