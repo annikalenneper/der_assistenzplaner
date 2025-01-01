@@ -6,6 +6,27 @@ import 'package:der_assistenzplaner/utils/step_data.dart';
 import 'package:flutter/material.dart';
 
 
+class SelectableWrapper<T> extends StatelessWidget {
+  final T entity; // Generische Entity (z. B. ein Assistant, Shift, Team)
+  final Widget child; // Das darzustellende Widget
+  final void Function(T)? onSelect; // Callback-Funktion für die Auswahl
+
+  const SelectableWrapper({
+    super.key,
+    required this.entity,
+    required this.child,
+    this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onSelect != null ? () => onSelect!(entity) : null,
+      child: child,
+    );
+  }
+}
+
 class DynamicStepper extends StatefulWidget {
   final List<StepData> steps;
   /// callback function to handle user inputs and safe them to the database
@@ -66,7 +87,7 @@ Future<void> pickTime({
     context: context,
     initialTime: initialTime,
   );
-  /// call callback function to save time
+  /// callback function to handle returned time
   if (pickedTime != null) {
     onTimeSelected(pickedTime);
   }
