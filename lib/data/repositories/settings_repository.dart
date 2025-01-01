@@ -1,7 +1,7 @@
 
 import 'dart:developer';
 import 'package:der_assistenzplaner/data/models/tag.dart';
-import 'package:der_assistenzplaner/utils/shared_preferences_helper.dart';
+import 'package:der_assistenzplaner/data/shared-preferences/shared_preferences_helper.dart';
 import 'package:der_assistenzplaner/viewmodels/settings_model.dart';
 
 class SettingsRepository {
@@ -109,26 +109,26 @@ class SettingsRepository {
     }
   }
 
-  Future<List<Tag>> getPersonalTags () async {
+  Future<Set<Tag>> getPersonalTags () async {
     try {
-      final personalTags = await SharedPreferencesHelper.loadValue('personalTags', List<Tag>);
-      if (personalTags is List<Tag>) {
+      final personalTags = await SharedPreferencesHelper.loadValue('personalTags', Set<Tag>);
+      if (personalTags is Set<Tag>) {
         log('SettingsRepository: Fetched personal tags.');
         return personalTags;
       } else {
-        log('SettingsRepository: No personal tags found. Returning an empty list.');
-        return []; // return empty list if no tags found
+        log('SettingsRepository: No personal tags found. Returning an empty Set.');
+        return [] as Set<Tag>; // return empty set if no tags found
       }
     } catch (e, stackTrace) {
       log('SettingsRepository: Error fetching personal tags: $e', stackTrace: stackTrace);
-      return []; // return empty list on failure
+      return [] as Set<Tag>; // return empty set on failure
     }
   }
 
-  Future<Map<String, List<Tag>>> getShiftTags() async {
+  Future<Map<String, Set<Tag>>> getShiftTags() async {
     try {
-      final shiftTags = await SharedPreferencesHelper.loadValue('shiftTags', Map<String, List<Tag>>);
-      if (shiftTags is Map<String, List<Tag>>) {
+      final shiftTags = await SharedPreferencesHelper.loadValue('shiftTags', Map<String, Set<Tag>>);
+      if (shiftTags is Map<String, Set<Tag>>) {
         log('SettingsRepository: Fetched shift tags.');
         return shiftTags;
       } else {
