@@ -1,4 +1,4 @@
-import 'package:der_assistenzplaner/models/shift.dart';
+import 'package:der_assistenzplaner/data/models/shift.dart';
 import 'package:flutter/material.dart';
 
 class Tag {
