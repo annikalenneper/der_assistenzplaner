@@ -10,7 +10,7 @@ enum ShiftDisplayOptions {scheduled, unscheduled, all, assistant}
 class ShiftModel extends ChangeNotifier {
   ShiftRepository shiftRepository = ShiftRepository();
 
-  Set<Shift> shifts = [] as Set<Shift>;
+  Set<Shift> shifts = <Shift>{};
   Map<DateTime, Set<Shift>> mapOfShiftsByDay = {}; 
   Map<String, Set<Shift>> mapOfShiftsByAssistant = {}; 
 
