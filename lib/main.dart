@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:der_assistenzplaner/data/models/assistant.dart';
 import 'package:der_assistenzplaner/data/models/shift.dart';
-import 'package:der_assistenzplaner/data/repositories/assistant_repository.dart';
 import 'package:der_assistenzplaner/styles.dart';
 import 'package:der_assistenzplaner/viewmodels/settings_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
