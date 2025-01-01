@@ -1,10 +1,8 @@
-import 'package:der_assistenzplaner/models/shift.dart';
+import 'package:der_assistenzplaner/data/models/shift.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
-import 'package:der_assistenzplaner/viewmodels/workschedule_model.dart';
 import 'package:flutter/material.dart';
-import 'package:der_assistenzplaner/models/assistant.dart';
-import 'package:der_assistenzplaner/models/tag.dart';
+import 'package:der_assistenzplaner/data/models/tag.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -138,17 +136,18 @@ class ShiftCard extends StatelessWidget {
 
 /// TO-DO: refactor with assistantID instead of assistant
 class AssistantCard extends StatelessWidget {
-  final Assistant assistant;
+  final String assistantID;
 
-  const AssistantCard({super.key, required this.assistant});
+  const AssistantCard({super.key, required this.assistantID});
 
   @override
   Widget build(BuildContext context) {
-    final assistantID = assistant.assistantID;
-    final name = assistant.name;
-    final deviation = assistant.formattedDeviation;
-    final tags = assistant.tags;
-    final color = Provider.of<AssistantModel>(context).assistantColorMap[assistant.assistantID] ?? Colors.grey;
+    final assistantModel = Provider.of<AssistantModel>(context, listen: false);
+    final assistant = assistantModel.assistantMap[assistantID];
+    final name = assistant?.name ?? 'Unbekannt';
+    final deviation = assistant?.formattedDeviation ?? 'Unbekannt';
+    final tags = assistant?.tags ?? [];
+    final color = assistantModel.assistantColorMap[assistantID] ?? Colors.grey;
 
     var screenWidth = MediaQuery.of(context).size.width;
 
@@ -215,38 +214,35 @@ class AssistantCard extends StatelessWidget {
 
 //----------------- AssistantMarker -----------------
 
+
 class AssistantMarker extends StatelessWidget {
-  final String? assistantID;
+  final String assistantID;
   final double size;
-  
-  const AssistantMarker({super.key, required this.size, this.assistantID});
-  
+
+  const AssistantMarker({super.key, required this.size, required this.assistantID});
+
   @override
   Widget build(BuildContext context) {
-    final assistantModel = Provider.of<AssistantModel>(context);
+    final assistantModel = Provider.of<AssistantModel>(context, listen: false);
+    final assistant = assistantModel.assistantMap[assistantID];
+    final name = assistant?.name ?? 'Unbekannt';
     final color = assistantModel.assistantColorMap[assistantID] ?? Colors.grey;
-    final name = assistantModel.assistantMap[assistantID]?.name ?? '';
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: GestureDetector(
-        onTap: () {
-          final workscheduleModel = Provider.of<WorkscheduleModel>(context, listen: false);
-          workscheduleModel.updateDisplayOption(ShiftDisplayOptions.assistant, assistantID);
-        },
-        child: Container(
-          width: size,
-          height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color,
-        ),
-        child: Center(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              name.isNotEmpty ? name[0].toUpperCase() : '?',
-              style: TextStyle(fontSize: size * 0.6, color: Colors.white, height: 1),
-              ),
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+      ),
+      child: Center(
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            name[0].toUpperCase(),
+            style: TextStyle(
+              fontSize: size * 0.6,
+              color: Colors.white,
+              height: 1,
             ),
           ),
         ),
@@ -254,6 +250,7 @@ class AssistantMarker extends StatelessWidget {
     );
   }
 }
+
 
 //----------------- TagWidget -----------------
 
