@@ -10,7 +10,7 @@ enum ShiftDisplayOptions {scheduled, unscheduled, all, assistant}
 class ShiftModel extends ChangeNotifier {
   ShiftRepository shiftRepository = ShiftRepository();
 
-  Set<Shift> shifts = <Shift>{};
+  late Set<Shift> shifts;
   Map<DateTime, Set<Shift>> mapOfShiftsByDay = {}; 
   Map<String, Set<Shift>> mapOfShiftsByAssistant = {}; 
 
@@ -94,7 +94,7 @@ class ShiftModel extends ChangeNotifier {
 
   Set<Shift> getShiftsByDay(DateTime day) {
     final normalizedDay = DateTime(day.year, day.month, day.day);
-    return mapOfShiftsByDay[normalizedDay] ?? [] as Set<Shift>; 
+    return mapOfShiftsByDay[normalizedDay]?.toSet() ?? <Shift>{}; 
   }
 
   Set<Shift> getShiftsByDateRange(DateTime start, DateTime end) {
@@ -136,7 +136,7 @@ class ShiftModel extends ChangeNotifier {
   
   Future<void> init() async {
     /// load data from database on initialization
-    _loadShifts();
+    await _loadShifts();
     _loadMapOfShiftsByAssistants();
     _loadMapOfShiftsByDay();
     log('shiftModel: initialized with ${shifts.length} shifts');
