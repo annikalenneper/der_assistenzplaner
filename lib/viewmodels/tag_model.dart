@@ -7,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 class TagModel extends ChangeNotifier {
   Tag? selectedTag;
   late List<Tag> personalTags = [];
+  late Map<String, Tag> shiftTagsMap = {};
 
   get name => selectedTag?.name;
   get tagSymbol => selectedTag?.tagSymbol;
