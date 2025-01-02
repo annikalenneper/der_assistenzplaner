@@ -29,6 +29,11 @@ double calculateShiftDuration(Shift shift) {
   return shift.end.difference(shift.start).inMinutes / 60;
 }
 
+DateTime lastDayOfMonth(DateTime dateTime) {
+  DateTime firstDayNextMonth = DateTime(dateTime.year, dateTime.month + 1, 1);
+  return firstDayNextMonth.subtract(Duration(days: 1));
+} 
+
 
 //------------------------- Shared Methods -------------------------
 
