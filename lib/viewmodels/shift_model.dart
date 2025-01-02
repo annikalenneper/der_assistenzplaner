@@ -134,7 +134,7 @@ class ShiftModel extends ChangeNotifier {
 
   //----------------- Initialization Methods -----------------
   
-  Future<void> initialize() async {
+  Future<void> init() async {
     /// load data from database on initialization
     _loadShifts();
     _loadMapOfShiftsByAssistants();
