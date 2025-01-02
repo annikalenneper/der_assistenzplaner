@@ -46,8 +46,6 @@ void saveStepperInput(context, Map<String, dynamic> inputs, Type type) {
     final shiftModel = Provider.of<ShiftModel>(context, listen: false);
     final newShift = Shift(inputs['start'], inputs['end'], inputs['assistantID']);
     shiftModel.saveShift(newShift);
-  // } else if (type == Type.settings) {
-    
    }
 }
 
