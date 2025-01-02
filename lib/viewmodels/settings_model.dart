@@ -11,10 +11,10 @@ enum ShiftFrequency { daily, recurring, flexible }
 class SettingsModel extends ChangeNotifier {
   SettingsRepository settingsRepository = SettingsRepository();
 
-  Duration _minimumBetweenStartAndDueDate = Duration(days: 7);
+  /// default values
+  TimeOfDay _defaultShiftStart = const TimeOfDay(hour: 8, minute: 0);
+  TimeOfDay _defaultShiftEnd = const TimeOfDay(hour: 16, minute: 0);
 
-  late DateTime availabilitesStartDate;
-  late DateTime availabilitesDueDate;
   late bool allShiftsAre24hShifts;
   late TimeOfDay customShiftStart;
   late TimeOfDay customShiftEnd;
@@ -27,40 +27,19 @@ class SettingsModel extends ChangeNotifier {
   static const String key24hShift = 'is24hShift';
   static const String keyCustomShiftStart = 'customShiftStart';
   static const String keyCustomShiftEnd = 'customShiftEnd';
-  static const String keyAvailabilitiesDueDate = 'availabilitiesDueDate';
-  static const String keyAvailabilitiesStartDate = 'availabilitiesStartDate';
   static const String keySelectedWeekdays = 'selectedWeekdays';
   static const String keyShiftSettings = 'shiftFrequency';
 
 
   //----------------- Formatted Values -----------------
 
-  String get formattedAvailabilitiesStartDate => formatDateTime(availabilitesStartDate);
-  String get formattedAvailabilitiesDueDate => formatDateTime(availabilitesDueDate);
+
   String get formattedCustomShiftStart => formatTimeOfDay(customShiftStart);
   String get formattedCustomShiftEnd => formatTimeOfDay(customShiftEnd);
   String get formattedShiftFrequency => shiftFrequency.name.toString();
   
   bool isWeekdaySelected(int day) => selectedWeekdays.contains(day);
 
-
-  //----------------- Setter methods -----------------
-
-  set availabilitiesStartDate(DateTime value) {
-    DateTime earliestPossibleStartDate = availabilitesDueDate.subtract(_minimumBetweenStartAndDueDate);
-
-    (value.isBefore(earliestPossibleStartDate)) 
-          ? availabilitesStartDate = value 
-          : availabilitesStartDate = earliestPossibleStartDate;
-  }
-
-  set availabilitiesDueDate(DateTime value) {
-    DateTime latestPossibleDueDate = availabilitesStartDate.add(_minimumBetweenStartAndDueDate);
-
-    (value.isAfter(latestPossibleDueDate)) 
-          ? availabilitesDueDate = value 
-          : availabilitesDueDate = latestPossibleDueDate;
-  }
 
 
   //----------------- UI methods -----------------
@@ -149,25 +128,18 @@ class SettingsModel extends ChangeNotifier {
 
   //------------------ Initialization Methods ------------------	
 
-  Future<void> initialize() async {
+  Future<void> init() async {
     await _loadFromPrefs();
     log("settings_model: initialized with preferences");
     notifyListeners();
   }
 
   Future<void> _loadFromPrefs() async {
-    /// default values
-    DateTime defaultAvailabilitiesStartDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
-    DateTime defaultAvailabilityDueDate = DateTime(DateTime.now().year, DateTime.now().month, 15);
-    TimeOfDay defaultShiftStart = const TimeOfDay(hour: 8, minute: 0);
-    TimeOfDay defaultShiftEnd = const TimeOfDay(hour: 16, minute: 0);
 
     /// load settings from SharedPreferences using the repository
-    availabilitesStartDate = await settingsRepository.getAvailabilitiesStartDate() ?? defaultAvailabilitiesStartDate;
-    availabilitesDueDate = await settingsRepository.getAvailabilitiesDueDate() ?? defaultAvailabilityDueDate;
     allShiftsAre24hShifts = await SharedPreferencesHelper.loadValue(key24hShift, bool) ?? false;
-    customShiftStart = await SharedPreferencesHelper.loadValue(keyCustomShiftStart, TimeOfDay) ?? defaultShiftStart;
-    customShiftEnd = await SharedPreferencesHelper.loadValue(keyCustomShiftEnd, TimeOfDay) ?? defaultShiftEnd;
+    customShiftStart = await SharedPreferencesHelper.loadValue(keyCustomShiftStart, TimeOfDay) ?? _defaultShiftStart;
+    customShiftEnd = await SharedPreferencesHelper.loadValue(keyCustomShiftEnd, TimeOfDay) ?? _defaultShiftEnd;
     shiftFrequency = await settingsRepository.getShiftFrequency();
     selectedWeekdays = await settingsRepository.getSelectedWeekdays();    
 
