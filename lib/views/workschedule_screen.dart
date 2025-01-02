@@ -83,9 +83,8 @@ class CalendarViewState extends State<CalendarView> {
             });
           },
 
-          eventLoader: (day) => shiftModel.getShiftsByDay(day).map((shift) {
-            return shift;
-          }).toList(),
+          eventLoader: (day) => shiftModel.getShiftsForDisplay(
+                                  context, _selectedShiftDisplayOption).toList(),
 
           onFormatChanged: (format) {
             if (_calendarFormat != format) {

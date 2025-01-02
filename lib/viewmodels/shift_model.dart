@@ -76,7 +76,7 @@ class ShiftModel extends ChangeNotifier {
     }
   }
 
-  Set<Shift> selectDisplayedShifts (context, ShiftDisplayOptions selected) {
+  Set<Shift> getShiftsForDisplay (context, ShiftDisplayOptions selected) {
     switch (selected) {
       case ShiftDisplayOptions.scheduled:
         return scheduledShifts;
