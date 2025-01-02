@@ -71,66 +71,66 @@ class _AssistantListViewState extends State<AssistantListView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<AssistantModel>(
-        builder: (context, assistantModel, child) {
-          return SizedBox(
-          child: Stack(
-            children: [
-              Column(
-                children: [
-                  Expanded(
-                    child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 6,
-                        childAspectRatio: 0.8,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
-                      itemCount: assistantModel.assistants.length,
-                      itemBuilder: (context, index) {
-                        /// get individual assistants from assistantModel assistants list
-                        var assistant = assistantModel.assistants.elementAt(index);
-                        return GestureDetector(
-                          onTap: () {
-                            assistantModel.currentAssistant = assistant;
-                            /// navigate to AssistantDetailView
-                            widget.changePageViewIndex(1);
-                          },
-                          child: AssistantCard(assistantID: assistant.assistantID,)
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              Positioned(
-                bottom: 20,
-                right: 20,
-                child: FloatingActionButton(
-                  child: Icon(Icons.add),
-                  onPressed: () {
-                    showDialog(
-                    context: context, 
-                    builder: (context) {
-                      return PopUpBox(
-                        view:  DynamicStepper(
-                          steps: addAssistantStepData(),
-                          onComplete: (inputs) => saveStepperInput(context, inputs, Type.assistant),
+          body: SizedBox(
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    Expanded(
+                      child: Consumer<AssistantModel>(
+                        builder: (context, assistantModel, child) {  
+                        return GridView.builder(
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 6,
+                            childAspectRatio: 0.8,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
                           ),
+                          itemCount: assistantModel.assistants.length,
+                          itemBuilder: (context, index) {
+                            /// get individual assistants from assistantModel assistants list
+                            var assistant = assistantModel.assistants.elementAt(index);
+                            return GestureDetector(
+                              onTap: () {
+                                assistantModel.currentAssistant = assistant;
+                                /// navigate to AssistantDetailView
+                                widget.changePageViewIndex(1);
+                              },
+                              child: AssistantCard(assistantID: assistant.assistantID,)
+                            );
+                          },
                         );
-                      }, 
-                    );
-                  },
+                        }
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                Positioned(
+                  bottom: 20,
+                  right: 20,
+                  child: FloatingActionButton(
+                    child: Icon(Icons.add),
+                    onPressed: () {
+                      showDialog(
+                      context: context, 
+                      builder: (context) {
+                        return PopUpBox(
+                          view:  DynamicStepper(
+                            steps: addAssistantStepData(),
+                            onComplete: (inputs) => saveStepperInput(context, inputs, Type.assistant),
+                            ),
+                          );
+                        }, 
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         );
-      }),
-    );
-  }
-}
-
+      }
+    }
 
 
 //----------------- AssistantDetailView -----------------
