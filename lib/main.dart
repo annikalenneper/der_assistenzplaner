@@ -52,6 +52,9 @@ Future<void> main() async {
           ChangeNotifierProvider(
             create: (_) => settingsModel,
           ),
+          ChangeNotifierProvider(
+            create: (_) => availabilitiesModel,
+          ),
         ],   
         child: MyApp(),
       ),
