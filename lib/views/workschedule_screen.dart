@@ -3,6 +3,7 @@ import 'package:der_assistenzplaner/utils/cache.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/utils/step_data.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
+import 'package:der_assistenzplaner/viewmodels/availabilities_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/views/shared/cards_and_markers.dart';
 import 'package:der_assistenzplaner/views/shared/user_input_widgets.dart';
@@ -23,6 +24,12 @@ class CalendarViewState extends State<CalendarView> {
   DateTime? _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
   CalendarFormat _calendarFormat = CalendarFormat.month;
+
+  static final _defaultFirstDay = DateTime(DateTime.now().year, DateTime.now().month, 1);
+  static final _defaultLastDay = lastDayOfMonth(DateTime.now());
+
+  var _selectedShiftDisplayOption = ShiftDisplayOptions.all;
+
   MarkerCache markerCache = MarkerCache();
 
   @override
@@ -32,15 +39,16 @@ class CalendarViewState extends State<CalendarView> {
         final assistantModel = Provider.of<AssistantModel>(context);
 
         final calendar = TableCalendar(
-          firstDay: DateTime(2024, 12, 1), //TO-DO: change to first day of month of oldest shift
-          lastDay: DateTime(2024, 12, 30),
+
+          firstDay: _defaultFirstDay, 
+          lastDay: _defaultLastDay, 
           focusedDay: _focusedDay,
           calendarFormat: _calendarFormat,
           startingDayOfWeek: StartingDayOfWeek.monday,
-          locale: 'de_DE',
-          
+          locale: 'de_DE',    
           shouldFillViewport: true,
           headerVisible: true,
+
           headerStyle: const HeaderStyle(
             titleCentered: true,
             formatButtonVisible: false,
@@ -68,8 +76,6 @@ class CalendarViewState extends State<CalendarView> {
             return isSameDay(_selectedDay, day);
           },
 
-          eventLoader: (day) => [],
-
           onDaySelected: (selectedDay, focusedDay) {
             setState(() {
               _selectedDay = selectedDay;
@@ -77,7 +83,9 @@ class CalendarViewState extends State<CalendarView> {
             });
           },
 
-          calendarBuilders: CalendarBuilders(),
+          eventLoader: (day) => shiftModel.getShiftsByDay(day).map((shift) {
+            return shift;
+          }).toList(),
 
           onFormatChanged: (format) {
             if (_calendarFormat != format) {
@@ -156,9 +164,13 @@ class CalendarViewState extends State<CalendarView> {
                       padding: const EdgeInsets.all(8.0),
                       child: Align(
                         alignment: Alignment.bottomLeft,
-                        child: Text (
-                          'Dein Team hat noch X Tage Zeit für die Abgabe der Verfügbarkeiten. \nZahl der eingetragenen Verfügbarkeiten: X',
-                          style: const TextStyle(fontSize: 12),
+                        child: Consumer<AvailabilitiesModel>(
+                          builder: (BuildContext context, availabilities, child) {  
+                            return Text (
+                              'Dein Team hat noch ${availabilities.daysUntilAvailabilitiesDueDate} Tage Zeit für die Abgabe der Verfügbarkeiten. \nZahl der eingetragenen Verfügbarkeiten: X',
+                              style: const TextStyle(fontSize: 12),
+                            );
+                          },
                         ),
                       ),
                     )
