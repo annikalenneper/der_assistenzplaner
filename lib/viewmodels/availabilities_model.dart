@@ -53,6 +53,21 @@ class AvailabilitiesModel extends ChangeNotifier{
 
   //----------------- UI methods -----------------
 
+
+  //----------------- Application specific internal methods --------------------
+
+  Future<void> _deleteOutdatedAvailabilities() async {
+    /// TO-DO: implement deleting outdated availabilities from database
+  }
+
+  Future<void> _updateAvailabilitiesCount() async {
+    /// TO-DO: implement saving availabilities to database
+  }
+
+
+
+
+
   //----------------- Initialization methods -----------------
 
   Future<void> init() async {
