@@ -71,13 +71,11 @@ class AvailabilitiesModel extends ChangeNotifier{
   //----------------- Initialization methods -----------------
 
   Future<void> init() async {
-
     await _loadAvailabilities();
 
     /// get values from SharedPreferences using SettingsRepository
     availabilitesStartDate = await settingsRepository.getAvailabilitiesStartDate() ?? _defaultAvailabilitiesStartDate;
     availabilitesDueDate = await settingsRepository.getAvailabilitiesDueDate() ?? _defaultAvailabilityDueDate;
-
   }
 
   Future<void> _loadAvailabilities() async {
