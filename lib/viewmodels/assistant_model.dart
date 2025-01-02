@@ -6,7 +6,6 @@ import 'package:der_assistenzplaner/data/models/tag.dart';
 
 class AssistantModel extends ChangeNotifier {
   AssistantRepository assistantRepository = AssistantRepository();
-  Set<Assistant> assistants = {};
   Map<String, Assistant> assistantMap = {}; /// efficient lookup per ID (O(1) instead of O(n))
   Map<String, Color> assistantColorMap = {}; 
   Assistant? currentAssistant;
@@ -14,6 +13,8 @@ class AssistantModel extends ChangeNotifier {
   AssistantModel();
 
   //----------------- Getter methods -----------------
+
+  Set<Assistant> get assistants => assistantMap.values.toSet();
 
   String get assistantID => currentAssistant?.assistantID ?? '';
   String get name => currentAssistant?.name ?? '';
@@ -81,6 +82,7 @@ class AssistantModel extends ChangeNotifier {
 
   Future<void> saveAssistant(Assistant assistant) async {
     await assistantRepository.saveAssistant(assistant);
+    _addAssistantToLocalStructures(assistant);
     notifyListeners(); 
   }
 
@@ -103,36 +105,46 @@ class AssistantModel extends ChangeNotifier {
 
   Future<void> deleteAssistant(String assistantID) async {
     await assistantRepository.deleteAssistant(assistantID);
+    _removeAssistantFromLocalStructures(assistantID);
     notifyListeners();
+  }
+
+
+  //----------------- Helper Methods -----------------
+
+  void _addAssistantToLocalStructures(Assistant assistant) {
+    assistantMap[assistant.assistantID] = assistant;
+    log('AssistantModel: _addAssistantToLocalStructures: assistant $assistant added');
+  }
+
+  void _removeAssistantFromLocalStructures(String assistantID) {
+    if (assistantMap.containsKey(assistantID)) {
+      assistantMap.remove(assistantID);
+    } else {
+      log('AssistantModel: _removeAssistantFromLocalStructures: assistantID $assistantID not found');
+    }
   }
   
 
   //----------------- Initializaton Methods -----------------
 
   /// loads all assistants from database, creates a map of assistantID to color and assigns it to assistantMap property
-  Future<void> initialize() async {
-    _loadAssistants();
+  Future<void> init() async {
+    final assistants = await _loadAssistants();
     _loadAssistantColors();
-    _loadAssistantMap();
+    assistantMap = {
+      for (var assistant in assistants) assistant.assistantID: assistant
+    };
     log('AssistantModel: initialized');
   }
 
-  Future<void> _loadAssistants() async {
-    assistants = await assistantRepository.fetchAllAssistants();
-    log('AssistantModel: assistants lists loaded: $assistants');
+  Future<Set<Assistant>> _loadAssistants() async {
+    return await assistantRepository.fetchAllAssistants();
   }
   
   Future<void> _loadAssistantColors() async {
     assistantColorMap = await assistantRepository.fetchAssistantColorMap();
     log('AssistantModel: assistantColorMap geladen: $assistantColorMap');
-  }
-
-  //TO-DO: always update assistantMap when assistants are updated
-  Future<void> _loadAssistantMap() async {
-    assistantMap = {
-      for (var assistant in assistants) assistant.assistantID: assistant
-    };
-    log('AssistantModel: assistantMap loaded: $assistantMap');
   }
 
 }
