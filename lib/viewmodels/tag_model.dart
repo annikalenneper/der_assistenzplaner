@@ -20,6 +20,7 @@ class TagModel extends ChangeNotifier {
     Tag('Duschen', FontAwesomeIcons.shower),
     Tag('Baden', FontAwesomeIcons.bath),
     Tag('Hund', FontAwesomeIcons.dog),
+    Tag('Katze', FontAwesomeIcons.cat),
     Tag('Doppeldienst', FontAwesomeIcons.checkDouble),
     Tag('Schwimmen', FontAwesomeIcons.water),
     Tag('Kino', FontAwesomeIcons.film),
