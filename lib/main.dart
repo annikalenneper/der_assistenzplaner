@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:der_assistenzplaner/data/models/assistant.dart';
 import 'package:der_assistenzplaner/data/models/shift.dart';
 import 'package:der_assistenzplaner/styles.dart';
+import 'package:der_assistenzplaner/viewmodels/availabilities_model.dart';
 import 'package:der_assistenzplaner/viewmodels/settings_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/views/settings_screen.dart';
@@ -29,10 +30,13 @@ Future<void> main() async {
   final assistantModel = AssistantModel();
   final shiftModel = ShiftModel();
   final settingsModel = SettingsModel();
+  final availabilitiesModel = AvailabilitiesModel();
 
   /// load data
-  await assistantModel.initialize();
-  await shiftModel.initialize();
+  await assistantModel.init();
+  await shiftModel.init();
+  await settingsModel.init();
+  await availabilitiesModel.init();
 
   /// initialize date formatting and make providers available before running the app
   initializeDateFormatting().then((_) {
