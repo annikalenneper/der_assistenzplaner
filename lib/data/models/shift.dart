@@ -60,12 +60,5 @@ part 'shift.g.dart';
 
   }
 
-  //----------------- Availability -----------------
 
-  class Availability {
-    final Shift shift;
-    final String assistantID;
-
-    const Availability(this.shift, this.assistantID);
-  }
 
