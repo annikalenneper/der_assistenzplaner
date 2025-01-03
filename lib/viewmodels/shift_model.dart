@@ -2,6 +2,7 @@
 import 'dart:developer';
 import 'package:der_assistenzplaner/data/repositories/shift_repository.dart';
 import 'package:der_assistenzplaner/utils/cache.dart';
+import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/data/models/shift.dart';
 
@@ -11,8 +12,10 @@ class ShiftModel extends ChangeNotifier {
   ShiftRepository shiftRepository = ShiftRepository();
 
   late Set<Shift> shifts;
-  Map<DateTime, Set<Shift>> mapOfShiftsByDay = {}; 
-  Map<String, Set<Shift>> mapOfShiftsByAssistant = {}; 
+  late Map<String, Set<Shift>> _mapOfShiftsByAssistant; 
+  late Map<DateTime, List<Shift>> _mapOfShiftsByDay;
+
+
 
   ShiftDisplayOptions _selectedShiftDisplayOption = ShiftDisplayOptions.scheduled;
   String? _selectedAssistantID;
@@ -28,6 +31,7 @@ class ShiftModel extends ChangeNotifier {
   DateTime get start => _currentShift?.start ?? DateTime.now();
   DateTime get end => _currentShift?.end ?? DateTime.now();
   Duration get duration => _currentShift?.duration ?? Duration.zero;
+  Map<DateTime, List<Shift>> get shiftsByDay => _mapOfShiftsByDay;
 
   /// removing unscheduledShifts more efficient: only few unscheduledShifts in database
   Set<Shift> get scheduledShifts =>
@@ -62,18 +66,23 @@ class ShiftModel extends ChangeNotifier {
   void updateDisplayOption(ShiftDisplayOptions? option, String? assistantID) {
     if (option != null) {
       _selectedShiftDisplayOption = option;
+      _updateShiftsByDay(option);
       log('ShiftModel: Display option set to $_selectedShiftDisplayOption');
       notifyListeners();
     } 
     if (assistantID != null) {
       _selectedShiftDisplayOption = ShiftDisplayOptions.assistant;
       _selectedAssistantID = assistantID;
+      _updateShiftsByDay(_selectedShiftDisplayOption);
       log('ShiftModel: Selected assistant set to $_selectedAssistantID');
       notifyListeners();
     } 
-    else {
-      log('ShiftModel: _selectedShiftDisplayOption not set, parameter required.');
-    }
+  }
+
+  void _updateShiftsByDay(ShiftDisplayOptions displayOption) {
+    final filteredShifts = getShiftsForDisplay(null, displayOption).toList();
+    _mapOfShiftsByDay = _groupShiftsByDay(filteredShifts);
+    notifyListeners();
   }
 
   Set<Shift> getShiftsForDisplay (context, ShiftDisplayOptions selected) {
@@ -85,17 +94,14 @@ class ShiftModel extends ChangeNotifier {
       case ShiftDisplayOptions.all:
         return shifts;
       case ShiftDisplayOptions.assistant:
-        return mapOfShiftsByAssistant[_selectedAssistantID] ?? <Shift>{};
+        return _mapOfShiftsByAssistant[_selectedAssistantID] ?? <Shift>{};
     }
   }
 
+  
 
   //------------------ Filter Methods ------------------
 
-  Set<Shift> getShiftsByDay(DateTime day) {
-    final normalizedDay = DateTime(day.year, day.month, day.day);
-    return mapOfShiftsByDay[normalizedDay]?.toSet() ?? <Shift>{}; 
-  }
 
   Set<Shift> getShiftsByDateRange(DateTime start, DateTime end) {
     final normalizedStart = DateTime(start.year, start.month, start.day);
@@ -103,16 +109,40 @@ class ShiftModel extends ChangeNotifier {
     Set<Shift> result = [] as Set<Shift>;
     DateTime currentDay = normalizedStart;
     while (currentDay.isBefore(normalizedEnd) || currentDay.isAtSameMomentAs(normalizedEnd)) {
-      if (mapOfShiftsByDay.containsKey(currentDay)) {
-        result.addAll(mapOfShiftsByDay[currentDay]!);
+      for (final shift in shifts) {
+        if (shift.start.isBefore(currentDay) && shift.end.isAfter(currentDay)) {
+          result.add(shift);
+        }
       }
       currentDay = currentDay.add(Duration(days: 1));
     }
     return result;
   }
 
-  Set<Shift> getShiftsByAssistant(String assistantID) => 
-      mapOfShiftsByAssistant[assistantID] ?? <Shift>{};
+  Map<DateTime, List<Shift>> _groupShiftsByDay(List<Shift> shifts) {
+    final Map<DateTime, List<Shift>> shiftsByDay = {};
+
+    for (final shift in shifts) {
+      log('Processing shift: ${shift.shiftID}, Start: ${shift.start}, End: ${shift.end}');
+
+      final normalizedStart = normalizeDate(shift.start);
+      final normalizedEnd = normalizeDate(shift.end);
+
+      log('Normalized Start: $normalizedStart, Normalized End: $normalizedEnd');
+
+      DateTime currentDay = normalizedStart;
+
+      while (!currentDay.isAfter(normalizedEnd)) {
+        log('Adding shift ${shift.shiftID} to day: $currentDay');
+        shiftsByDay.putIfAbsent(currentDay, () => []).add(shift);
+        currentDay = currentDay.add(const Duration(days: 1));
+      }
+    }
+
+    log('ShiftModel: Grouped ${shifts.length} shifts into ${shiftsByDay.length} days.');
+    return shiftsByDay;
+  }
+
 
   
 
@@ -122,13 +152,35 @@ class ShiftModel extends ChangeNotifier {
   /// save new shift or update existing in shiftbox through shiftRepository
   Future<void> saveShift(Shift newShift) async {
     await shiftRepository.saveShift(newShift);
+    _addShiftToLocalStructure(newShift);
     notifyListeners();
   }
 
   /// delete shift from database
   Future<void> deleteShift(String shiftID) async {
-    shiftRepository.deleteShift(shiftID);
+    await shiftRepository.deleteShift(shiftID);
+    _deleteShiftFromLocalStructure(shiftID);
     notifyListeners();
+  }
+
+
+  //----------------- Helper Methods -----------------
+
+  void _addShiftToLocalStructure(Shift newShift) {
+    if(shifts.contains(newShift)) {
+      log('ShiftModel: Shift already exists in local structure');
+      return;
+    } 
+    else {
+        shifts.add(newShift);
+        log('ShiftModel: Added shift to local structure');
+    }
+  }
+
+  void _deleteShiftFromLocalStructure(String shiftID) {
+    final shiftToDelete = shifts.firstWhere((shift) => shift.shiftID == shiftID);
+    shifts.remove(shiftToDelete);
+    log('ShiftModel: Deleted shift from local structure');
   }
 
 
@@ -137,8 +189,8 @@ class ShiftModel extends ChangeNotifier {
   Future<void> init() async {
     /// load data from database on initialization
     await _loadShifts();
-    _loadMapOfShiftsByAssistants();
-    _loadMapOfShiftsByDay();
+    await _loadMapOfShiftsByAssistants();
+    await _loadShiftsByDay();
     log('shiftModel: initialized with ${shifts.length} shifts');
   }
 
@@ -146,34 +198,23 @@ class ShiftModel extends ChangeNotifier {
     shifts = await shiftRepository.fetchAllShifts();
   }
 
-  Future<void> _loadMapOfShiftsByDay() async {
-    mapOfShiftsByDay.clear();
-    for (final shift in shifts) {
-      /// add shift to every day it is scheduled
-      DateTime currentDay = DateTime(shift.start.year, shift.start.month, shift.start.day);
-      /// loop through days until end of shift
-      while (currentDay.isBefore(shift.end) || currentDay.isAtSameMomentAs(shift.end)) {
-        mapOfShiftsByDay.putIfAbsent(currentDay, () => [] as Set<Shift>);
-        mapOfShiftsByDay[currentDay]!.add(shift);
-        currentDay = currentDay.add(Duration(days: 1));
-      }
-    }
-    log('ShiftModel: Loaded mapOfShiftsByDay with ${mapOfShiftsByDay.length} days and their shifts.');
-    notifyListeners();
-  }
-
-
   Future<void> _loadMapOfShiftsByAssistants() async {
-    mapOfShiftsByAssistant.clear();
+    _mapOfShiftsByAssistant = {}; 
     for (final shift in shifts) {
-      if (shift.assistantID != null) {
-        mapOfShiftsByAssistant.putIfAbsent(shift.assistantID!, () => [] as Set<Shift>);
-        mapOfShiftsByAssistant[shift.assistantID!]!.add(shift);
+      if (shift.assistantID != null && shift.assistantID!.isNotEmpty) {
+        _mapOfShiftsByAssistant.putIfAbsent(shift.assistantID!, () => <Shift>{}).add(shift);
       } else {
         log('ShiftModel: Shift with ID ${shift.shiftID} has no assistant assigned.');
       }
     }
-    log('ShiftModel: Loaded mapOfShiftsByAssistant with ${mapOfShiftsByAssistant.length} assistants and their shifts.');
+    log('ShiftModel: Loaded mapOfShiftsByAssistant with ${_mapOfShiftsByAssistant.length} assistants and their shifts.');
+    notifyListeners();
+  }
+
+
+  Future<void> _loadShiftsByDay() async {
+    _mapOfShiftsByDay = _groupShiftsByDay(shifts.toList());
+    log('ShiftModel: Loaded mapOfShiftsByDay with ${_mapOfShiftsByDay.length} days and their shifts.');
     notifyListeners();
   }
 
