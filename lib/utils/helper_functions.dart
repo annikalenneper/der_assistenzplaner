@@ -39,6 +39,7 @@ DateTime lastDayOfMonth(DateTime dateTime) {
 
 enum Type {assistant, shift}
 
+/// saves input from dynamic stepper according to type
 void saveStepperInput(context, Map<String, dynamic> inputs, Type type) {
   if (type == Type.assistant) {
     final assistantModel = Provider.of<AssistantModel>(context, listen: false);
@@ -49,17 +50,23 @@ void saveStepperInput(context, Map<String, dynamic> inputs, Type type) {
     log('Assistant saved to database: $newAssistant, color: $color');
   } else if (type == Type.shift) {
     final shiftModel = Provider.of<ShiftModel>(context, listen: false);
-    final newShift = Shift(inputs['start'], inputs['end'], inputs['assistantID']);
-    shiftModel.saveShift(newShift);
-   }
+      try {
+        if (Shift.isValidShift(inputs['start'], inputs['end'])) {
+          final newShift = Shift(inputs['start'], inputs['end'], inputs['assistantID']);
+          shiftModel.saveShift(newShift);
+        } 
+      } catch (e) {
+        log('Failed to save shift: $e');
+      }
+  }
 }
 
 
 
 
-//------------------------- Generic Sorting Algorithm -------------------------
 
-/// inserts elements sorted into a list
+
+/// inserts generic elements sorted into a list
 void insertSorted<T>(List<T> list, T element, int Function(T a, T b) compare) {
   /// find index where to insert element
   int index = list.indexWhere((e) => compare(element, e) < 0);
@@ -72,7 +79,14 @@ void insertSorted<T>(List<T> list, T element, int Function(T a, T b) compare) {
 }
 
 
+
 //------------------------- Time Formatting -------------------------
+
+
+/// normalizes DateTime to date without time
+DateTime normalizeDate(DateTime dateTime) {
+  return DateTime(dateTime.year, dateTime.month, dateTime.day);
+}
 
 /// fotmatted as 'Mo, 01.01.2021 08:00 Uhr'
 String formatDateTime(DateTime dateTime) {
