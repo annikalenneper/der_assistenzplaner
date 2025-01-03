@@ -31,6 +31,7 @@ class SettingsModel extends ChangeNotifier {
   static const String keyShiftSettings = 'shiftFrequency';
 
 
+
   //----------------- Formatted Values -----------------
 
 
