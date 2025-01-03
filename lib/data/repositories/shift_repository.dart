@@ -13,7 +13,7 @@ class ShiftRepository {
     try {
       final shiftBox = await Hive.openBox<Shift>('shifts');
       log('shiftRepository: fetched all shifts');
-      return Set.unmodifiable(shiftBox.values); // return unmodifiable set
+      return shiftBox.values.toSet(); // return unmodifiable set
     } catch (e, stackTrace) {
       log('shiftRepository: Failed to fetch all shifts: $e', stackTrace: stackTrace);
       return <Shift>{}; // return empty set on failure
