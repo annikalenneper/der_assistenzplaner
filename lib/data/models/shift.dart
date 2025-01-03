@@ -23,7 +23,16 @@ part 'shift.g.dart';
     @HiveField(3)
     String? _assistantID;
 
-    Shift(this._start, this._end, this._assistantID); 
+    static bool isValidShift(DateTime start, DateTime end) {
+    return start.isBefore(end);
+  }
+
+    Shift(this._start, this._end, this._assistantID){
+      if (!isValidShift(_start, _end)) {
+        throw ArgumentError('Invalid Shift: start must be before end.');
+      }
+    }
+
 
     @override
     String toString() {
@@ -58,6 +67,7 @@ part 'shift.g.dart';
         ? _end = end
         : throw ArgumentError('Endzeitpunkt muss nach Startzeitpunkt liegen.');
 
+    
   }
 
 
