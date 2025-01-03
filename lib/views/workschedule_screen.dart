@@ -1,3 +1,4 @@
+import 'package:der_assistenzplaner/data/models/shift.dart';
 import 'package:der_assistenzplaner/styles.dart';
 import 'package:der_assistenzplaner/utils/cache.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
@@ -21,14 +22,12 @@ class CalendarView extends StatefulWidget {
 }
 
 class CalendarViewState extends State<CalendarView> {
-  DateTime? _selectedDay = DateTime.now();
+  DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
   static final _defaultFirstDay = DateTime(DateTime.now().year, DateTime.now().month, 1);
   static final _defaultLastDay = lastDayOfMonth(DateTime.now());
-
-  var _selectedShiftDisplayOption = ShiftDisplayOptions.all;
 
   MarkerCache markerCache = MarkerCache();
 
@@ -83,8 +82,7 @@ class CalendarViewState extends State<CalendarView> {
             });
           },
 
-          eventLoader: (day) => shiftModel.getShiftsForDisplay(
-                                  context, _selectedShiftDisplayOption).toList(),
+          eventLoader: (day) => shiftModel.shiftsByDay[(day)] ?? [],
 
           onFormatChanged: (format) {
             if (_calendarFormat != format) {
@@ -98,49 +96,58 @@ class CalendarViewState extends State<CalendarView> {
           /// headline
           final headingForSelectedDay = Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Text(formatDateTime(_selectedDay!), style: const TextStyle(fontSize: 20)),
+            child: Text(formatDateTime(_selectedDay), style: const TextStyle(fontSize: 20)),
           );
                 
 
           /// shows scheduled shifts for selected day
-          final scrollableListOfShifts = SingleChildScrollView(
-            child: Column(
-              children: [
-                ListView.builder(
-                  itemCount: shiftModel.shifts.length,
-                  shrinkWrap: true,            
-                  physics: const NeverScrollableScrollPhysics(), 
-                  itemBuilder: (context, index) {
-                    final shift = shiftModel.shifts.elementAt(index);
-                    return ShiftCard(shift: shift, assistantID: shift.assistantID ?? '',);
-                  },            
-                ),
+          /// shows scheduled shifts for selected day and selected display option
+        
+        final shiftsForSelectedDay = shiftModel.shiftsByDay[(_selectedDay)] ?? [];
 
-                /// + Button 
-                Padding(
-                  padding: const EdgeInsets.all(40.0),
-                  child: IconButton(   
-                    icon: const Icon(Icons.add), 
-                    alignment: Alignment.center, 
-                    padding: const EdgeInsets.all(12),
-                    onPressed: () { 
-                      showDialog(
-                        context: context, 
-                        builder: (context) {
-                          return PopUpBox(
-                            view:  DynamicStepper(
-                              steps: addShiftStepData(_selectedDay!),
-                              onComplete: (inputs) => saveStepperInput(context, inputs, Type.shift),
-                            ),
-                          );
-                        }, 
-                      );
-                    },
-                  ),
+        final scrollableListOfShifts = SingleChildScrollView(
+          child: Column(
+            children: [
+              ListView.builder(
+                itemCount: shiftsForSelectedDay.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  final shift = shiftsForSelectedDay[index];
+                    return ShiftCard(
+                      shift: shift,
+                      assistantID: shift.assistantID ?? '',
+                    );
+                },
+              ),
+
+              /// + Button
+              Padding(
+                padding: const EdgeInsets.all(40.0),
+                child: IconButton(
+                  icon: const Icon(Icons.add),
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(12),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return PopUpBox(
+                          view: DynamicStepper(
+                            steps: addShiftStepData(_selectedDay),
+                            onComplete: (inputs) =>
+                                saveStepperInput(context, inputs, Type.shift),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
-              ],
-            ),
-          );
+              ),
+            ],
+          ),
+        );
+
 
           final scheduledShiftsView = Column(
             children: [
