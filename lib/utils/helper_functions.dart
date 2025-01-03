@@ -63,9 +63,6 @@ void saveStepperInput(context, Map<String, dynamic> inputs, Type type) {
 
 
 
-
-
-
 /// inserts generic elements sorted into a list
 void insertSorted<T>(List<T> list, T element, int Function(T a, T b) compare) {
   /// find index where to insert element
