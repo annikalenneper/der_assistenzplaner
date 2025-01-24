@@ -79,26 +79,18 @@ List<StepData> addShiftStepData(selectedDay){
   final startInput = StepData(
   title: 'Wann soll die Schicht beginnen?',
   contentBuilder: (inputs) {
-    return DropDownTimePicker(
-      date: selectedDay, 
-      onTimeSelected: (selectedTime) {
-        inputs['start'] = selectedTime;
-        log('Selected start time: ${inputs.toString()}');
-        }
+      return TimePickerDialog(
+      initialTime: TimeOfDay.now()
       );
-    },
+    }
   );
 
 
   final endInput = StepData(
     title: 'Wann soll die Schicht enden?',
     contentBuilder: (inputs) {
-    return DropDownTimePicker(
-      date: DateTime.now(), 
-      onTimeSelected: (selectedTime) {
-        inputs['end'] = selectedTime;
-        log('Selected end time: ${inputs.toString()}');
-        }
+    return TimePickerDialog(
+        initialTime: TimeOfDay.now(),
       );
     },
   );
