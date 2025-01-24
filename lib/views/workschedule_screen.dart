@@ -201,6 +201,7 @@ class CalendarViewState extends State<CalendarView> {
                             return AssistantMarker(
                               assistantID: assistant.assistantID,
                               size: 40, 
+                              onTap: (){},
                             );
                           }).toList(),
                         ),
