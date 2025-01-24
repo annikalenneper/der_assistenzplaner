@@ -15,8 +15,6 @@ class ShiftModel extends ChangeNotifier {
   late Map<String, Set<Shift>> _mapOfShiftsByAssistant; 
   late Map<DateTime, List<Shift>> _mapOfShiftsByDay;
 
-
-
   ShiftDisplayOptions _selectedShiftDisplayOption = ShiftDisplayOptions.scheduled;
   String? _selectedAssistantID;
   final MarkerCache markerCache = MarkerCache();
@@ -99,6 +97,7 @@ class ShiftModel extends ChangeNotifier {
   }
 
   
+  
 
   //------------------ Filter Methods ------------------
 
@@ -147,7 +146,7 @@ class ShiftModel extends ChangeNotifier {
   
 
 
-  //----------------- Data Manipulation Methods -----------------
+  //----------------- Data Methods -----------------
   
   /// save new shift or update existing in shiftbox through shiftRepository
   Future<void> saveShift(Shift newShift) async {
