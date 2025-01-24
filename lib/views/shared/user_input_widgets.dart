@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 
 
 class SelectableWrapper<T> extends StatelessWidget {
-  final T entity; // Generische Entity (z. B. ein Assistant, Shift, Team)
-  final Widget child; // Das darzustellende Widget
-  final void Function(T)? onSelect; // Callback-Funktion für die Auswahl
+  final T entity; // generic entity
+  final Widget child; // widget
+  final void Function(T)? onSelect; // callback function
 
   const SelectableWrapper({
     super.key,
@@ -29,7 +29,7 @@ class SelectableWrapper<T> extends StatelessWidget {
 
 class DynamicStepper extends StatefulWidget {
   final List<StepData> steps;
-  /// callback function to handle user inputs and safe them to the database
+  /// callback function to handle user inputs and safe them to database
   final void Function(Map<String, dynamic> inputs) onComplete;
 
   const DynamicStepper({super.key, required this.steps, required this.onComplete});
@@ -41,6 +41,13 @@ class DynamicStepper extends StatefulWidget {
 class DynamicStepperState extends State<DynamicStepper> {
   int _currentStep = 0;
   final Map<String, dynamic> _inputs = {};
+  late final List<GlobalKey<FormState>> _formKeys;
+
+  @override
+  void initState() {
+    super.initState();
+    _formKeys = List.generate(widget.steps.length, (_)=> GlobalKey<FormState>());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,12 +69,18 @@ class DynamicStepperState extends State<DynamicStepper> {
             setState(() => _currentStep--);
           }
         },
-        /// returns map of user inputs
-        steps: widget.steps.map((stepData) {
+        steps: widget.steps.asMap().entries.map((entry) {
+          int index = entry.key;
+          StepData stepData = entry.value;
           return Step(
             title: Text(stepData.title),
-            content: stepData.contentBuilder(_inputs),
-            isActive: widget.steps.indexOf(stepData) == _currentStep,
+            content: Form(
+              key: _formKeys[index],
+              child: stepData.contentBuilder((key, value) {
+                _inputs[key] = value;
+              }),
+            ),
+            isActive: index == _currentStep,
           );
         }).toList(),
       ),
@@ -94,99 +107,166 @@ Future<void> pickTime({
 }
 
 
-//---------------- Custom Time Picker Hours and Minutes ----------------
+// combines two dropdown windows for minutes and hours selection
+class CustomTimePicker extends StatefulWidget {
+  final ValueChanged<TimeOfDay>? onTimeChanged;
+  final TimeOfDay? initialTime;
 
-class DropDownTimePicker extends StatefulWidget {
-  /// date for time picker, pass from calender
-  final DateTime date; 
-  /// callback function to handle user inputs 
-  final ValueChanged<DateTime> onTimeSelected; 
-
-  const DropDownTimePicker({super.key, required this.date, required this.onTimeSelected,});
+  const CustomTimePicker({
+    super.key,
+    this.onTimeChanged,
+    this.initialTime,
+  });
 
   @override
-  State<DropDownTimePicker> createState() => DropDownTimePickerState();
+  State<CustomTimePicker> createState() => _CustomTimePickerState();
 }
 
-class DropDownTimePickerState extends State<DropDownTimePicker> {
-  late int selectedHour = widget.date.hour;
-  late int selectedMinute = widget.date.minute;
+class _CustomTimePickerState extends State<CustomTimePicker> {
+  late int _selectedHour;
+  late int _selectedMinute;
 
   @override
   void initState() {
     super.initState();
-    _updateTime(hour: selectedHour, minute: selectedMinute);
+    // set initial values
+    _selectedHour = widget.initialTime?.hour ?? 0;
+    _selectedMinute = widget.initialTime?.minute ?? 0;
+  }
+
+  // generate hours options
+  List<DropdownMenuItem<int>> get _hourItems {
+    return List.generate(24, (index) {
+      return DropdownMenuItem(
+        value: index,
+        child: Text(index.toString().padLeft(2, '0')),
+      );
+    });
+  }
+
+  // generate minute options
+  List<DropdownMenuItem<int>> get _minuteItems {
+    return List.generate(60, (index) {
+      return DropdownMenuItem(
+        value: index,
+        child: Text(index.toString().padLeft(2, '0')),
+      );
+    });
+  }
+
+  // keep values in sync with selection
+  void _onHourChanged(int? newHour) {
+    if (newHour != null) {
+      setState(() {
+        _selectedHour = newHour;
+      });
+      _notifyTimeChanged();
+    }
+  }
+
+  void _onMinuteChanged(int? newMinute) {
+    if (newMinute != null) {
+      setState(() {
+        _selectedMinute = newMinute;
+      });
+      _notifyTimeChanged();
+    }
+  }
+
+  void _notifyTimeChanged() {
+    if (widget.onTimeChanged != null) {
+      widget.onTimeChanged!(TimeOfDay(hour: _selectedHour, minute: _selectedMinute));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            /// hours dropdown
-            Expanded(
-              child: DropdownButton<int>(
-                value: selectedHour,
-                hint: const Text('Stunde'),
-                items: List.generate(24, (index) {
-                  return DropdownMenuItem<int>(
-                    value: index,
-                    child: Text(index.toString().padLeft(2, '0')),
-                  );
-                }),
-                /// update time when user selects new hour
-                onChanged: (value) {
-                  if (value != null) {
-                    _updateTime(hour: value);
-                  }
-                },
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // hours dropdown
+          IntrinsicWidth(
+            child: DropdownButtonFormField<int>(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
               ),
+              value: _selectedHour,
+              items: _hourItems,
+              onChanged: _onHourChanged,
             ),
-            const SizedBox(width: 16), 
-            /// minutes dropdown
-            Expanded(
-              child: DropdownButton<int>(
-                value: selectedMinute,
-                hint: const Text('Minute'),
-                items: List.generate(60, (index) {
-                  return DropdownMenuItem<int>(
-                    value: index,
-                    child: Text(index.toString().padLeft(2, '0')),
-                  );
-                }),
-                onChanged: (value) {
-                  if (value != null) {
-                    _updateTime(minute: value);
-                  }
-                },
+          ),
+          SizedBox(width: 12),
+          Text(':'),
+          SizedBox(width: 12,),
+          // minutes dropdown
+          IntrinsicWidth(
+            child: DropdownButtonFormField<int>(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
               ),
+              value: _selectedMinute,
+              items: _minuteItems,
+              onChanged: _onMinuteChanged,
             ),
-          ],
-        ),
-      ],
+          ),
+          SizedBox(width: 12,),
+          Text('Uhr'),
+        ],
+      ),
     );
   }
+}
 
-  void _updateTime({int? hour, int? minute}) {
-    setState(() {
-      /// set values on changed
-      if (hour != null) selectedHour = hour;
-      if (minute != null) selectedMinute = minute;
 
-      /// create new DateTime object with updated values 
-      final updatedDateTime = DateTime(
-        widget.date.year,
-        widget.date.month,
-        widget.date.day,
-        selectedHour,
-        selectedMinute,
-      );
 
-      /// update inputs map and call callback
-      widget.onTimeSelected(updatedDateTime);
-    });
+//------------------------- Dropdown menus -------------------------
+
+/// generic dropdown widget 
+class DropDownOptionPicker<T> extends StatefulWidget {
+  final List<T> options; 
+  final ValueChanged<T> onOptionSelected; 
+  final T? initialValue; 
+
+  const DropDownOptionPicker({super.key, required this.options, required this.onOptionSelected, this.initialValue});
+
+  @override
+  State<DropDownOptionPicker<T>> createState() => _DropDownOptionPickerState<T>();
+}
+
+class _DropDownOptionPickerState<T> extends State<DropDownOptionPicker<T>> {
+  late T selectedOption;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedOption = widget.initialValue ?? widget.options.first; 
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButton<T>(
+      value: selectedOption,
+      isExpanded: true,
+      items: widget.options.map((option) {
+        return DropdownMenuItem<T>(
+          value: option,
+          /// use enum name if option is enum, else use toString
+          child: Text(
+            option is Enum ? option.name : option.toString(), 
+          ),
+        );
+      }).toList(),
+      onChanged: (value) {
+        if (value != null) {
+          setState(() {
+            selectedOption = value;
+          });
+          widget.onOptionSelected(value);
+        }
+      },
+    );
   }
 }
 
@@ -242,51 +322,4 @@ class DropDownColorPickerState extends State<DropDownColorPicker> {
   }
 }
 
-
-/// generic dropdown widget 
-class DropDownOptionPicker<T> extends StatefulWidget {
-  final List<T> options; 
-  final ValueChanged<T> onOptionSelected; 
-  final T? initialValue; 
-
-  const DropDownOptionPicker({super.key, required this.options, required this.onOptionSelected, this.initialValue});
-
-  @override
-  State<DropDownOptionPicker<T>> createState() => _DropDownOptionPickerState<T>();
-}
-
-class _DropDownOptionPickerState<T> extends State<DropDownOptionPicker<T>> {
-  late T selectedOption;
-
-  @override
-  void initState() {
-    super.initState();
-    selectedOption = widget.initialValue ?? widget.options.first; 
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButton<T>(
-      value: selectedOption,
-      isExpanded: true,
-      items: widget.options.map((option) {
-        return DropdownMenuItem<T>(
-          value: option,
-          /// use enum name if option is enum, else use toString
-          child: Text(
-            option is Enum ? option.name : option.toString(), 
-          ),
-        );
-      }).toList(),
-      onChanged: (value) {
-        if (value != null) {
-          setState(() {
-            selectedOption = value;
-          });
-          widget.onOptionSelected(value);
-        }
-      },
-    );
-  }
-}
 
