@@ -62,7 +62,6 @@ void saveStepperInput(context, Map<String, dynamic> inputs, Type type) {
 }
 
 
-
 /// inserts generic elements sorted into a list
 void insertSorted<T>(List<T> list, T element, int Function(T a, T b) compare) {
   /// find index where to insert element
@@ -94,6 +93,7 @@ String formatDateTime(DateTime dateTime) {
   return '$weekday, $day.$month.$year';
 }
 
+/// formatted as '08:00'
 String formatTimeOfDay(TimeOfDay time) {
   final hour = time.hour.toString().padLeft(2, '0');
   final minute = time.minute.toString().padLeft(2, '0');
