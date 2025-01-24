@@ -64,7 +64,7 @@ class ShiftCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        AssistantMarker(size: 40, assistantID: assistantID),
+        AssistantMarker(size: 40, assistantID: assistantID, onTap: (){},),
         const SizedBox(width: 8),
         Text(assistant?.name ?? 'Unbesetzt'),
       ]);
@@ -157,7 +157,7 @@ class AssistantCard extends StatelessWidget {
         margin: EdgeInsets.all(8.0),
         child: Column(
           children: [
-            AssistantMarker(size: 50, assistantID: assistantID),
+            AssistantMarker(size: 50, assistantID: assistantID, onTap: (){},),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               child: Column(
@@ -218,8 +218,14 @@ class AssistantCard extends StatelessWidget {
 class AssistantMarker extends StatelessWidget {
   final String assistantID;
   final double size;
+  final VoidCallback onTap; // Callback für Tap-Events
 
-  const AssistantMarker({super.key, required this.size, required this.assistantID});
+  const AssistantMarker({
+    super.key,
+    required this.size,
+    required this.assistantID,
+    required this.onTap, // Erforderlich machen
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -227,22 +233,31 @@ class AssistantMarker extends StatelessWidget {
     final assistant = assistantModel.assistantMap[assistantID];
     final name = assistant?.name ?? 'Unbekannt';
     final color = assistantModel.assistantColorMap[assistantID] ?? Colors.grey;
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
-      child: Center(
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            name[0].toUpperCase(),
-            style: TextStyle(
-              fontSize: size * 0.6,
-              color: Colors.white,
-              height: 1,
+
+    return Material(
+      color: Colors.transparent, // Hintergrund transparent machen
+      shape: const CircleBorder(), // Runde Form definieren
+      child: InkWell(
+        onTap: onTap, // Tap-Callback zuweisen
+        customBorder: const CircleBorder(), // Runde Tap-Grenze
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color,
+          ),
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                name[0].toUpperCase(),
+                style: TextStyle(
+                  fontSize: size * 0.6,
+                  color: Colors.white,
+                  height: 1,
+                ),
+              ),
             ),
           ),
         ),
@@ -272,8 +287,8 @@ class _TagWidgetViewState extends State<TagWidget> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Focus(
-          child: GestureDetector(
-            /// two states: focused and not focused 
+          child: InkWell(
+            /// switch between the states
             onTap: () {
               setState(() {
                 isFocused = !isFocused;   
