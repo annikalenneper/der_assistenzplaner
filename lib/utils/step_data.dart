@@ -8,9 +8,14 @@ import 'package:flutter/material.dart';
 class StepData {
   final String title;
   final String information;
+  final String inputKey;
   final Widget Function(Map<String, dynamic> inputs) contentBuilder;
 
-  StepData({required this.title, this.information = '', required this.contentBuilder});
+  StepData({
+    required this.title, 
+    this.information = '', 
+    required this.inputKey,
+    required this.contentBuilder});
 }
 
 /// returns a list of step data for adding a new assistant
@@ -19,16 +24,22 @@ List<StepData> addAssistantStepData(){
 
   final nameInput = StepData(
     title: 'Wie soll deine neue Assistenzkraft heißen?', 
-    contentBuilder: (inputs) {
-      return TextField(
+    inputKey: 'name',
+    contentBuilder: (saveInput) {
+      return TextFormField(
         decoration: InputDecoration(
           border: OutlineInputBorder(),
           labelText: 'Name der Assistenzkraft',
         ),
         keyboardType: TextInputType.text,
-        onChanged: (value) {
-          inputs['name'] = value;
-          log(inputs.toString());
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Bitte geben Sie einen Namen ein';
+          }
+          return null;
+        },
+        onSaved: (value) {
+          saveInput('name', value);
         },
       );
     },
@@ -36,16 +47,25 @@ List<StepData> addAssistantStepData(){
 
   final hoursInput = StepData(
     title: 'Wie viele Stunden soll deine Assistenzkraft pro Monat arbeiten?', 
-    contentBuilder: (inputs) {
-      return TextField(
+    inputKey: 'contractedHours',
+    contentBuilder: (saveInput) {
+      return TextFormField(
         decoration: InputDecoration(
           border: OutlineInputBorder(),
           labelText: 'Vertraglich vereinbarte Stunden',
         ),
         keyboardType: TextInputType.number,
-        onChanged: (value) {
-          inputs['contractedHours'] = double.parse(value);
-          log(inputs.toString());
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Bitte geben Sie die Stunden ein';
+          }
+          if (double.tryParse(value) == null) {
+            return 'Bitte geben Sie eine gültige Zahl ein';
+          }
+          return null;
+        },
+        onSaved: (value) {
+          saveInput('contractedHours', double.parse(value!));
         },
       );
     }
@@ -53,14 +73,37 @@ List<StepData> addAssistantStepData(){
 
   final assignColor = StepData(
     title: 'Welche Farbe möchtest du deiner Assistenzkraft zuordnen?',
-    contentBuilder: (inputs) {
-      // Set a default color (safe only color from map)
-      inputs['color'] = ModernBusinessTheme.assistantColors[0]['color']; 
+    inputKey: 'color',
+    contentBuilder: (saveInput) {
+      String selectedColor = ModernBusinessTheme.assistantColors[0]['color']; 
 
-      return DropDownColorPicker(
-        onColorSelected: (color) {
-          inputs['color'] = color; 
-          log('Selected color: $color');
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Column(
+            children: [
+              DropDownColorPicker(
+                onColorSelected: (color) {
+                  setState(() {
+                    selectedColor = color;
+                  });
+                },
+              ),
+              // Verstecktes FormField zum Speichern der ausgewählten Farbe
+              FormField<String>(
+                initialValue: selectedColor,
+                builder: (FormFieldState<String> state) {
+                  return Container(
+                    height: 0,
+                    width: 0,
+                    child: null,
+                  );
+                },
+                onSaved: (value) {
+                  saveInput('color', selectedColor);
+                },
+              ),
+            ],
+          );
         },
       );
     },
@@ -72,25 +115,37 @@ List<StepData> addAssistantStepData(){
   return stepData;
 }
 
+
 /// returns a list of step data for adding a new shift
 List<StepData> addShiftStepData(selectedDay){
   final List<StepData> stepData = [];
 
   final startInput = StepData(
-  title: 'Wann soll die Schicht beginnen?',
-  contentBuilder: (inputs) {
-      return TimePickerDialog(
-      initialTime: TimeOfDay.now()
+    title: 'Wann soll die Schicht beginnen?',
+    contentBuilder: (inputs) {
+      return CustomTimePicker(
+        initialTime: TimeOfDay.now(),
+        onTimeChanged: (selectedTime) {
+          var shiftStart = DateTime(
+            selectedDay.year, 
+            selectedDay.month, 
+            selectedDay.day, 
+            selectedTime.hour, 
+            selectedTime.minute);
+          inputs['start'] = shiftStart;
+        }  
       );
-    }
+    },
   );
-
 
   final endInput = StepData(
     title: 'Wann soll die Schicht enden?',
     contentBuilder: (inputs) {
-    return TimePickerDialog(
+      return CustomTimePicker(
         initialTime: TimeOfDay.now(),
+        onTimeChanged: (selectedTime) {
+          inputs['end'] = DateTime(selectedDay, selectedTime.hour, selectedTime.minute);
+        } 
       );
     },
   );
