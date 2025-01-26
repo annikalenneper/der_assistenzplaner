@@ -34,6 +34,10 @@ DateTime lastDayOfMonth(DateTime dateTime) {
   return firstDayNextMonth.subtract(Duration(days: 1));
 } 
 
+DateTime firstDayOfMonth(DateTime dateTime) {
+  return DateTime(dateTime.year, dateTime.month, 1);
+}
+
 
 //------------------------- Shared Methods -------------------------
 
@@ -91,6 +95,14 @@ String formatDateTime(DateTime dateTime) {
   final month = dateTime.month.toString().padLeft(2, '0');
   final year = dateTime.year;
   return '$weekday, $day.$month.$year';
+}
+
+/// formatted as '01.01.2021'
+String formatDate(DateTime dateTime) {
+  final day = dateTime.day.toString().padLeft(2, '0');
+  final month = dateTime.month.toString().padLeft(2, '0');
+  final year = dateTime.year;
+  return '$day.$month.$year';
 }
 
 /// formatted as '08:00'
@@ -152,4 +164,17 @@ bool isAfter(TimeOfDay first, TimeOfDay second) {
     return true;
   }
   return false;
+}
+
+//------------------------- Validators -------------------------
+
+String? validateTime(String? value) {
+  final RegExp timeRegExp = RegExp(r'^([01]\d|2[0-3]):([0-5]\d)$');
+  if (value == null || value.isEmpty) {
+    return 'Bitte gib eine Uhrzeit ein';
+  }
+  if (!timeRegExp.hasMatch(value)) {
+    return 'Bitte gib eine gültige Uhrzeit im Format HH:MM ein';
+  }
+  return null;
 }
