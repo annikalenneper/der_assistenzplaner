@@ -45,8 +45,8 @@ part 'shift.g.dart';
     DateTime get start => _start;
     DateTime get end => _end;
     Duration get duration => _end.difference(_start);
-    String? get assistantID => _assistantID ?? null ;
-    bool get isScheduled => _assistantID != '';
+    String? get assistantID => _assistantID;
+    bool get isScheduled => _assistantID != null;
     List<Tag> get tags => [];
 
     String get formattedDuration {
