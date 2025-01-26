@@ -1,13 +1,11 @@
-import 'package:der_assistenzplaner/data/models/shift.dart';
 import 'package:der_assistenzplaner/styles.dart';
 import 'package:der_assistenzplaner/utils/cache.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
-import 'package:der_assistenzplaner/utils/step_data.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/availabilities_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/views/shared/cards_and_markers.dart';
-import 'package:der_assistenzplaner/views/shared/user_input_widgets.dart';
+import 'package:der_assistenzplaner/views/shared/input_forms.dart';
 import 'package:der_assistenzplaner/views/shared/view_containers.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -130,18 +128,24 @@ class CalendarViewState extends State<CalendarView> {
                   padding: const EdgeInsets.all(12),
                   onPressed: () {
                     showDialog(
-                      context: context,
-                      builder: (context) {
-                        return PopUpBox(
-                          view: DynamicStepper(
-                            steps: addShiftStepData(_selectedDay),
-                            onComplete: (inputs) =>
-                                saveStepperInput(context, inputs, Type.shift),
+                      context: context, 
+                      builder:
+                       (context) {
+                        return AlertDialog(
+                          content: Padding(
+                            padding: const EdgeInsets.all(40.0),
+                            child: ShiftForm(
+                              selectedDay: _selectedDay,
+                              onSave: (start, end, assistantID) {
+                                final newShift = shiftModel.createShift(start, end, assistantID);
+                                shiftModel.saveShift(newShift);
+                              },
+                            ),
                           ),
                         );
                       },
                     );
-                  },
+                  }
                 ),
               ),
             ],
