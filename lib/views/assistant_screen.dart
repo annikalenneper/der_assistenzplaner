@@ -1,7 +1,4 @@
-import 'package:der_assistenzplaner/utils/helper_functions.dart';
-import 'package:der_assistenzplaner/utils/step_data.dart';
 import 'package:der_assistenzplaner/views/settings_screen.dart';
-import 'package:der_assistenzplaner/views/shared/user_input_widgets.dart';
 import 'package:der_assistenzplaner/views/shared/view_containers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -114,12 +111,10 @@ class _AssistantListViewState extends State<AssistantListView> {
                       showDialog(
                       context: context, 
                       builder: (context) {
-                        return PopUpBox(
-                          view:  DynamicStepper(
-                            steps: addAssistantStepData(),
-                            onComplete: (inputs) => saveStepperInput(context, inputs, Type.assistant),
-                            ),
-                          );
+                        return AlertDialog(
+                          title: Text('Neue Assistenzkraft hinzufügen'),
+                          content: Text('kommt bald'),
+                        );
                         }, 
                       );
                     },
