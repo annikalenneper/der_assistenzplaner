@@ -1,4 +1,5 @@
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
+import 'package:der_assistenzplaner/views/shared/user_input_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -88,7 +89,7 @@ class ShiftFormState extends State<ShiftForm> {
             validator: (value) => validateDate(value),
           ),
           TextFormField(
-            controller: _endDateController,
+            controller: _endTimeController,
             decoration: const InputDecoration(
               hintText: '00:00',
             ),
@@ -99,7 +100,7 @@ class ShiftFormState extends State<ShiftForm> {
                 initialTime: TimeOfDay.now(),
               );
               if (picked != null) {
-                _endDateController.text = formatTimeOfDay(picked);
+                _endTimeController.text = formatTimeOfDay(picked);
               }
             },
             validator: (value) => validateTime(value),
@@ -135,7 +136,7 @@ class ShiftFormState extends State<ShiftForm> {
 
 
 class AssistantForm extends StatefulWidget {
-  final Function(String name, double hours) onSave;
+  final Function(String name, double hours, Color color) onSave;
   
   const AssistantForm({super.key, required this.onSave});
 
@@ -147,6 +148,8 @@ class AssistantFormState extends State<AssistantForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _hourController = TextEditingController();
+  Color selectedColor = Colors.blue;
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -174,28 +177,24 @@ class AssistantFormState extends State<AssistantForm> {
             decoration: const InputDecoration(
               hintText: 'Stundenanzahl',
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Bitte geben Sie eine Stundenanzahl ein';
-              }
-              else if (double.parse(value) < 0 || double.parse(value) > 192) {
-                return 'Bitte geben Sie eine gültige Zahl an Arbeitsstunden pro Monat ein';
-              } 
-              return null;
+            validator: (value) => validateHours(value),
+          ),
+          Text('Ordne der neuen Assistenz eine Farbe zu'),
+          DropDownColorPicker(
+            onColorSelected: (color) {
+              selectedColor = color;
             },
           ),
           Spacer(),
           ElevatedButton(
             onPressed: () {
               if (_formKey.currentState!.validate()) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Assistent wird angelegt')),
-                );
-                _formKey.currentState!.save();
                 widget.onSave(
                   _nameController.text,
                   double.parse(_hourController.text), 
+                  selectedColor,
                 );
+                Navigator.pop(context);
               }
             },
             child: const Text('Assistent erstellen'),
@@ -228,6 +227,23 @@ String? validateDate(String? value) {
   }
   if (!dateRegExp.hasMatch(value)) {
     return 'Bitte gib ein gültiges Datum im Format TT.MM.JJJJ ein';
+  }
+  return null;
+}
+
+String? validateHours (value) {
+  if (value == null || value.isEmpty) {
+    return 'Bitte geben Sie eine Stundenanzahl ein';
+  }
+  else if (double.parse(value) < 0 || double.parse(value) > 192) {
+    return 'Bitte geben Sie eine gültige Zahl an Arbeitsstunden pro Monat ein';
+  } 
+  return null;
+}
+
+String? startBeforeEnd(DateTime start, DateTime end) {
+  if (start.isAfter(end)) {
+    return 'Startzeit muss vor Endzeit liegen';
   }
   return null;
 }
