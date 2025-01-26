@@ -13,7 +13,10 @@ class ShiftCard extends StatelessWidget {
   final Shift shift;
   final String assistantID;
 
-  const ShiftCard({super.key, required this.shift, required this.assistantID,});
+  const ShiftCard({
+    super.key, 
+    required this.shift, 
+    required this.assistantID,});
 
   @override
   Widget build(BuildContext context) {
@@ -75,17 +78,25 @@ class ShiftCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         TextButton(
-          onPressed: () {},
+          onPressed: () {}, 
+          /// highlight all days/shifts where 
+          /// assistant assigned to this shift is available
+          /// AND assistant assigned to the other shift is available for this shift
+
+          /// if user selects a day that is not highlighted:
+          /// open alertDialog. If user confirms: 
+          /// assistants need to confirm the swap first (send notification)
           child: Column(
             children: [
               Icon(Icons.change_circle),
-              Text('Tauschen', textAlign: TextAlign.center), 
+              Text('Tauschen', textAlign: TextAlign.center),
             ],
           ),
         ),
                       
         TextButton(
           onPressed: () {},
+          /// open dialog to split the shift
           child: Column(
             children: [
               Icon(Icons.call_split),
@@ -224,7 +235,7 @@ class AssistantMarker extends StatelessWidget {
     super.key,
     required this.size,
     required this.assistantID,
-    required this.onTap, // Erforderlich machen
+    required this.onTap, 
   });
 
   @override
@@ -234,28 +245,32 @@ class AssistantMarker extends StatelessWidget {
     final name = assistant?.name ?? 'Unbekannt';
     final color = assistantModel.assistantColorMap[assistantID] ?? Colors.grey;
 
-    return Material(
-      color: Colors.transparent, // Hintergrund transparent machen
-      shape: const CircleBorder(), // Runde Form definieren
-      child: InkWell(
-        onTap: onTap, // Tap-Callback zuweisen
-        customBorder: const CircleBorder(), // Runde Tap-Grenze
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color,
-          ),
-          child: Center(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                name[0].toUpperCase(),
-                style: TextStyle(
-                  fontSize: size * 0.6,
-                  color: Colors.white,
-                  height: 1,
+    /// wrapped with Material Widget to enable InkWell without overflow
+    return Padding(
+      padding: const EdgeInsets.all(9.0),
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        child: InkWell(
+          onTap: onTap, // tap-callback
+          customBorder: const CircleBorder(), 
+          child: Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+            ),
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  name[0].toUpperCase(),
+                  style: TextStyle(
+                    fontSize: size * 0.6,
+                    color: Colors.white,
+                    height: 1,
+                  ),
                 ),
               ),
             ),
