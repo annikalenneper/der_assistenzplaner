@@ -79,6 +79,9 @@ class AssistantModel extends ChangeNotifier {
 
   //----------------- Data Manipulation Methods -----------------
 
+  Assistant createAssistant(String name, double contractedHours) {
+    return Assistant(name, contractedHours);
+  }
 
   Future<void> saveAssistant(Assistant assistant) async {
     await assistantRepository.saveAssistant(assistant);
