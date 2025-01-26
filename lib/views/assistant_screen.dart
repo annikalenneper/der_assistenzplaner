@@ -113,9 +113,10 @@ class _AssistantListViewState extends State<AssistantListView> {
                           return AlertDialog(
                             title: Text('Neue Assistenzkraft hinzufügen'),
                             content: AssistantForm(
-                              onSave: (name, hours) {
+                              onSave: (name, hours, color) {
                                 final newAssistant = assistantModel.createAssistant(name, hours);
                                 assistantModel.saveAssistant(newAssistant);
+                                assistantModel.assignColor(newAssistant.assistantID, color);
                               },
                             ),
                           );
@@ -209,12 +210,7 @@ class AssistantDetailView extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          PopUpBox(view: TagGridView()),
-                          ElevatedButton(
-                            onPressed: () {
-                             /// TO-DO assignTag()
-                            }, 
-                            child: Text('Ausgewählte Tags zuordnen'))
+                          
                         ],
                       ),            
                     ),
