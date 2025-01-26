@@ -1,11 +1,6 @@
-import 'dart:developer';
 
-import 'package:der_assistenzplaner/data/models/assistant.dart';
 import 'package:der_assistenzplaner/data/models/shift.dart';
-import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
-import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 
 //------------------------- Shared Calculations -------------------------
@@ -40,30 +35,6 @@ DateTime firstDayOfMonth(DateTime dateTime) {
 
 
 //------------------------- Shared Methods -------------------------
-
-enum Type {assistant, shift}
-
-/// saves input from dynamic stepper according to type
-void saveStepperInput(context, Map<String, dynamic> inputs, Type type) {
-  if (type == Type.assistant) {
-    final assistantModel = Provider.of<AssistantModel>(context, listen: false);
-    final newAssistant = Assistant(inputs['name'],inputs['contractedHours']);
-    assistantModel.saveAssistant(newAssistant);
-    final color = inputs['color'];
-    assistantModel.assignColor(newAssistant.assistantID, color);
-    log('Assistant saved to database: $newAssistant, color: $color');
-  } else if (type == Type.shift) {
-    final shiftModel = Provider.of<ShiftModel>(context, listen: false);
-      try {
-        if (Shift.isValidShift(inputs['start'], inputs['end'])) {
-          final newShift = Shift(inputs['start'], inputs['end'], inputs['assistantID']);
-          shiftModel.saveShift(newShift);
-        } 
-      } catch (e) {
-        log('Failed to save shift: $e');
-      }
-  }
-}
 
 
 /// inserts generic elements sorted into a list
@@ -110,6 +81,18 @@ String formatTimeOfDay(TimeOfDay time) {
   final hour = time.hour.toString().padLeft(2, '0');
   final minute = time.minute.toString().padLeft(2, '0');
   return '$hour:$minute';
+}
+
+/// convert String to DateTime
+DateTime stringToDate(String date) {
+  final List<String> dateParts = date.split('.');
+  return DateTime(int.parse(dateParts[2]), int.parse(dateParts[1]), int.parse(dateParts[0]));
+}
+
+/// convert String to TimeOfDay
+TimeOfDay stringToTime(String time) {
+  final List<String> timeParts = time.split(':');
+  return TimeOfDay(hour: int.parse(timeParts[0]), minute: int.parse(timeParts[1]));
 }
 
 /// convert TimeOfDay to DateTime
@@ -166,15 +149,3 @@ bool isAfter(TimeOfDay first, TimeOfDay second) {
   return false;
 }
 
-//------------------------- Validators -------------------------
-
-String? validateTime(String? value) {
-  final RegExp timeRegExp = RegExp(r'^([01]\d|2[0-3]):([0-5]\d)$');
-  if (value == null || value.isEmpty) {
-    return 'Bitte gib eine Uhrzeit ein';
-  }
-  if (!timeRegExp.hasMatch(value)) {
-    return 'Bitte gib eine gültige Uhrzeit im Format HH:MM ein';
-  }
-  return null;
-}
