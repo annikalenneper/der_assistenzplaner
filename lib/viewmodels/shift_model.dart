@@ -145,8 +145,14 @@ class ShiftModel extends ChangeNotifier {
 
   
 
-
   //----------------- Data Methods -----------------
+
+
+  Shift createShift(DateTime start, DateTime end, String? assistantID) {
+    final newShift = Shift(start, end, assistantID);
+    return newShift;
+  }
+
   
   /// save new shift or update existing in shiftbox through shiftRepository
   Future<void> saveShift(Shift newShift) async {
