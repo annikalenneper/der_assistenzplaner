@@ -1,8 +1,7 @@
 
 
-import 'dart:developer';
+
 import 'package:der_assistenzplaner/styles.dart';
-import 'package:der_assistenzplaner/utils/step_data.dart';
 import 'package:flutter/material.dart';
 
 
@@ -27,66 +26,9 @@ class SelectableWrapper<T> extends StatelessWidget {
   }
 }
 
-class DynamicStepper extends StatefulWidget {
-  final List<StepData> steps;
-  /// callback function to handle user inputs and safe them to database
-  final void Function(Map<String, dynamic> inputs) onComplete;
 
-  const DynamicStepper({super.key, required this.steps, required this.onComplete});
 
-  @override
-  State<DynamicStepper> createState() => DynamicStepperState();
-}
 
-class DynamicStepperState extends State<DynamicStepper> {
-  int _currentStep = 0;
-  final Map<String, dynamic> _inputs = {};
-  late final List<GlobalKey<FormState>> _formKeys;
-
-  @override
-  void initState() {
-    super.initState();
-    _formKeys = List.generate(widget.steps.length, (_)=> GlobalKey<FormState>());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      child: Stepper(
-        currentStep: _currentStep,
-        onStepTapped: (step) => setState(() => _currentStep = step),
-        onStepContinue: () {
-          if (_currentStep < widget.steps.length - 1) {
-            setState(() => _currentStep++);
-          } else {
-            log("$_inputs");
-            widget.onComplete(_inputs);
-            Navigator.pop(context);
-          }
-        },
-        onStepCancel: () {
-          if (_currentStep > 0) {
-            setState(() => _currentStep--);
-          }
-        },
-        steps: widget.steps.asMap().entries.map((entry) {
-          int index = entry.key;
-          StepData stepData = entry.value;
-          return Step(
-            title: Text(stepData.title),
-            content: Form(
-              key: _formKeys[index],
-              child: stepData.contentBuilder((key, value) {
-                _inputs[key] = value;
-              }),
-            ),
-            isActive: index == _currentStep,
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
 
 //------------------------- Generic TimePicker -------------------------
 
