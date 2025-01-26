@@ -60,7 +60,7 @@ class ShiftModel extends ChangeNotifier {
 
   //----------------- UI methods -----------------
   
-  /// only one parameter required to update display option
+  /// update display option with either enum ShiftDisplayOptions or assistantID
   void updateDisplayOption(ShiftDisplayOptions? option, String? assistantID) {
     if (option != null) {
       _selectedShiftDisplayOption = option;
@@ -122,17 +122,12 @@ class ShiftModel extends ChangeNotifier {
     final Map<DateTime, List<Shift>> shiftsByDay = {};
 
     for (final shift in shifts) {
-      log('Processing shift: ${shift.shiftID}, Start: ${shift.start}, End: ${shift.end}');
-
       final normalizedStart = normalizeDate(shift.start);
       final normalizedEnd = normalizeDate(shift.end);
-
-      log('Normalized Start: $normalizedStart, Normalized End: $normalizedEnd');
-
       DateTime currentDay = normalizedStart;
 
+      /// add shift to each day it spans, including start and end day
       while (!currentDay.isAfter(normalizedEnd)) {
-        log('Adding shift ${shift.shiftID} to day: $currentDay');
         shiftsByDay.putIfAbsent(currentDay, () => []).add(shift);
         currentDay = currentDay.add(const Duration(days: 1));
       }
@@ -143,7 +138,6 @@ class ShiftModel extends ChangeNotifier {
   }
 
 
-  
 
   //----------------- Data Methods -----------------
 
