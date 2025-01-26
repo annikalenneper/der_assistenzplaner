@@ -1,4 +1,5 @@
 import 'package:der_assistenzplaner/views/settings_screen.dart';
+import 'package:der_assistenzplaner/views/shared/input_forms.dart';
 import 'package:der_assistenzplaner/views/shared/view_containers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -67,16 +68,16 @@ class _AssistantListViewState extends State<AssistantListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-          body: SizedBox(
-            child: Stack(
-              children: [
-                Column(
-                  children: [
-                    Expanded(
-                      child: Consumer<AssistantModel>(
-                        builder: (context, assistantModel, child) {  
-                        return GridView.builder(
+    return Consumer<AssistantModel>(
+      builder: (context, assistantModel, child) {
+        return Scaffold(
+            body: SizedBox(
+              child: Stack(
+                children: [
+                  Column(
+                    children: [
+                      Expanded(
+                        child: GridView.builder(
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 6,
                             childAspectRatio: 0.8,
@@ -96,36 +97,42 @@ class _AssistantListViewState extends State<AssistantListView> {
                               child: AssistantCard(assistantID: assistant.assistantID,)
                             );
                           },
-                        );
-                        }
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Positioned(
-                  bottom: 20,
-                  right: 20,
-                  child: FloatingActionButton(
-                    child: Icon(Icons.add),
-                    onPressed: () {
-                      showDialog(
-                      context: context, 
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('Neue Assistenzkraft hinzufügen'),
-                          content: Text('kommt bald'),
-                        );
-                        }, 
-                      );
-                    },
+                    ],
                   ),
-                ),
-              ],
+                  Positioned(
+                    bottom: 20,
+                    right: 20,
+                    child: FloatingActionButton(
+                      child: Icon(Icons.add),
+                      onPressed: () {
+                        showDialog(
+                        context: context, 
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('Neue Assistenzkraft hinzufügen'),
+                            content: AssistantForm(
+                              onSave: (name, hours) {
+                                final newAssistant = assistantModel.createAssistant(name, hours);
+                                assistantModel.saveAssistant(newAssistant);
+                              },
+                            ),
+                          );
+                          }, 
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      }
-    }
+          );
+      },
+    );
+  }
+}
+    
 
 
 //----------------- AssistantDetailView -----------------
