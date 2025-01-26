@@ -7,8 +7,9 @@ import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/views/shared/cards_and_markers.dart';
 import 'package:der_assistenzplaner/views/shared/input_forms.dart';
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:table_calendar/table_calendar.dart' hide normalizeDate;
 import 'package:provider/provider.dart';
+
 
 
 class CalendarView extends StatefulWidget {
@@ -85,22 +86,20 @@ class CalendarViewState extends State<CalendarView> {
             if (_calendarFormat != format) {
               setState(() {
                 _calendarFormat = format;
-                });
-              }
-            },
-          );
+              });
+            }
+          },
+        );
 
-          /// headline
-          final headingForSelectedDay = Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Text(formatDateTime(_selectedDay), style: const TextStyle(fontSize: 20)),
-          );
-                
+        /// headline
+        final headingForSelectedDay = Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Text(formatDateTime(_selectedDay), style: const TextStyle(fontSize: 20)),
+        );        
 
-          /// shows scheduled shifts for selected day
-          /// shows scheduled shifts for selected day and selected display option
-        
-        final shiftsForSelectedDay = shiftModel.shiftsByDay[(_selectedDay)] ?? [];
+        /// shows scheduled shifts for selected day         
+        final normalizedSelectedDay = normalizeDate(_selectedDay);
+        final shiftsForSelectedDay = shiftModel.shiftsByDay[(normalizedSelectedDay)] ?? [];
 
         final scrollableListOfShifts = SingleChildScrollView(
           child: Column(
@@ -152,71 +151,74 @@ class CalendarViewState extends State<CalendarView> {
         );
 
 
-          final scheduledShiftsView = Column(
-            children: [
-              headingForSelectedDay,         
-              Expanded(child: scrollableListOfShifts), 
-            ],
-          );
+        final scheduledShiftsView = Column(
+          children: [
+            headingForSelectedDay,         
+            Expanded(child: scrollableListOfShifts), 
+          ],
+        );
 
-          return Row(     
-            children: [
-              /// left side
-              Expanded(
-                flex: 3,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: calendar
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Consumer<AvailabilitiesModel>(
-                          builder: (BuildContext context, availabilities, child) {  
-                            return Text (
-                              'Dein Team hat noch ${availabilities.daysUntilAvailabilitiesDueDate} Tage Zeit für die Abgabe der Verfügbarkeiten. \nZahl der eingetragenen Verfügbarkeiten: X',
-                              style: const TextStyle(fontSize: 12),
-                            );
-                          },
-                        ),
-                      ),
-                    )
-                  ],
-                )
-              ),
-
-              /// right side
-              Expanded(
-                flex: 2,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: scheduledShiftsView,
-                    ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal, 
-                        child: Row(
-                          children: assistantModel.assistants.map((assistant) {
-                            return AssistantMarker(
-                              assistantID: assistant.assistantID,
-                              size: 40, 
-                              onTap: (){},
-                            );
-                          }).toList(),
-                        ),
+        return Row(     
+          children: [
+            /// left side
+            Expanded(
+              flex: 3,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: calendar
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Consumer<AvailabilitiesModel>(
+                        builder: (BuildContext context, availabilities, child) {  
+                          return Text (
+                            'Dein Team hat noch ${availabilities.daysUntilAvailabilitiesDueDate} Tage Zeit für die Abgabe der Verfügbarkeiten. \nZahl der eingetragenen Verfügbarkeiten: X',
+                            style: const TextStyle(fontSize: 12),
+                          );
+                        },
                       ),
                     ),
-                  ],
-                ),
+                  )
+                ],
+              )
+            ),
+
+            /// right side
+            Expanded(
+              flex: 2,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: scheduledShiftsView,
+                  ),
+                  /// row of assistant markers to select all shifts for one assistant
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal, 
+                      child: Row(
+                        children: assistantModel.assistants.map((assistant) {
+                          return AssistantMarker(
+                            assistantID: assistant.assistantID,
+                            size: 40, 
+                            onTap: (){
+                              shiftModel.updateDisplayOption(ShiftDisplayOptions.assistant, assistant.assistantID);
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],      
-          );   
-        },
-      );
-    }
+            ),
+          ],      
+        );   
+      },
+    );
   }
+}
 
