@@ -128,6 +128,38 @@ String dayOfWeekToString(int day)
   }
 }
 
+/// convert from String inputs to DateTimeRange
+DateTimeRange parseDateTimeRange(
+  String startDateText,
+  String startTimeText,
+  String endDateText,
+  String endTimeText,
+) {
+  var startDate = stringToDate(startDateText);
+  var startTime = stringToTime(startTimeText);
+  var endDate = stringToDate(endDateText);
+  var endTime = stringToTime(endTimeText);
+
+  var start = DateTime(
+    startDate.year,
+    startDate.month,
+    startDate.day,
+    startTime.hour,
+    startTime.minute,
+  );
+
+  var end = DateTime(
+    endDate.year,
+    endDate.month,
+    endDate.day,
+    endTime.hour,
+    endTime.minute,
+  );
+
+  return DateTimeRange(start: start, end: end);
+}
+
+
 //------------------------- Comparators -------------------------
 
 
