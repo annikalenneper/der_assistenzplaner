@@ -27,7 +27,7 @@ class ShiftRepository {
     try {
       final shiftBox = await Hive.openBox<Shift>('shifts');
       await shiftBox.put(newShift.shiftID, newShift); // save or update
-      log('shiftRepository: saved or updated shift with ID ${newShift.shiftID}');
+      log('shiftRepository: saved or updated shift from ${newShift.start} - ${newShift.end}');
     } catch (e, stackTrace) {
       log('shiftRepository: Failed to save or update shift with ID ${newShift.shiftID}: $e', stackTrace: stackTrace);
     }
