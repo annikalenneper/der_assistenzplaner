@@ -20,6 +20,15 @@ class ShiftCard extends StatelessWidget {
     required this.shift, 
     required this.assistantID,});
 
+  bool _validateShiftSplit(Shift shift, DateTime breakpoint) {
+    return (
+      breakpoint == shift.start ||
+      breakpoint == shift.end ||
+      breakpoint.isBefore(shift.start) || 
+      breakpoint.isAfter(shift.end)
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -101,10 +110,10 @@ class ShiftCard extends StatelessWidget {
             pickTime(
               context: context, 
               initialTime: dateTimeToTimeOfDay(shift.start.add(const Duration(hours: 8))), 
-              onTimeSelected: (time) {
+              onTimeSelected: (time) {               
                 ShiftModel shiftModel = Provider.of<ShiftModel>(context, listen: false);
                 final breakpoint = timeOfDayToDateTime(time, shift.start);
-                if (breakpoint.isBefore(shift.start) || breakpoint.isAfter(shift.end)) {
+                if (_validateShiftSplit(shift, breakpoint)) {
                   showDialog(
                     context: context,
                     builder: (BuildContext dialogContext) {
@@ -135,39 +144,39 @@ class ShiftCard extends StatelessWidget {
         ),
                       
         TextButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext dialogContext) {
-                  return AlertDialog(
-                    title: const Text('Möchten Sie diese Schicht wirklich löschen?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Abbrechen'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          final shiftModel = Provider.of<ShiftModel>(context, listen: false);
-                          shiftModel.deleteShift(shift.shiftID);
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('Löschen bestätigen'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            }, 
-            child: Column(
-              children: [
-                Icon(Icons.delete),
-                Text('Löschen', textAlign: TextAlign.center), 
-              ],
-            ),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext dialogContext) {
+                return AlertDialog(
+                  title: const Text('Möchten Sie diese Schicht wirklich löschen?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Abbrechen'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        final shiftModel = Provider.of<ShiftModel>(context, listen: false);
+                        shiftModel.deleteShift(shift.shiftID);
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Löschen bestätigen'),
+                    ),
+                  ],
+                );
+              },
+            );
+          }, 
+          child: Column(
+            children: [
+              Icon(Icons.delete),
+              Text('Löschen', textAlign: TextAlign.center), 
+            ],
           ),
-        ],
-      ); 
+        ),
+      ],
+    ); 
   }
 }
 
@@ -197,7 +206,14 @@ class AssistantCard extends StatelessWidget {
         margin: EdgeInsets.all(8.0),
         child: Column(
           children: [
-            AssistantMarker(size: 50, assistantID: assistantID, onTap: (){},),
+            AssistantMarker(
+              size: 50, assistantID: 
+              assistantID, 
+              onTap: () {
+                final ShiftModel shiftModel = Provider.of<ShiftModel>(context, listen: false);
+                shiftModel.updateDisplayOption(ShiftDisplayOptions.assistant, assistantID);
+              },
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               child: Column(
@@ -371,71 +387,48 @@ class _TagWidgetViewState extends State<TagWidget> {
 
 //----------------- CalendarDayMarkers -----------------
 
-class CalendarDayMarkers extends StatelessWidget {
-  const CalendarDayMarkers({
-    super.key,
-    required this.withAssistantID,
-    required this.withoutAssistantID,
-  });
+CalendarDayMarker? buildDayMarker(context, day, shiftModel) {
+  final normalizedDay = normalizeDate(day);
+  final shiftMap = shiftModel.shiftsByDay;
+  final shifts = shiftMap[normalizedDay];
+  if (shifts != null && shifts.isNotEmpty){
+    //TO-DO: Assi-Farben anzeigen, wenn Schicht besetzt
+    return CalendarDayMarker(shift: shifts.first, color: Colors.grey.shade300);
+  }
+  else {
+    return null;
+  }
+}
 
-  final Set<String> withAssistantID;
-  final Set<String> withoutAssistantID;
+
+class CalendarDayMarker extends StatelessWidget {
+  final Shift shift;
+  final Color color;
+
+  const CalendarDayMarker({super.key, required this.shift, required this.color});
 
   @override
   Widget build(BuildContext context) {
-    AssistantModel assistantModel = Provider.of<AssistantModel>(context);
     return Stack(
-        children: [
-          /// marker for shifts with assistantID
-          if (withAssistantID.isNotEmpty)
-            Positioned.fill(
-              right: 1,
-              bottom: 1,
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Wrap(
-                  spacing: 4, 
-                  runSpacing: 2, 
-                  children: withAssistantID.map((assistantID) {
-                    final color = assistantModel.assistantColorMap[assistantID] ?? Colors.grey;
-                    final assistantName = assistantModel.assistantMap[assistantID]?.name ?? 'Unbekannt';
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                      child: Text(
-                        assistantName, // Zeige den Namen statt der ID an
-                        style: const TextStyle(color: Colors.white, fontSize: 10),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          /// marker for shifts without assistantID
-          if (withoutAssistantID.isNotEmpty)
-            Positioned.fill(
-              left: 1,
-              bottom: 1,
-              child: Align(
-                alignment: Alignment.bottomLeft,
+      children: [
+          Positioned.fill(
+            right: 1,
+            bottom: 1,
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: SizedBox(
+                height: 20,
                 child: Container(
-                  width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(5),
+                    color: color,
+                    borderRadius: BorderRadius.circular(5.0),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                  child: Text(
-                    '${withoutAssistantID.length} unbesetzt',
-                    style: const TextStyle(color: Colors.white, fontSize: 10),
-                  ),
+                  child: Text(shift.toString()),
                 ),
-              ),
+              )
             ),
-        ],
+          ),
+        ]
       );
     }    
   }

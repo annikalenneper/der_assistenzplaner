@@ -1,3 +1,4 @@
+import 'package:der_assistenzplaner/data/models/shift.dart';
 import 'package:der_assistenzplaner/views/shared/cards_and_markers.dart';
 import 'package:flutter/material.dart';
 
@@ -5,13 +6,13 @@ import 'package:flutter/material.dart';
 class MarkerCache {
   final Map<DateTime, Widget> _cache = {};
 
-  Widget getMarker(DateTime day, Set<String> withAssistantID, Set<String> withoutAssistantID) {
+  Widget getMarker(DateTime day, Shift shift, Color color) {
     if (_cache.containsKey(day)) {
       return _cache[day]!;
     }
-    final marker = CalendarDayMarkers(
-      withAssistantID: withAssistantID,
-      withoutAssistantID: withAssistantID,
+    final marker = CalendarDayMarker(
+      shift: shift,
+      color: color,
     );
     _cache[day] = marker;
     return marker;
