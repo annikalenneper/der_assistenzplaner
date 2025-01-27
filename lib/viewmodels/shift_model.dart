@@ -11,136 +11,67 @@ enum ShiftDisplayOptions {scheduled, unscheduled, all, assistant}
 class ShiftModel extends ChangeNotifier {
   ShiftRepository shiftRepository = ShiftRepository();
 
-  late Set<Shift> shifts;
+  late Set<Shift> _shifts;
   late Map<String, Set<Shift>> _mapOfShiftsByAssistant; 
   late Map<DateTime, List<Shift>> _mapOfShiftsByDay;
 
   ShiftDisplayOptions _selectedShiftDisplayOption = ShiftDisplayOptions.scheduled;
   String? _selectedAssistantID;
+  
   final MarkerCache markerCache = MarkerCache();
-
-  Shift? _currentShift;
 
   ShiftModel();
 
   //----------------- Getter methods -----------------
 
-  Shift? get currentShift => _currentShift;
-  DateTime get start => _currentShift?.start ?? DateTime.now();
-  DateTime get end => _currentShift?.end ?? DateTime.now();
-  Duration get duration => _currentShift?.duration ?? Duration.zero;
   Map<DateTime, List<Shift>> get shiftsByDay => _mapOfShiftsByDay;
+  ShiftDisplayOptions get selectedShiftDisplayOption => _selectedShiftDisplayOption;
+  Set<Shift> get scheduledShifts => _shifts.toSet()..removeWhere((shift) => !shift.isScheduled);
+  Set<Shift> get unscheduledShifts => _shifts.where((shift) => !shift.isScheduled).toSet();
 
-  /// removing unscheduledShifts more efficient: only few unscheduledShifts in database
-  Set<Shift> get scheduledShifts =>
-      shifts.toSet()..removeWhere((shift) => !shift.isScheduled);
-
-  Set<Shift> get unscheduledShifts => 
-      shifts.where((shift) => !shift.isScheduled).toSet();
-
-
-  //----------------- Setter methods -----------------
-
-  set currentShift(Shift? shift) {
-    _currentShift = shift;
-    notifyListeners();
-  }
-
-  set start(DateTime start) =>
-      (start.isBefore(end)) 
-      ? currentShift?.start = start 
-      : currentShift?.start = end;
-
-  set end(DateTime end) =>
-      (end.isAfter(start)) 
-      ? currentShift?.end = end 
-      : currentShift?.end = start;
-
-    
 
   //----------------- UI methods -----------------
   
-  /// update display option with either enum ShiftDisplayOptions or assistantID
+  /// update display option from UI
   void updateDisplayOption(ShiftDisplayOptions? option, String? assistantID) {
     if (option != null) {
       _selectedShiftDisplayOption = option;
-      _updateShiftsByDay(option);
+      _filterShiftsByDay(option);
       log('ShiftModel: Display option set to $_selectedShiftDisplayOption');
       notifyListeners();
     } 
     if (assistantID != null) {
       _selectedShiftDisplayOption = ShiftDisplayOptions.assistant;
       _selectedAssistantID = assistantID;
-      _updateShiftsByDay(_selectedShiftDisplayOption);
+      _filterShiftsByDay(_selectedShiftDisplayOption);
       log('ShiftModel: Selected assistant set to $_selectedAssistantID');
       notifyListeners();
     } 
   }
 
-  void _updateShiftsByDay(ShiftDisplayOptions displayOption) {
-    final filteredShifts = getShiftsForDisplay(null, displayOption).toList();
+  /// filter shifts according to selected display option and update mapOfShiftsByDay accordingly
+  void _filterShiftsByDay(ShiftDisplayOptions displayOption) {
+    final filteredShifts = _selectShiftsForDisplay(null, displayOption).toList();
     _mapOfShiftsByDay = _groupShiftsByDay(filteredShifts);
     notifyListeners();
   }
 
-  Set<Shift> getShiftsForDisplay (context, ShiftDisplayOptions selected) {
+  /// get shifts according to selected display option
+  Set<Shift> _selectShiftsForDisplay (context, ShiftDisplayOptions selected) {
     switch (selected) {
       case ShiftDisplayOptions.scheduled:
         return scheduledShifts;
       case ShiftDisplayOptions.unscheduled:
         return unscheduledShifts;
       case ShiftDisplayOptions.all:
-        return shifts;
+        return _shifts;
       case ShiftDisplayOptions.assistant:
         return _mapOfShiftsByAssistant[_selectedAssistantID] ?? <Shift>{};
     }
   }
 
-  
-  
-
-  //------------------ Filter Methods ------------------
-
-
-  Set<Shift> getShiftsByDateRange(DateTime start, DateTime end) {
-    final normalizedStart = DateTime(start.year, start.month, start.day);
-    final normalizedEnd = DateTime(end.year, end.month, end.day);
-    Set<Shift> result = [] as Set<Shift>;
-    DateTime currentDay = normalizedStart;
-    while (currentDay.isBefore(normalizedEnd) || currentDay.isAtSameMomentAs(normalizedEnd)) {
-      for (final shift in shifts) {
-        if (shift.start.isBefore(currentDay) && shift.end.isAfter(currentDay)) {
-          result.add(shift);
-        }
-      }
-      currentDay = currentDay.add(Duration(days: 1));
-    }
-    return result;
-  }
-
-  Map<DateTime, List<Shift>> _groupShiftsByDay(List<Shift> shifts) {
-    final Map<DateTime, List<Shift>> shiftsByDay = {};
-
-    for (final shift in shifts) {
-      final normalizedStart = normalizeDate(shift.start);
-      final normalizedEnd = normalizeDate(shift.end);
-      DateTime currentDay = normalizedStart;
-
-      /// add shift to each day it spans, including start and end day
-      while (!currentDay.isAfter(normalizedEnd)) {
-        shiftsByDay.putIfAbsent(currentDay, () => []).add(shift);
-        currentDay = currentDay.add(const Duration(days: 1));
-      }
-    }
-
-    log('ShiftModel: Grouped ${shifts.length} shifts into ${shiftsByDay.length} days.');
-    return shiftsByDay;
-  }
-
-
 
   //----------------- Data Methods -----------------
-
 
   /// initialize new shift without saving it
   Shift createShift(DateTime start, DateTime end, String? assistantID) {
@@ -185,8 +116,8 @@ class ShiftModel extends ChangeNotifier {
   }
 
   void _deleteShiftFromLocalStructure(String shiftID) {
-    final shiftToDelete = shifts.firstWhere((shift) => shift.shiftID == shiftID);
-    shifts.remove(shiftToDelete);
+    final shiftToDelete = _shifts.firstWhere((shift) => shift.shiftID == shiftID);
+    _shifts.remove(shiftToDelete);
     _deleteShiftFromMapOfShiftsByDay(shiftID);
     _deleteShiftFromMapOfShiftsByAssistant(shiftToDelete);
     log('ShiftModel: Deleted shift from local structure');
@@ -200,40 +131,72 @@ class ShiftModel extends ChangeNotifier {
     await _loadShifts();
     await _loadMapOfShiftsByAssistants();
     await _loadShiftsByDay();
-    log('shiftModel: initialized with ${shifts.length} shifts');
+    log('shiftModel: initialized with ${_shifts.length} shifts');
   }
 
 
   Future<void> _loadShifts() async {
-    shifts = await shiftRepository.fetchAllShifts();
+    _shifts = await shiftRepository.fetchAllShifts();
   }
 
   Future<void> _loadMapOfShiftsByAssistants() async {
     _mapOfShiftsByAssistant = {}; 
-    for (final shift in shifts) {
+    for (final shift in _shifts) {
       if (shift.assistantID != null && shift.assistantID!.isNotEmpty) {
         _mapOfShiftsByAssistant.putIfAbsent(shift.assistantID!, () => <Shift>{}).add(shift);
       } else {
         log('ShiftModel: Shift with ID ${shift.shiftID} has no assistant assigned.');
       }
-    }
-    log('ShiftModel: Loaded mapOfShiftsByAssistant with ${_mapOfShiftsByAssistant.length} assistants and their shifts.');
+    } log('ShiftModel: Loaded mapOfShiftsByAssistant with ${_mapOfShiftsByAssistant.length} assistants and their shifts.');
     notifyListeners();
   }
 
   Future<void> _loadShiftsByDay() async {
-    _mapOfShiftsByDay = _groupShiftsByDay(shifts.toList());
+    _mapOfShiftsByDay = _groupShiftsByDay(_shifts.toList());
     log('ShiftModel: Loaded mapOfShiftsByDay with ${_mapOfShiftsByDay.length} days and their shifts.');
     notifyListeners();
   }
 
 
 
+  //----------------- Helper Methods: Filter -----------------
 
-  //----------------- Helper Methods -----------------
+  Map<DateTime, List<Shift>> _groupShiftsByDay(List<Shift> shifts) {
+    final Map<DateTime, List<Shift>> shiftsByDay = {};
+    for (final shift in shifts) {
+      final normalizedStart = normalizeDate(shift.start);
+      final normalizedEnd = normalizeDate(shift.end);
+      DateTime currentDay = normalizedStart;
+      /// add shift to each day it spans, including start and end day
+      while (!currentDay.isAfter(normalizedEnd)) {
+        shiftsByDay.putIfAbsent(currentDay, () => []).add(shift);
+        currentDay = currentDay.add(const Duration(days: 1));
+      }
+    } log('ShiftModel: Grouped ${shifts.length} shifts into ${shiftsByDay.length} days.');
+    return shiftsByDay;
+  }
+
+  Set<Shift> _getShiftsByDateRange(DateTime start, DateTime end) {
+    final normalizedStart = DateTime(start.year, start.month, start.day);
+    final normalizedEnd = DateTime(end.year, end.month, end.day);
+    Set<Shift> result = [] as Set<Shift>;
+    DateTime currentDay = normalizedStart;
+    while (currentDay.isBefore(normalizedEnd) || currentDay.isAtSameMomentAs(normalizedEnd)) {
+      for (final shift in _shifts) {
+        if (shift.start.isBefore(currentDay) && shift.end.isAfter(currentDay)) {
+          result.add(shift);
+        }
+      }
+      currentDay = currentDay.add(Duration(days: 1));
+    }
+    return result;
+  }
+
+
+  //----------------- Helper Methods: Data Handling -----------------
 
   void _addToShifts(Shift newShift) {
-    shifts.add(newShift);
+    _shifts.add(newShift);
     log('ShiftModel: Added shift to shifts list');
   }
 
@@ -241,12 +204,10 @@ class ShiftModel extends ChangeNotifier {
     final normalizedStart = normalizeDate(newShift.start);
     final normalizedEnd = normalizeDate(newShift.end);
     DateTime currentDay = normalizedStart;
-
     while (!currentDay.isAfter(normalizedEnd)) {
       _mapOfShiftsByDay.putIfAbsent(currentDay, () => []).add(newShift);
       currentDay = currentDay.add(const Duration(days: 1));
     }
-
     log('ShiftModel: Added shift to mapOfShiftsByDay');
   }
 
