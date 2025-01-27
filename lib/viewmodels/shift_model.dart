@@ -142,6 +142,7 @@ class ShiftModel extends ChangeNotifier {
   //----------------- Data Methods -----------------
 
 
+  /// initialize new shift without saving it
   Shift createShift(DateTime start, DateTime end, String? assistantID) {
     return Shift(start, end, assistantID);
   }
@@ -160,23 +161,32 @@ class ShiftModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// split shift at given time and save both old and new shift
+  Future<void> splitShift(Shift shift, DateTime splitTime) async{
+    if (splitTime.isBefore(shift.start) || splitTime.isAfter(shift.end)) {
+      throw ArgumentError('Split time must be between start and end of shift.');
+    }
+    final newShift = Shift(splitTime, shift.end, shift.assistantID);
+    shift.end = splitTime;
+    await saveShift(shift);
+    await saveShift(newShift);
+  } 
 
-  //----------------- Helper Methods -----------------
+
+  //----------------- Local Data Methods -----------------
 
   void _addShiftToLocalStructure(Shift newShift) {
-    if(shifts.contains(newShift)) {
-      log('ShiftModel: Shift already exists in local structure');
-      return;
-    } 
-    else {
-        shifts.add(newShift);
-        log('ShiftModel: Added shift to local structure');
-    }
+    _addToShifts(newShift);
+    _addToMapOfShiftsByDay(newShift);
+    _addToMapOfShiftsByAssistant(newShift);
+    log('ShiftModel: Added shift to local structure and updated shiftsByDay.');
   }
 
   void _deleteShiftFromLocalStructure(String shiftID) {
     final shiftToDelete = shifts.firstWhere((shift) => shift.shiftID == shiftID);
     shifts.remove(shiftToDelete);
+    _deleteShiftFromMapOfShiftsByDay(shiftID);
+    _deleteShiftFromMapOfShiftsByAssistant(shiftToDelete);
     log('ShiftModel: Deleted shift from local structure');
   }
 
@@ -190,6 +200,7 @@ class ShiftModel extends ChangeNotifier {
     await _loadShiftsByDay();
     log('shiftModel: initialized with ${shifts.length} shifts');
   }
+
 
   Future<void> _loadShifts() async {
     shifts = await shiftRepository.fetchAllShifts();
@@ -208,11 +219,54 @@ class ShiftModel extends ChangeNotifier {
     notifyListeners();
   }
 
-
   Future<void> _loadShiftsByDay() async {
     _mapOfShiftsByDay = _groupShiftsByDay(shifts.toList());
     log('ShiftModel: Loaded mapOfShiftsByDay with ${_mapOfShiftsByDay.length} days and their shifts.');
     notifyListeners();
+  }
+
+
+
+
+  //----------------- Helper Methods -----------------
+
+  void _addToShifts(Shift newShift) {
+    shifts.add(newShift);
+    log('ShiftModel: Added shift to shifts list');
+  }
+
+  void _addToMapOfShiftsByDay(Shift newShift) {
+    final normalizedStart = normalizeDate(newShift.start);
+    final normalizedEnd = normalizeDate(newShift.end);
+    DateTime currentDay = normalizedStart;
+
+    while (!currentDay.isAfter(normalizedEnd)) {
+      _mapOfShiftsByDay.putIfAbsent(currentDay, () => []).add(newShift);
+      currentDay = currentDay.add(const Duration(days: 1));
+    }
+
+    log('ShiftModel: Added shift to mapOfShiftsByDay');
+  }
+
+  void _addToMapOfShiftsByAssistant(Shift newShift) {
+    if (newShift.assistantID != null) {
+      _mapOfShiftsByAssistant.putIfAbsent(newShift.assistantID!, () => {}).add(newShift);
+      log('ShiftModel: Added shift to mapOfShiftsByAssistant');
+    } else {
+      log('ShiftModel: Shift does not have an assistantID and was not added to mapOfShiftsByAssistant');
+    }
+  }
+
+  void _deleteShiftFromMapOfShiftsByDay(String shiftID) {
+    _mapOfShiftsByDay.forEach((day, shiftList) {
+      shiftList.removeWhere((shift) => shift.shiftID == shiftID);
+    });
+  }
+
+  void _deleteShiftFromMapOfShiftsByAssistant(Shift shift) {
+    if (shift.assistantID != null && shift.assistantID!.isNotEmpty) {
+      _mapOfShiftsByAssistant[shift.assistantID!]?.remove(shift);
+    }
   }
 
 }
