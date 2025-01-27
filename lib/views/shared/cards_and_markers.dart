@@ -1,6 +1,8 @@
 import 'package:der_assistenzplaner/data/models/shift.dart';
+import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
+import 'package:der_assistenzplaner/views/shared/single_input_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/data/models/tag.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -95,8 +97,35 @@ class ShiftCard extends StatelessWidget {
         ),
                       
         TextButton(
-          onPressed: () {},
-          /// open dialog to split the shift
+          onPressed: () {
+            pickTime(
+              context: context, 
+              initialTime: dateTimeToTimeOfDay(shift.start.add(const Duration(hours: 8))), 
+              onTimeSelected: (time) {
+                ShiftModel shiftModel = Provider.of<ShiftModel>(context, listen: false);
+                final breakpoint = timeOfDayToDateTime(time, shift.start);
+                if (breakpoint.isBefore(shift.start) || breakpoint.isAfter(shift.end)) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext dialogContext) {
+                      return AlertDialog(
+                        title: const Text('Ungültige Zeitangabe'),
+                        content: const Text('Die Zeitangabe liegt nicht innerhalb der Schicht.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                shiftModel.splitShift(shift, breakpoint);
+                }
+              },
+            );
+          },
           child: Column(
             children: [
               Icon(Icons.call_split),
@@ -229,7 +258,7 @@ class AssistantCard extends StatelessWidget {
 class AssistantMarker extends StatelessWidget {
   final String assistantID;
   final double size;
-  final VoidCallback onTap; // Callback für Tap-Events
+  final VoidCallback onTap; 
 
   const AssistantMarker({
     super.key,
