@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:der_assistenzplaner/data/models/assistant.dart';
 import 'package:der_assistenzplaner/data/models/shift.dart';
-import 'package:der_assistenzplaner/styles.dart';
+import 'package:der_assistenzplaner/styles/styles.dart';
 import 'package:der_assistenzplaner/viewmodels/availabilities_model.dart';
 import 'package:der_assistenzplaner/viewmodels/settings_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
@@ -13,6 +13,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/views/assistant_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 
 
@@ -69,8 +70,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Der Assistenzplaner',
-      // TO-DO: add theme
       theme: ModernBusinessTheme.themeData,
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: [
+        const Locale('de', 'DE'),
+      ],
       home: HomeScreen(),
       routes: {
         '/assistantTab': (context) => HomeScreen(initialTabIndex: 1),
