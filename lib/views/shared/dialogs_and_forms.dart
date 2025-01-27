@@ -1,5 +1,5 @@
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
-import 'package:der_assistenzplaner/views/shared/user_input_widgets.dart';
+import 'package:der_assistenzplaner/views/shared/single_input_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -27,6 +27,9 @@ class ShiftFormState extends State<ShiftForm> {
     /// set initial value for dates
     _startDateController.text = formatDate(widget.selectedDay);
     _endDateController.text = formatDate(widget.selectedDay);
+    //TO-DO: set default values from settings
+    _startTimeController.text = '08:00'; 
+    _endTimeController.text = '16:00';
   }
 
   Future<void> _pickDate(TextEditingController controller) async {
@@ -39,7 +42,6 @@ class ShiftFormState extends State<ShiftForm> {
       controller.text = formatDate(picked);
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -61,19 +63,15 @@ class ShiftFormState extends State<ShiftForm> {
           TextFormField(
             controller: _startTimeController,
             decoration: const InputDecoration(
-              label: Text('Uhrzeit'),
               hintText: '00:00',
             ),
             readOnly: true,
             onTap: () async {
-              TimeOfDay? picked = await showTimePicker(
-                initialEntryMode: TimePickerEntryMode.input,
-                context: context,
-                initialTime: TimeOfDay.now(),
+              pickTime(
+                context: context, 
+                initialTime: stringToTime(_startTimeController.text), 
+                onTimeSelected: (time) => _startTimeController.text = formatTimeOfDay(time)
               );
-              if (picked != null) {
-                _startTimeController.text = formatTimeOfDay(picked);
-              }
             },
             validator: (value) => validateTime(value),
           ),
@@ -113,17 +111,14 @@ class ShiftFormState extends State<ShiftForm> {
                   const SnackBar(content: Text('Schicht wird angelegt')),
                 );
                 _formKey.currentState!.save();
-                var startDate = stringToDate(_startDateController.text);
-                var startTime = stringToTime(_startTimeController.text);
-                var endDate = stringToDate(_endDateController.text);
-                var endTime = stringToTime(_endTimeController.text);
-                var start = DateTime(startDate.year, startDate.month, startDate.day, startTime.hour, startTime.minute);
-                var end = DateTime(endDate.year, endDate.month, endDate.day, endTime.hour, endTime.minute);
-                widget.onSave(
-                  start,
-                  end, 
-                  null
+                final shiftTimeRange = parseDateTimeRange(
+                  _startDateController.text, 
+                  _startTimeController.text, 
+                  _endDateController.text, 
+                  _endTimeController.text
                 );
+                widget.onSave(shiftTimeRange.start, shiftTimeRange.end, null);
+                Navigator.pop(context);
               }
             },
             child: const Text('Schicht erstellen'),
@@ -204,6 +199,8 @@ class AssistantFormState extends State<AssistantForm> {
     );
   }
 }
+
+
 
 
 
