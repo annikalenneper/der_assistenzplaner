@@ -31,7 +31,6 @@ class SettingsModel extends ChangeNotifier {
   static const String keyShiftSettings = 'shiftFrequency';
 
 
-
   //----------------- Formatted Values -----------------
 
 
@@ -40,7 +39,6 @@ class SettingsModel extends ChangeNotifier {
   String get formattedShiftFrequency => shiftFrequency.name.toString();
   
   bool isWeekdaySelected(int day) => selectedWeekdays.contains(day);
-
 
 
   //----------------- UI methods -----------------
