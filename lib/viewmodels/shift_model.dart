@@ -165,6 +165,8 @@ class ShiftModel extends ChangeNotifier {
   Future<void> splitShift(Shift shift, DateTime splitTime) async{
     if (splitTime.isBefore(shift.start) || splitTime.isAfter(shift.end)) {
       throw ArgumentError('Split time must be between start and end of shift.');
+    } if (splitTime.isAtSameMomentAs(shift.start) || splitTime.isAtSameMomentAs(shift.end)) {
+      throw ArgumentError('Split time must not be equal to start or end of shift.');
     }
     final newShift = Shift(splitTime, shift.end, shift.assistantID);
     shift.end = splitTime;
