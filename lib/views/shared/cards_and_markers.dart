@@ -65,8 +65,7 @@ class ShiftCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Beginn: ${(shift.start.hour).toString().padLeft(2, '0')}:${shift.start.minute.toString().padLeft(2, '0')} Uhr'),
-        Text('Ende: ${(shift.end.hour).toString().padLeft(2, '0')}:${shift.end.minute.toString().padLeft(2, '0')} Uhr'),
+        Text(shift.toString()),
       ],
     );
   } 
