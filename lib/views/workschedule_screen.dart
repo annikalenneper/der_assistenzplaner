@@ -1,11 +1,11 @@
-import 'package:der_assistenzplaner/styles.dart';
+import 'package:der_assistenzplaner/styles/styles.dart';
 import 'package:der_assistenzplaner/utils/cache.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/availabilities_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:der_assistenzplaner/views/shared/cards_and_markers.dart';
-import 'package:der_assistenzplaner/views/shared/input_forms.dart';
+import 'package:der_assistenzplaner/views/shared/dialogs_and_forms.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart' hide normalizeDate;
 import 'package:provider/provider.dart';
