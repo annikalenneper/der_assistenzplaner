@@ -1,5 +1,5 @@
 import 'package:der_assistenzplaner/views/settings_screen.dart';
-import 'package:der_assistenzplaner/views/shared/input_forms.dart';
+import 'package:der_assistenzplaner/views/shared/dialogs_and_forms.dart';
 import 'package:der_assistenzplaner/views/shared/view_containers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
