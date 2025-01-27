@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:der_assistenzplaner/styles/styles.dart';
 import 'package:der_assistenzplaner/utils/cache.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
@@ -69,6 +71,10 @@ class CalendarViewState extends State<CalendarView> {
             canMarkersOverflow: true,
           ),
 
+          calendarBuilders: CalendarBuilders(
+            markerBuilder: (context, day, events) => buildDayMarker(context, day, shiftModel) 
+          ),
+
           selectedDayPredicate: (day) {
             return isSameDay(_selectedDay, day);
           },
@@ -82,13 +88,6 @@ class CalendarViewState extends State<CalendarView> {
 
           eventLoader: (day) => shiftModel.shiftsByDay[(day)] ?? [],
 
-          onFormatChanged: (format) {
-            if (_calendarFormat != format) {
-              setState(() {
-                _calendarFormat = format;
-              });
-            }
-          },
         );
 
         /// headline
@@ -110,10 +109,10 @@ class CalendarViewState extends State<CalendarView> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   final shift = shiftsForSelectedDay[index];
-                    return ShiftCard(
-                      shift: shift,
-                      assistantID: shift.assistantID ?? '',
-                    );
+                  return ShiftCard(
+                    shift: shift,
+                    assistantID: shift.assistantID ?? '',
+                  );
                 },
               ),
 
