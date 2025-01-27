@@ -1,7 +1,7 @@
 
 
 
-import 'package:der_assistenzplaner/styles.dart';
+import 'package:der_assistenzplaner/styles/styles.dart';
 import 'package:flutter/material.dart';
 
 
@@ -30,7 +30,8 @@ class SelectableWrapper<T> extends StatelessWidget {
 
 
 
-//------------------------- Generic TimePicker -------------------------
+//------------------------- TimePicker -------------------------
+
 
 Future<void> pickTime({
   required BuildContext context, 
@@ -41,6 +42,7 @@ Future<void> pickTime({
   TimeOfDay? pickedTime = await showTimePicker(
     context: context,
     initialTime: initialTime,
+    initialEntryMode: TimePickerEntryMode.input,
   );
   /// callback function to handle returned time
   if (pickedTime != null) {
@@ -50,21 +52,21 @@ Future<void> pickTime({
 
 
 // combines two dropdown windows for minutes and hours selection
-class CustomTimePicker extends StatefulWidget {
+class CustomDropDownTimePicker extends StatefulWidget {
   final ValueChanged<TimeOfDay>? onTimeChanged;
   final TimeOfDay? initialTime;
 
-  const CustomTimePicker({
+  const CustomDropDownTimePicker({
     super.key,
     this.onTimeChanged,
     this.initialTime,
   });
 
   @override
-  State<CustomTimePicker> createState() => _CustomTimePickerState();
+  State<CustomDropDownTimePicker> createState() => CustomDropDownTimePickerState();
 }
 
-class _CustomTimePickerState extends State<CustomTimePicker> {
+class CustomDropDownTimePickerState extends State<CustomDropDownTimePicker> {
   late int _selectedHour;
   late int _selectedMinute;
 

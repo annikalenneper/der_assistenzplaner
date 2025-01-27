@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:der_assistenzplaner/data/repositories/settings_repository.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/data/shared-preferences/shared_preferences_helper.dart';
-import 'package:der_assistenzplaner/views/shared/user_input_widgets.dart';
+import 'package:der_assistenzplaner/views/shared/single_input_widgets.dart';
 import 'package:flutter/material.dart';
 
 enum ShiftFrequency { daily, recurring, flexible }
