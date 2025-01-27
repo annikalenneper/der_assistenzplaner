@@ -1,6 +1,4 @@
-import 'package:der_assistenzplaner/views/settings_screen.dart';
 import 'package:der_assistenzplaner/views/shared/dialogs_and_forms.dart';
-import 'package:der_assistenzplaner/views/shared/view_containers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:der_assistenzplaner/views/shared/cards_and_markers.dart';
@@ -120,15 +118,15 @@ class _AssistantListViewState extends State<AssistantListView> {
                               },
                             ),
                           );
-                          }, 
-                        );
-                      },
-                    ),
+                        }, 
+                      );
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          );
+          ),
+        );
       },
     );
   }
@@ -150,6 +148,7 @@ class AssistantDetailView extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
+            assistant.deselectAssistant();
             navigateToAssistantScreen(context);
           },
         ),
