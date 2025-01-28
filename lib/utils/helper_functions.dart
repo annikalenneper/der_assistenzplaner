@@ -105,8 +105,7 @@ TimeOfDay dateTimeToTimeOfDay(DateTime dateTime) {
 }
 
 /// convert DateTime.weekday (int) to String
-String dayOfWeekToString(int day)
-{
+String dayOfWeekToString(int day) {
   switch (day) {
     case 1:
       return 'Montag';
