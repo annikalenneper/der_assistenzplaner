@@ -1,5 +1,4 @@
 
-import 'package:der_assistenzplaner/data/models/shift.dart';
 import 'package:flutter/material.dart';
 
 
