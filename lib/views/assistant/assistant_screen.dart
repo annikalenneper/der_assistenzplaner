@@ -1,10 +1,10 @@
-import 'package:der_assistenzplaner/views/shared/dialogs_and_forms.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:der_assistenzplaner/views/shared/markers.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'dart:developer';
 import 'package:der_assistenzplaner/utils/nav.dart';
+import 'package:der_assistenzplaner/views/assistant/assistant_usecases.dart';
 
 
 //----------------- AssistantPage -----------------
@@ -110,7 +110,7 @@ class _AssistantListViewState extends State<AssistantListView> {
                         builder: (context) {
                           return AlertDialog(
                             title: Text('Neue Assistenzkraft hinzufügen'),
-                            content: AssistantForm(
+                            content: AddAssistantForm(
                               onSave: (name, hours, color) {
                                 final newAssistant = assistantModel.createAssistant(name, hours);
                                 assistantModel.saveAssistant(newAssistant);
