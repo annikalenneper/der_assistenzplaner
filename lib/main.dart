@@ -5,13 +5,13 @@ import 'package:der_assistenzplaner/styles/styles.dart';
 import 'package:der_assistenzplaner/viewmodels/availabilities_model.dart';
 import 'package:der_assistenzplaner/viewmodels/settings_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
-import 'package:der_assistenzplaner/views/settings_screen.dart';
-import 'package:der_assistenzplaner/views/workschedule_screen.dart';
+import 'package:der_assistenzplaner/views/settings/settings_screen.dart';
+import 'package:der_assistenzplaner/views/planner/planner_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
-import 'package:der_assistenzplaner/views/assistant_screen.dart';
+import 'package:der_assistenzplaner/views/assistant/assistant_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
