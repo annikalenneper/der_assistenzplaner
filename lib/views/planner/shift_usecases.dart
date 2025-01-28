@@ -1,7 +1,7 @@
 
 
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
-import 'package:der_assistenzplaner/views/shared/dialogs_and_forms.dart';
+import 'package:der_assistenzplaner/utils/validators.dart';
 import 'package:der_assistenzplaner/views/shared/single_input_widgets.dart';
 import 'package:flutter/material.dart';
 
@@ -52,6 +52,7 @@ class ShiftFormState extends State<ShiftForm> {
       key: _formKey,
       child: Column(
         children: <Widget>[
+
           const Text('Wann beginnt die Schicht?'),
           TextFormField(
             controller: _startDateController,
@@ -105,7 +106,9 @@ class ShiftFormState extends State<ShiftForm> {
             },
             validator: (value) => validateTime(value),
           ),
+          
           Spacer(),
+
           ElevatedButton(
             onPressed: () {
               if (_formKey.currentState!.validate()) {
