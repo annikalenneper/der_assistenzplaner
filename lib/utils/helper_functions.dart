@@ -20,8 +20,8 @@ Duration calculateTimeOfDayDuration(TimeOfDay start, TimeOfDay end) {
   return Duration(hours: hours, minutes: minutes);
 }
 
-double calculateShiftDuration(Shift shift) {
-  return shift.end.difference(shift.start).inMinutes / 60;
+double calculateDateTimeDuration(DateTime start, DateTime end) {
+  return end.difference(start).inMinutes / 60;
 }
 
 DateTime lastDayOfMonth(DateTime dateTime) {

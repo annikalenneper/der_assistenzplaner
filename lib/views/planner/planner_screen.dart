@@ -1,17 +1,14 @@
-import 'dart:developer';
-
 import 'package:der_assistenzplaner/styles/styles.dart';
 import 'package:der_assistenzplaner/utils/cache.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/availabilities_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
-import 'package:der_assistenzplaner/views/shared/cards_and_markers.dart';
-import 'package:der_assistenzplaner/views/shared/dialogs_and_forms.dart';
+import 'package:der_assistenzplaner/views/shared/markers.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart' hide normalizeDate;
 import 'package:provider/provider.dart';
-
+import 'package:der_assistenzplaner/views/planner/shift_usecases.dart' as planner;
 
 
 class CalendarView extends StatefulWidget {
@@ -131,7 +128,7 @@ class CalendarViewState extends State<CalendarView> {
                         return AlertDialog(
                           content: Padding(
                             padding: const EdgeInsets.all(40.0),
-                            child: ShiftForm(
+                            child: planner.ShiftForm(
                               selectedDay: _selectedDay,
                               onSave: (start, end, assistantID) {
                                 final newShift = shiftModel.createShift(start, end, assistantID);

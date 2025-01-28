@@ -1,7 +1,9 @@
+
+
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
+import 'package:der_assistenzplaner/views/shared/dialogs_and_forms.dart';
 import 'package:der_assistenzplaner/views/shared/single_input_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class ShiftForm extends StatefulWidget {
   final DateTime selectedDay;
@@ -127,120 +129,4 @@ class ShiftFormState extends State<ShiftForm> {
       ),
     );
   }
-}
-
-
-class AssistantForm extends StatefulWidget {
-  final Function(String name, double hours, Color color) onSave;
-  
-  const AssistantForm({super.key, required this.onSave});
-
-  @override
-  State<AssistantForm> createState() => AssistantFormState();
-}
-
-class AssistantFormState extends State<AssistantForm> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _hourController = TextEditingController();
-  Color selectedColor = Colors.blue;
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: <Widget>[
-          Text('Wie heißt die Assistenz?'),
-          TextFormField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              hintText: 'Name der Assistenz',
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Bitte gib einen Namen ein';
-              }
-              return null;
-            },
-          ),
-          Text('Wie viele Stunden soll die Assistenz pro Monat arbeiten?'),
-          TextFormField(
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            controller: _hourController,
-            decoration: const InputDecoration(
-              hintText: 'Stundenanzahl',
-            ),
-            validator: (value) => validateHours(value),
-          ),
-          Text('Ordne der neuen Assistenz eine Farbe zu'),
-          DropDownColorPicker(
-            onColorSelected: (color) {
-              selectedColor = color;
-            },
-          ),
-          Spacer(),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                widget.onSave(
-                  _nameController.text,
-                  double.parse(_hourController.text), 
-                  selectedColor,
-                );
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Assistent erstellen'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-
-
-
-//------------------------- Validators -------------------------
-
-String? validateTime(String? value) {
-  final RegExp timeRegExp = RegExp(r'^([01]\d|2[0-3]):([0-5]\d)$');
-  if (value == null || value.isEmpty) {
-    return 'Bitte gib eine Uhrzeit ein';
-  }
-  if (!timeRegExp.hasMatch(value)) {
-    return 'Bitte gib eine gültige Uhrzeit im Format HH:MM ein';
-  }
-  return null;
-}
-
-String? validateDate(String? value) {
-  final RegExp dateRegExp = RegExp(r'^\d{2}\.\d{2}\.\d{4}$');
-  if (value == null || value.isEmpty) {
-    return 'Bitte gib ein Datum ein';
-  }
-  if (!dateRegExp.hasMatch(value)) {
-    return 'Bitte gib ein gültiges Datum im Format TT.MM.JJJJ ein';
-  }
-  return null;
-}
-
-String? validateHours (value) {
-  if (value == null || value.isEmpty) {
-    return 'Bitte geben Sie eine Stundenanzahl ein';
-  }
-  else if (double.parse(value) < 0 || double.parse(value) > 192) {
-    return 'Bitte geben Sie eine gültige Zahl an Arbeitsstunden pro Monat ein';
-  } 
-  return null;
-}
-
-String? startBeforeEnd(DateTime start, DateTime end) {
-  if (start.isAfter(end)) {
-    return 'Startzeit muss vor Endzeit liegen';
-  }
-  return null;
 }

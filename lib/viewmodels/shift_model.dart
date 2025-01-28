@@ -36,24 +36,30 @@ class ShiftModel extends ChangeNotifier {
   void updateDisplayOption(ShiftDisplayOptions? option, String? assistantID) {
     if (option != null) {
       _selectedShiftDisplayOption = option;
-      _filterShiftsByDay(option);
+      _filterShiftsForDisplay(option);
       log('ShiftModel: Display option set to $_selectedShiftDisplayOption');
       notifyListeners();
     } 
     if (assistantID != null) {
       _selectedShiftDisplayOption = ShiftDisplayOptions.assistant;
-      _selectedAssistantID = assistantID;
-      _filterShiftsByDay(_selectedShiftDisplayOption);
+      _selectOrToggleAssistant(assistantID);
+      _filterShiftsForDisplay(_selectedShiftDisplayOption);
       log('ShiftModel: Selected assistant set to $_selectedAssistantID');
       notifyListeners();
     } 
   }
 
   /// filter shifts according to selected display option and update mapOfShiftsByDay accordingly
-  void _filterShiftsByDay(ShiftDisplayOptions displayOption) {
+  void _filterShiftsForDisplay(ShiftDisplayOptions displayOption) {
     final filteredShifts = _selectShiftsForDisplay(null, displayOption).toList();
     _mapOfShiftsByDay = _groupShiftsByDay(filteredShifts);
     notifyListeners();
+  }
+
+  void _selectOrToggleAssistant(String assistantID) {
+    (_selectedAssistantID == assistantID) 
+    ? _selectedAssistantID = null 
+    : _selectedAssistantID = assistantID;
   }
 
   /// get shifts according to selected display option
@@ -65,8 +71,11 @@ class ShiftModel extends ChangeNotifier {
         return unscheduledShifts;
       case ShiftDisplayOptions.all:
         return _shifts;
+        /// return all shifts if assistant is deselected
       case ShiftDisplayOptions.assistant:
-        return _mapOfShiftsByAssistant[_selectedAssistantID] ?? <Shift>{};
+        return (_selectedAssistantID != null) 
+        ?  _mapOfShiftsByAssistant[_selectedAssistantID] ?? <Shift>{}
+        :  _shifts;         
     }
   }
 
@@ -82,6 +91,14 @@ class ShiftModel extends ChangeNotifier {
   Future<void> saveShift(Shift newShift) async {
     await shiftRepository.saveShift(newShift);
     _addShiftToLocalStructure(newShift);
+    notifyListeners();
+  }
+
+  /// update shift in database and local structure
+  Future<void> updateShift(Shift updatedShift) async {
+    await shiftRepository.saveShift(updatedShift);  
+    _deleteShiftFromLocalStructure(updatedShift.shiftID);
+    _addShiftToLocalStructure(updatedShift);
     notifyListeners();
   }
 
@@ -115,6 +132,11 @@ class ShiftModel extends ChangeNotifier {
     log('ShiftModel: Added shift to local structure and updated shiftsByDay.');
   }
 
+  void _updateShiftInLocalStructure(Shift updatedShift) {
+    _shifts.remove(updatedShift);
+    notifyListeners();
+  }
+
   void _deleteShiftFromLocalStructure(String shiftID) {
     final shiftToDelete = _shifts.firstWhere((shift) => shift.shiftID == shiftID);
     _shifts.remove(shiftToDelete);
@@ -122,6 +144,7 @@ class ShiftModel extends ChangeNotifier {
     _deleteShiftFromMapOfShiftsByAssistant(shiftToDelete);
     log('ShiftModel: Deleted shift from local structure');
   }
+
 
 
   //----------------- Initialization Methods -----------------
@@ -219,6 +242,7 @@ class ShiftModel extends ChangeNotifier {
       log('ShiftModel: Shift does not have an assistantID and was not added to mapOfShiftsByAssistant');
     }
   }
+
 
   void _deleteShiftFromMapOfShiftsByDay(String shiftID) {
     _mapOfShiftsByDay.forEach((day, shiftList) {

@@ -2,6 +2,7 @@ import 'package:der_assistenzplaner/data/models/shift.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
+import 'package:der_assistenzplaner/views/shared/dialogs_and_forms.dart';
 import 'package:der_assistenzplaner/views/shared/single_input_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/data/models/tag.dart';
@@ -20,12 +21,14 @@ class ShiftCard extends StatelessWidget {
     required this.shift, 
     required this.assistantID,});
 
-  bool _validateShiftSplit(Shift shift, DateTime breakpoint) {
+  /// check if splittime is outside shift or new shift shorter than 15 minutes
+  bool _isInvalidShiftSplit(Shift shift, DateTime splitTime) {
     return (
-      breakpoint == shift.start ||
-      breakpoint == shift.end ||
-      breakpoint.isBefore(shift.start) || 
-      breakpoint.isAfter(shift.end)
+      splitTime.isAtSameMomentAs(shift.start) ||
+      splitTime.isAtSameMomentAs(shift.end) ||
+      splitTime.isBefore(shift.start) || 
+      splitTime.isAfter(shift.end) ||
+      calculateDateTimeDuration(shift.start, shift.end) < 15.0
     );
   }
 
@@ -87,6 +90,38 @@ class ShiftCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
+
+        TextButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext dialogContext) {
+                return AlertDialog(
+                  title: const Text('Schicht bearbeiten'),
+                  content: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ShiftForm(
+                      selectedDay: shift.start,
+                      onSave: (start, end, assistantID) {
+                        final shiftModel = Provider.of<ShiftModel>(context, listen: false);
+                        shiftModel.updateShift(shift);
+                      },
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+          child: Column(
+            children: [
+              Icon(Icons.edit),
+              Text('Bearbeiten', textAlign: TextAlign.center),
+            ],
+
+          ),
+        ),
+
+
         TextButton(
           onPressed: () {}, 
           /// highlight all days/shifts where 
@@ -112,13 +147,13 @@ class ShiftCard extends StatelessWidget {
               onTimeSelected: (time) {               
                 ShiftModel shiftModel = Provider.of<ShiftModel>(context, listen: false);
                 final breakpoint = timeOfDayToDateTime(time, shift.start);
-                if (_validateShiftSplit(shift, breakpoint)) {
+                if (_isInvalidShiftSplit(shift, breakpoint)) {
                   showDialog(
                     context: context,
                     builder: (BuildContext dialogContext) {
                       return AlertDialog(
                         title: const Text('Ungültige Zeitangabe'),
-                        content: const Text('Die Zeitangabe liegt nicht innerhalb der Schicht.'),
+                        content: const Text('Der Schichtwechsel muss innerhalb der Schicht liegen. Die neuen Schichten müssen mindestens 15 Minuten lang sein.'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),
