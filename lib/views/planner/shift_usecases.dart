@@ -95,14 +95,12 @@ class ShiftFormState extends State<ShiftForm> {
               hintText: '00:00',
             ),
             readOnly: true,
-            onTap: () async {
-              TimeOfDay? picked = await showTimePicker(
-                context: context,
-                initialTime: TimeOfDay.now(),
+           onTap: () async {
+              pickTime(
+                context: context, 
+                initialTime: stringToTime(_endTimeController.text), 
+                onTimeSelected: (time) => _endTimeController.text = formatTimeOfDay(time)
               );
-              if (picked != null) {
-                _endTimeController.text = formatTimeOfDay(picked);
-              }
             },
             validator: (value) => validateTime(value),
           ),
