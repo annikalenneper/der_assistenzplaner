@@ -1,5 +1,5 @@
 import 'package:der_assistenzplaner/data/models/shift.dart';
-import 'package:der_assistenzplaner/views/shared/cards_and_markers.dart';
+import 'package:der_assistenzplaner/views/shared/markers.dart';
 import 'package:flutter/material.dart';
 
 /// Cache for markers to avoid unnecessary rebuilds
