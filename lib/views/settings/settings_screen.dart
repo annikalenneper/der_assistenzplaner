@@ -5,20 +5,6 @@ import 'package:der_assistenzplaner/viewmodels/tag_model.dart';
 import 'package:provider/provider.dart';
 
 
-const shiftFrequencySettingsTitle = Text('Wie regelmäßig findet deine Assistanz statt?');
-
-List<Widget> shiftFrequencySettings() {
-  ShiftFrequency selectedShiftFrequency;
-  return ShiftFrequency.values.map((frequency) {
-    return RadioListTile<ShiftFrequency>(
-      title: Text(frequency.toString()),
-      value: frequency, groupValue: null,
-      onChanged: (val) => (val != null) ? selectedShiftFrequency = val : null,
-    );
-  }).toList();
-}
-
-//final SettingsBox shiftFrequencySettings(shiftFrequencySettingsTitle);
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -46,7 +32,7 @@ class SettingsScreen extends StatelessWidget {
                           child: RadioListTile<ShiftFrequency>(
                             title: Text(settings.getShiftFrequencyTitle(frequency)),
                             value: frequency,
-                            groupValue: settings.shiftFrequency,
+                            groupValue: settings._shiftFrequency,
                             onChanged: (val) => settings.updateShiftFrequency(val!),
                           ),
                         );
