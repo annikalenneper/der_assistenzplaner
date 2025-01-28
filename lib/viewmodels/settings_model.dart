@@ -10,62 +10,79 @@ enum ShiftFrequency { daily, recurring, flexible }
 class SettingsModel extends ChangeNotifier {
   SettingsRepository settingsRepository = SettingsRepository();
 
-  late bool _shiftDuration24h;
-  late TimeOfDay _shiftStart;
-  late TimeOfDay _shiftEnd;
-  late ShiftFrequency _shiftFrequency;
-  late Set<int> _weekdays;
+  /// options can be set in model without saving to SharedPreferences 
+  /// confirmation dialog will be shown before saving or returning to previous screen
+  late ShiftFrequency shiftFrequency;
+  late bool shiftDuration24h;
+  late Set<int> weekdays;
 
-  Duration get shiftDuration => calculateTimeOfDayDuration(_shiftStart, _shiftEnd);
+  late TimeOfDay shiftStart;
+  late TimeOfDay shiftEnd;
+
+  Duration get shiftDuration => calculateTimeOfDayDuration(shiftStart, shiftEnd);
 
   /// keys for SharedPreferences 
   static const String keyFrequency = 'shiftFrequency';
   static const String key24hShift = 'is24hShift';
-  static const String keyShiftStart = 'customShiftStart';
-  static const String keyShiftEnd = 'customShiftEnd';
   static const String keyWeekdays = 'weekdays';
- 
+  static const String keyShiftStart = 'shiftStart';
+  static const String keyShiftEnd = 'shiftEnd';
 
-  //----------------- Getter Methods -----------------
+  int get selectedFrequencyKey {
+    switch (shiftFrequency) {
+      case ShiftFrequency.daily:
+        return shiftDuration24h ? 1 : 2;
+      case ShiftFrequency.recurring:
+        return 3;
+      case ShiftFrequency.flexible:
+        return 4;
+    }
+  }
 
-  ShiftFrequency get shiftFrequency => _shiftFrequency;
-  Set<int> get selectedWeekdays => _weekdays;
-  bool get is24hShift => _shiftDuration24h;
-  TimeOfDay get shiftStart => _shiftStart;
-  TimeOfDay get shiftEnd => _shiftEnd;
+  bool isWeekdaySelected(int day) => weekdays.contains(day);
 
 
   //----------------- Data Methods -----------------
 
+  /// only save settings to SharedPreferences if user confirms 
+  void saveAllSettings() {
+    _saveToPreferences(key24hShift, shiftDuration24h);
+    _saveToPreferences(keyFrequency, shiftFrequency.name);
+    _saveToPreferences(keyShiftStart, shiftStart);
+    _saveToPreferences(keyShiftEnd, shiftEnd);
+    _saveToPreferences(keyWeekdays, weekdays.toSet());
+    notifyListeners();
+  }
+
   void saveIf24hShift(value) {
-    _shiftDuration24h = value;
+    shiftDuration24h = value;
     _saveToPreferences(key24hShift, value);
     log("settings_model: is24hShift set to $value");
     notifyListeners();
   }
 
   void saveShiftFrequency(ShiftFrequency frequency) {
-    _shiftFrequency = frequency;
+    shiftFrequency = frequency;
     _saveToPreferences(keyFrequency, frequency.name);
     log("settings_model: shiftFrequency set to $frequency");
     notifyListeners();
   }
   
   void saveWeekdays(Set<int> selectedWeekdays) {
-    _weekdays = selectedWeekdays;
+    weekdays = selectedWeekdays;
     _saveToPreferences(keyWeekdays, selectedWeekdays.toSet());
     notifyListeners();
   }
 
   void saveShiftStart(TimeOfDay time) {
-    _shiftStart = time;
+    shiftStart = time;
     _saveToPreferences(keyShiftStart, time);
     log("settings_model: customShiftStart set to $time");
     notifyListeners();
   }
 
   void saveShiftEnd(TimeOfDay time) {
-    _shiftEnd = time;
+    shiftEnd = time;
     _saveToPreferences(keyShiftEnd, time);
     log("settings_model: customShiftEnd set to $time");
     notifyListeners();
@@ -92,11 +109,11 @@ class SettingsModel extends ChangeNotifier {
     TimeOfDay defaultShiftEnd = const TimeOfDay(hour: 16, minute: 0);
     
     /// load settings from SharedPreferences using the repository
-    _shiftDuration24h = await SharedPreferencesHelper.loadValue(key24hShift, bool) ?? false;
-    _shiftStart = await SharedPreferencesHelper.loadValue(keyShiftStart, TimeOfDay) ?? defaultShiftStart;
-    _shiftEnd = await SharedPreferencesHelper.loadValue(keyShiftEnd, TimeOfDay) ?? defaultShiftEnd;
-    _shiftFrequency = await settingsRepository.getShiftFrequency();
-    _weekdays = await settingsRepository.getSelectedWeekdays();    
+    shiftDuration24h = await SharedPreferencesHelper.loadValue(key24hShift, bool) ?? false;
+    shiftStart = await SharedPreferencesHelper.loadValue(keyShiftStart, TimeOfDay) ?? defaultShiftStart;
+    shiftEnd = await SharedPreferencesHelper.loadValue(keyShiftEnd, TimeOfDay) ?? defaultShiftEnd;
+    shiftFrequency = await settingsRepository.getShiftFrequency();
+    weekdays = await settingsRepository.getSelectedWeekdays();    
 
   }
 }
