@@ -1,113 +1,90 @@
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/viewmodels/settings_model.dart';
+import 'package:der_assistenzplaner/views/settings/settings_controller.dart';
+import 'package:der_assistenzplaner/views/settings/settings_viewcontainer.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/viewmodels/tag_model.dart';
 import 'package:provider/provider.dart';
 
 
-
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Einstellungen'),
       ),
+
       body: Consumer<SettingsModel>(
         builder: (context, settings, child) {
+
+          final settingsIntroText = "Deine Auswahl legt fest, wie deine Schichten im Kalender eingetragen werden. \n\nKeine Sorge, du kannst jederzeit einzelne Schichten im Kalender anpassen oder deine Einstellungen ändern.";
+
+          final frequencyTitle = "Frequenz";
+          final weekdayTitle = "Wochentage";
+          final timeTitle = "Schichtzeit";
+
+          final frequencyInfo = "Hier kannst du auswählen, wie häufig deine Assistenz bei dir ist.";
+          final weekdayInfo = "Wähle die Tage aus, an denen deine Assistenz bei dir ist.";
+          final timeInfo = "Hier kannst du einstellen, wann deine Schichten anfangen und enden.";
+
+          final controller = SettingsController(settings);
+          final frequency = controller.generateFrequencyRadioTiles();
+          final weekdays = controller.generateWeekdayOptions();
+          final time = controller.generateShiftTimeOptions(context);
+
           return Column(
             children: [
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(40),
+                color: Colors.grey[200],
+                child: Center(
+                  child: Text(
+                    settingsIntroText, 
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16),
+                  ),
+                )
+              ),
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(40),
-                  children: [
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 40),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
                 
-                    Text('Wie regelmäßig findet deine Assistanz statt?', style: Theme.of(context).textTheme.titleLarge),
-                    Row(
-                      /// create radio buttons for each frequency
-                      children: ShiftFrequency.values.map((frequency) {
-                        return Flexible(
-                          child: RadioListTile<ShiftFrequency>(
-                            title: Text(settings.getShiftFrequencyTitle(frequency)),
-                            value: frequency,
-                            groupValue: settings._shiftFrequency,
-                            onChanged: (val) => settings.updateShiftFrequency(val!),
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                      SettingsInfo(
+                        title: frequencyTitle,
+                        info: frequencyInfo,
+                        selectedValue: controller.getFrequencyOption(
+                          settings.selectedFrequencyKey),
+                      ),
                 
-                    Text('An welchen Tagen findet deine Assistanz statt?', style: Theme.of(context).textTheme.titleLarge),
-                    Wrap(
-                      alignment: WrapAlignment.spaceAround,
-                      /// generate checkboxes for each day of the week (int 1-7)
-                      children: List.generate(7, (index) {
-                        final day = index + 1;
-                        return Row(
-                          mainAxisSize: MainAxisSize.min, 
-                          children: [
-                            Checkbox(
-                              value: settings.isWeekdaySelected(day),
-                              onChanged: (val) => settings.toggleWeekday(day),
-                            ),
-                            Text(dayOfWeekToString(day), style: Theme.of(context).textTheme.bodyLarge,), 
-                          ],
-                        );
-                      }),
-                    ),
+                      Divider(),
                 
-                    Text('Findet deine Assistenz rund um die Uhr statt? (24-Stunden-Schichten)', style: Theme.of(context).textTheme.titleLarge,),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Row(
-                            children: [true, false].map((is24h) {
-                              return Flexible(
-                                child: RadioListTile<bool>(
-                                  title: Text(is24h ? 'Ja' : 'Nein'),
-                                  value: is24h,
-                                  groupValue: settings.allShiftsAre24hShifts,
-                                  onChanged: (val) => settings.toggle24hShift(val),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                        Spacer()
-                      ],
-                    ),
+                      SettingsInfo(
+                        title: weekdayTitle,
+                        info: weekdayInfo,
+                        selectedValue: 'Deine Assistenz kommt an folgenden Tagen: ${(daysOfWeekToString(settings.weekdays))}.',
+                      ),
                 
-                    Text('Wann beginnt und endet eine Schicht normalerweise?', style: Theme.of(context).textTheme.titleLarge),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ListTile(
-                            leading: const Icon(Icons.access_time),
-                            title: const Text('Startzeit'),
-                            subtitle: Text(''),
-                            onTap: () => settings.openShiftStartPicker(context),
-                          ),
-                        ),
+                      Divider(),
                 
-                        Expanded(
-                          child: ListTile(
-                            leading: const Icon(Icons.access_time),
-                            title: const Text('Endzeit'),
-                            subtitle: Text(''),
-                            onTap: () => settings.openShiftEndPicker(context),
-                          ),
-                        ),
-                
-                        Spacer()
-                      ],
-                    ),
-                  ],
+                      SettingsInfo(
+                        title: timeTitle,
+                        info: timeInfo,
+                        selectedValue: 'Meine Schichten beginnen normalerweise um ${formatTimeOfDay(settings.shiftStart)} und enden um ${formatTimeOfDay(settings.shiftEnd)}',
+                      ),
+
+                      SizedBox(height: 40,),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 20), 
-            ],
+            ],   
           );
         },
       ),
