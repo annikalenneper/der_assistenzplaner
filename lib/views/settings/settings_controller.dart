@@ -21,6 +21,37 @@ class SettingsController {
     4 : 'Meine Schichten finden immer unterschiedlich statt (flexibel).',
   };
 
+  Future<void> editFrequency(BuildContext context) async {
+    final selectedOption = await showDialog<int>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Frequenz bearbeiten'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: _generateFrequencyRadioTiles()
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Abbrechen'),
+            ),
+            TextButton(
+              onPressed: () {
+                settingsmodel.saveShiftFrequency(settingsmodel.shiftFrequency);
+                Navigator.pop(context);
+              },
+              child: Text('Speichern'),
+            ),
+          ],
+        );
+      },
+    );
+    if (selectedOption != null) {
+      _setFrequencyOptions(selectedOption);
+    }
+  }
+
   String getFrequencyOption(int key) => _frequencyOptions[key] ?? 'Etwas ist schiefgegangen';
 
   void _setFrequencyOptions(int option) {
@@ -40,7 +71,7 @@ class SettingsController {
     }
   }
 
-  List<RadioListTile<int>> generateFrequencyRadioTiles() {
+  List<RadioListTile<int>> _generateFrequencyRadioTiles() {
     var selectedOption = settingsmodel.selectedFrequencyKey;
     return _frequencyOptions.entries.map((entry) {
       return RadioListTile<int>(
@@ -52,48 +83,85 @@ class SettingsController {
     }).toList();
   }
 
-  Future<void> editFrequency(BuildContext context) async {
-    final selectedOption = await showDialog<int>(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: Text('Frequenz bearbeiten'),
-          children: generateFrequencyRadioTiles()
-        );
-      },
-    );
-
-    if (selectedOption != null) {
-      _setFrequencyOptions(selectedOption);
-    }
-  }
 
 
   ///----------------- Days of the Week -----------------
+  
+  void editWeekdays(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.all(20),
+          title: Text('Wochentage auswählen'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: _generateWeekdayOptions(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Abbrechen'),
+            ),
+            TextButton(
+              onPressed: () {
+                settingsmodel.saveWeekdays(settingsmodel.weekdays);
+                Navigator.pop(context);
+              },
+              child: Text('Speichern'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-  List<Widget> generateWeekdayOptions() {
+  List<Widget> _generateWeekdayOptions() {
     final weekdayKeys = List<int>.generate(7, (index) => index + 1);
     return weekdayKeys.map((day){
-      return IntrinsicHeight(
-        child: Column(
-          children:[ 
-            Checkbox(
-              value: settingsmodel.isWeekdaySelected(day), 
-              onChanged: (val) => (val!) 
-                ? settingsmodel.weekdays.add(day) 
-                : settingsmodel.weekdays.remove(day)
-            ),
-            Text(dayOfWeekToString(day)),
-          ]
-        ),
+      return Row(
+        children:[ 
+          Checkbox(
+            value: settingsmodel.isWeekdaySelected(day), 
+            onChanged: (val) => (val!) 
+              ? settingsmodel.weekdays.add(day) 
+              : settingsmodel.weekdays.remove(day)
+          ),
+          Text(dayOfWeekToString(day)),
+        ]
       );
     }).toList();
   }
 
 
   ///----------------- Shift Times -----------------
+  
+  void editShiftTimes(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Schichtzeiten bearbeiten'),
+          content: ListBody(children:_generateShiftTimeOptions(context)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Abbrechen'),
+            ),
+            TextButton(
+              onPressed: () {
+                settingsmodel.saveShiftTimes(settingsmodel.shiftStart, settingsmodel.shiftEnd);
+                Navigator.pop(context);
+              },
+              child: Text('Speichern'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-  List<Widget> generateShiftTimeOptions(BuildContext context) {
+  List<Widget> _generateShiftTimeOptions(BuildContext context) {
     return [
       ListTile(
         leading: const Icon(Icons.access_time),
