@@ -126,6 +126,14 @@ String dayOfWeekToString(int day) {
   }
 }
 
+String daysOfWeekToString(Set<int> days) {
+  String result = '';
+  for (var day in days) {
+    result += '${dayOfWeekToString(day)}, ';
+  }
+  return result.substring(0, result.length - 2);
+}
+
 /// convert from String inputs to DateTimeRange
 DateTimeRange parseDateTimeRange(
   String startDateText,
