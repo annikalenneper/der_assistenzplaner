@@ -5,7 +5,6 @@ import 'package:der_assistenzplaner/views/shared/single_input_widgets.dart';
 import 'package:flutter/material.dart';
 
 
-
 ///----------------- Setting Options -----------------
 
 class SettingsController {
@@ -16,10 +15,10 @@ class SettingsController {
   ///----------------- Shift Frequency -----------------
 
   static const _frequencyOptions = {
-    1 : 'Meine Schichten finden täglich rund um die Uhr statt (24h-Modell)',
-    2 : 'Meine Schichten finden täglich statt, aber nicht durchgängig (weniger als 24h)',
-    3 : 'Meine Schichten finden an bestimmten Wochentagen statt',
-    4 : 'Meine Schichten finden immer unterschiedlich statt (flexibel)',
+    1 : 'Meine Schichten finden täglich rund um die Uhr statt (24h-Modell).',
+    2 : 'Meine Schichten finden täglich statt, aber nicht durchgängig (weniger als 24h).',
+    3 : 'Meine Schichten finden an bestimmten Wochentagen statt.',
+    4 : 'Meine Schichten finden immer unterschiedlich statt (flexibel).',
   };
 
   String getFrequencyOption(int key) => _frequencyOptions[key] ?? 'Etwas ist schiefgegangen';
@@ -51,6 +50,22 @@ class SettingsController {
         onChanged: (val) => (val!=null) ? _setFrequencyOptions(val) : null,
       );
     }).toList();
+  }
+
+  Future<void> editFrequency(BuildContext context) async {
+    final selectedOption = await showDialog<int>(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: Text('Frequenz bearbeiten'),
+          children: generateFrequencyRadioTiles()
+        );
+      },
+    );
+
+    if (selectedOption != null) {
+      _setFrequencyOptions(selectedOption);
+    }
   }
 
 
