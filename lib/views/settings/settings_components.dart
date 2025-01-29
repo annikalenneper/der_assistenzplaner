@@ -7,15 +7,16 @@ class Settings extends StatefulWidget {
   final String title;
   final String info;
   final String selectedValue;
+  final void Function() openEditDialog;
 
   const Settings({
     super.key, 
     required this.title, 
     required this.info, 
     required this.selectedValue, 
+    required this.openEditDialog,
   });
 
-   
   @override
   State<StatefulWidget> createState() => SettingsState();
 }
@@ -44,7 +45,7 @@ class SettingsState extends State<Settings> {
                     children: [
                       IconButton(
                         icon: Icon(Icons.edit),
-                        onPressed: () => {},
+                        onPressed: widget.openEditDialog,
                       ),
                       SizedBox(width: 5),
                       Text(widget.selectedValue),             
