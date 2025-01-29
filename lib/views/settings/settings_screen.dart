@@ -56,7 +56,7 @@ class SettingsScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                 
-                      SettingsInfo(
+                      Settings(
                         title: frequencyTitle,
                         info: frequencyInfo,
                         selectedValue: controller.getFrequencyOption(
@@ -65,7 +65,7 @@ class SettingsScreen extends StatelessWidget {
                 
                       Divider(),
                 
-                      SettingsInfo(
+                      Settings(
                         title: weekdayTitle,
                         info: weekdayInfo,
                         selectedValue: 'Deine Assistenz kommt an folgenden Tagen: ${(daysOfWeekToString(settings.weekdays))}.',
@@ -73,7 +73,7 @@ class SettingsScreen extends StatelessWidget {
                 
                       Divider(),
                 
-                      SettingsInfo(
+                      Settings(
                         title: timeTitle,
                         info: timeInfo,
                         selectedValue: 'Meine Schichten beginnen normalerweise um ${formatTimeOfDay(settings.shiftStart)} und enden um ${formatTimeOfDay(settings.shiftEnd)}',

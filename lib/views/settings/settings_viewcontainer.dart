@@ -3,12 +3,12 @@ import 'package:der_assistenzplaner/viewmodels/settings_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class SettingsInfo extends StatefulWidget {
+class Settings extends StatefulWidget {
   final String title;
   final String info;
   final String selectedValue;
 
-  const SettingsInfo({
+  const Settings({
     super.key, 
     required this.title, 
     required this.info, 
@@ -17,11 +17,11 @@ class SettingsInfo extends StatefulWidget {
 
    
   @override
-  State<StatefulWidget> createState() => SettingsInfoState();
+  State<StatefulWidget> createState() => SettingsState();
 }
 
-class SettingsInfoState extends State<SettingsInfo> {
-  SettingsInfoState();
+class SettingsState extends State<Settings> {
+  SettingsState();
 
   @override
   Widget build(BuildContext context) {
