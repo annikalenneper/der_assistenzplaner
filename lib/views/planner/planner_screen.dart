@@ -4,6 +4,7 @@ import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/availabilities_model.dart';
 import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
+import 'package:der_assistenzplaner/views/planner/shift_card.dart';
 import 'package:der_assistenzplaner/views/shared/markers.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart' hide normalizeDate;
