@@ -1,7 +1,7 @@
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/viewmodels/settings_model.dart';
 import 'package:der_assistenzplaner/views/settings/settings_controller.dart';
-import 'package:der_assistenzplaner/views/settings/settings_viewcontainer.dart';
+import 'package:der_assistenzplaner/views/settings/settings_components.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/viewmodels/tag_model.dart';
 import 'package:provider/provider.dart';
@@ -31,9 +31,6 @@ class SettingsScreen extends StatelessWidget {
           final timeInfo = "Hier kannst du einstellen, wann deine Schichten anfangen und enden.";
 
           final controller = SettingsController(settings);
-          final frequency = controller.generateFrequencyRadioTiles();
-          final weekdays = controller.generateWeekdayOptions();
-          final time = controller.generateShiftTimeOptions(context);
 
           return Column(
             children: [
@@ -61,6 +58,7 @@ class SettingsScreen extends StatelessWidget {
                         info: frequencyInfo,
                         selectedValue: controller.getFrequencyOption(
                           settings.selectedFrequencyKey),
+                        openEditDialog: () => controller.editFrequency(context),
                       ),
                 
                       Divider(),
@@ -69,6 +67,7 @@ class SettingsScreen extends StatelessWidget {
                         title: weekdayTitle,
                         info: weekdayInfo,
                         selectedValue: 'Deine Assistenz kommt an folgenden Tagen: ${(daysOfWeekToString(settings.weekdays))}.',
+                        openEditDialog: () => controller.editWeekdays(context),
                       ),
                 
                       Divider(),
@@ -77,6 +76,7 @@ class SettingsScreen extends StatelessWidget {
                         title: timeTitle,
                         info: timeInfo,
                         selectedValue: 'Meine Schichten beginnen normalerweise um ${formatTimeOfDay(settings.shiftStart)} und enden um ${formatTimeOfDay(settings.shiftEnd)}',
+                        openEditDialog: () => controller.editShiftTimes(context),
                       ),
 
                       SizedBox(height: 40,),
