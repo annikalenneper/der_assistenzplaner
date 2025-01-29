@@ -10,8 +10,6 @@ enum ShiftFrequency { daily, recurring, flexible }
 class SettingsModel extends ChangeNotifier {
   SettingsRepository settingsRepository = SettingsRepository();
 
-  /// options can be set in model without saving to SharedPreferences 
-  /// confirmation dialog will be shown before saving or returning to previous screen
   late ShiftFrequency shiftFrequency;
   late bool shiftDuration24h;
   late Set<int> weekdays;
@@ -40,7 +38,6 @@ class SettingsModel extends ChangeNotifier {
   }
 
   bool isWeekdaySelected(int day) => weekdays.contains(day);
-
 
   //----------------- Data Methods -----------------
 
@@ -74,14 +71,19 @@ class SettingsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void saveShiftStart(TimeOfDay time) {
+  void saveShiftTimes(TimeOfDay start, TimeOfDay end) {
+    _saveShiftStart(start);
+    _saveShiftEnd(end);
+  }
+
+  void _saveShiftStart(TimeOfDay time) {
     shiftStart = time;
     _saveToPreferences(keyShiftStart, time);
     log("settings_model: customShiftStart set to $time");
     notifyListeners();
   }
 
-  void saveShiftEnd(TimeOfDay time) {
+  void _saveShiftEnd(TimeOfDay time) {
     shiftEnd = time;
     _saveToPreferences(keyShiftEnd, time);
     log("settings_model: customShiftEnd set to $time");
