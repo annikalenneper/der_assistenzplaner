@@ -1,3 +1,4 @@
+import 'package:der_assistenzplaner/views/assistant/assistant_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:der_assistenzplaner/views/shared/markers.dart';
