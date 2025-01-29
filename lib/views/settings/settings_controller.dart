@@ -15,10 +15,10 @@ class SettingsController {
   ///----------------- Shift Frequency -----------------
 
   static const _frequencyOptions = {
-    1 : 'Meine Schichten finden täglich rund um die Uhr statt (24h-Modell).',
-    2 : 'Meine Schichten finden täglich statt, aber nicht durchgängig (weniger als 24h).',
-    3 : 'Meine Schichten finden an bestimmten Wochentagen statt.',
-    4 : 'Meine Schichten finden immer unterschiedlich statt (flexibel).',
+    1 : 'Schichten finden täglich rund um die Uhr statt (24h-Modell)',
+    2 : 'Schichten finden täglich statt, aber nicht durchgängig (weniger als 24h)',
+    3 : 'Schichten finden an bestimmten Wochentagen statt',
+    4 : 'Schichten finden immer unterschiedlich statt (flexibel)',
   };
 
   Future<void> editFrequency(BuildContext context) async {
@@ -73,10 +73,10 @@ class SettingsController {
 
   List<RadioListTile<int>> _generateFrequencyRadioTiles() {
     var selectedOption = settingsmodel.selectedFrequencyKey;
-    return _frequencyOptions.entries.map((entry) {
+    return _frequencyOptions.entries.map((option) {
       return RadioListTile<int>(
-        title: Text(entry.value), 
-        value: entry.key, 
+        title: Text(option.value), 
+        value: option.key, 
         groupValue: selectedOption,
         onChanged: (val) => (val!=null) ? _setFrequencyOptions(val) : null,
       );

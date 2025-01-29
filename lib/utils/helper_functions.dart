@@ -75,11 +75,11 @@ String formatDate(DateTime dateTime) {
   return '$day.$month.$year';
 }
 
-/// formatted as '08:00'
+/// formatted as '08:00 Uhr'
 String formatTimeOfDay(TimeOfDay time) {
   final hour = time.hour.toString().padLeft(2, '0');
   final minute = time.minute.toString().padLeft(2, '0');
-  return '$hour:$minute';
+  return '$hour:$minute Uhr';
 }
 
 /// convert String to DateTime

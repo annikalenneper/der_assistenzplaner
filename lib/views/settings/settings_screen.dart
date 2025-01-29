@@ -26,10 +26,6 @@ class SettingsScreen extends StatelessWidget {
           final weekdayTitle = "Wochentage";
           final timeTitle = "Schichtzeit";
 
-          final frequencyInfo = "Hier kannst du auswählen, wie häufig deine Assistenz bei dir ist.";
-          final weekdayInfo = "Wähle die Tage aus, an denen deine Assistenz bei dir ist.";
-          final timeInfo = "Hier kannst du einstellen, wann deine Schichten anfangen und enden.";
-
           final controller = SettingsController(settings);
 
           return Column(
@@ -55,7 +51,6 @@ class SettingsScreen extends StatelessWidget {
                 
                       Settings(
                         title: frequencyTitle,
-                        info: frequencyInfo,
                         selectedValue: controller.getFrequencyOption(
                           settings.selectedFrequencyKey),
                         openEditDialog: () => controller.editFrequency(context),
@@ -65,8 +60,7 @@ class SettingsScreen extends StatelessWidget {
                 
                       Settings(
                         title: weekdayTitle,
-                        info: weekdayInfo,
-                        selectedValue: 'Deine Assistenz kommt an folgenden Tagen: ${(daysOfWeekToString(settings.weekdays))}.',
+                        selectedValue: 'Die Assistenz kommt an folgenden Tagen: ${(daysOfWeekToString(settings.weekdays))}',
                         openEditDialog: () => controller.editWeekdays(context),
                       ),
                 
@@ -74,8 +68,7 @@ class SettingsScreen extends StatelessWidget {
                 
                       Settings(
                         title: timeTitle,
-                        info: timeInfo,
-                        selectedValue: 'Meine Schichten beginnen normalerweise um ${formatTimeOfDay(settings.shiftStart)} und enden um ${formatTimeOfDay(settings.shiftEnd)}',
+                        selectedValue: 'Schichten beginnen normalerweise um ${formatTimeOfDay(settings.shiftStart)} und enden um ${formatTimeOfDay(settings.shiftEnd)}',
                         openEditDialog: () => controller.editShiftTimes(context),
                       ),
 

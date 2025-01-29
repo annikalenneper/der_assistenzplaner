@@ -5,14 +5,12 @@ import 'package:provider/provider.dart';
 
 class Settings extends StatefulWidget {
   final String title;
-  final String info;
   final String selectedValue;
   final void Function() openEditDialog;
 
   const Settings({
     super.key, 
     required this.title, 
-    required this.info, 
     required this.selectedValue, 
     required this.openEditDialog,
   });
@@ -35,9 +33,7 @@ class SettingsState extends State<Settings> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.title),
-                SizedBox(width: 60),
-                Text(widget.info),     
+                Text(widget.title, style: TextStyle(fontSize: 20)),
                 Spacer(),     
                 Align(
                   alignment: Alignment.bottomLeft,
