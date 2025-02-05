@@ -20,7 +20,7 @@ class SettingsScreen extends StatelessWidget {
       body: Consumer<SettingsModel>(
         builder: (context, settings, child) {
 
-          final settingsIntroText = "Deine Auswahl legt fest, wie deine Schichten im Kalender eingetragen werden. \nKeine Sorge, du kannst jederzeit einzelne Schichten im Kalender anpassen oder deine Einstellungen ändern.";
+          final settingsIntroText = "Deine Auswahl legt fest, wie deine Schichten im Kalender eingetragen werden. \nDu kannst jederzeit einzelne Schichten im Kalender anpassen oder deine Einstellungen ändern.";
 
           final frequencyTitle = "Frequenz";
           final weekdayTitle = "Wochentage";
