@@ -7,9 +7,11 @@ import 'package:flutter/material.dart';
 
 class ShiftForm extends StatefulWidget {
   final DateTime selectedDay;
+  final DateTime? editShiftStart;
+  final DateTime? editShiftEnd;
   final Function(DateTime start, DateTime end, String? assistantID) onSave;
   
-  const ShiftForm({super.key, required this.onSave, required this.selectedDay});
+  const ShiftForm({super.key, required this.onSave, required this.selectedDay, this.editShiftStart, this.editShiftEnd});
 
   @override
   State<ShiftForm> createState() => ShiftFormState();
@@ -23,15 +25,29 @@ class ShiftFormState extends State<ShiftForm> {
   final TextEditingController _endDateController = TextEditingController();
   final TextEditingController _endTimeController = TextEditingController();
 
+  //TO-DO: add validators
+
+  //TO-DO: default values from settings when creating new shift (no start and end time given in constructor)
+  String getInitialStart(){
+    return (widget.editShiftStart != null) 
+      ? formatDate(widget.editShiftStart!)
+      : "08:00";
+  }
+
+  String getInitialEnd(){
+    return (widget.editShiftEnd != null) 
+      ? formatDate(widget.editShiftEnd!)
+      : "16:00";
+  }
+
   @override
   void initState() {
     super.initState();
     /// set initial value for dates
     _startDateController.text = formatDate(widget.selectedDay);
     _endDateController.text = formatDate(widget.selectedDay);
-    //TO-DO: set default values from settings
-    _startTimeController.text = '08:00'; 
-    _endTimeController.text = '16:00';
+    _startTimeController.text = getInitialStart(); 
+    _endTimeController.text = getInitialEnd();
   }
 
   Future<void> _pickDate(TextEditingController controller) async {
