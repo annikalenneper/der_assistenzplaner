@@ -91,7 +91,7 @@ class CalendarViewState extends State<CalendarView> {
         /// headline
         final headingForSelectedDay = Padding(
           padding: const EdgeInsets.all(20.0),
-          child: Text(formatDateAndTime(_selectedDay), style: const TextStyle(fontSize: 20)),
+          child: Text(formatDate(_selectedDay), style: const TextStyle(fontSize: 20)),
         );        
 
         /// shows scheduled shifts for selected day         

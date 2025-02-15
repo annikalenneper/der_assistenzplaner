@@ -70,10 +70,11 @@ String formatDateAndTime(DateTime dateTime) {
 
 /// fotmatted as 'Mo, 01.01.2021'
 String formatDate(DateTime dateTime) {
+  final weekday = dayOfWeekToString(dateTime.weekday);
   final day = dateTime.day.toString().padLeft(2, '0');
   final month = dateTime.month.toString().padLeft(2, '0');
   final year = dateTime.year;
-  return '$day.$month.$year';
+  return '$weekday, $day.$month.$year';
 }
 
 /// formatted as '08:00'
