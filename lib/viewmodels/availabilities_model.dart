@@ -7,13 +7,10 @@ import 'package:flutter/material.dart';
 class AvailabilitiesModel extends ChangeNotifier{
   SettingsRepository settingsRepository = SettingsRepository();
 
-  /// default values
-  DateTime _defaultAvailabilitiesStartDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
-  DateTime _defaultAvailabilityDueDate = DateTime(DateTime.now().year, DateTime.now().month, 15);
   Duration _minimumBetweenStartAndDueDate = Duration(days: 7);
 
-  late DateTime availabilitesStartDate;
-  late DateTime availabilitesDueDate;
+  late DateTime currentAvailabilitesStartDate;
+  late DateTime currentAvailabilitesDueDate;
   late int availabilitiesCount;
   late Set<Availability> currentAvailabilities;
   late Set<Availability> pastAvailabilities;
@@ -28,27 +25,27 @@ class AvailabilitiesModel extends ChangeNotifier{
 
   //----------------- Formatted Values -----------------
 
-  String get formattedAvailabilitiesStartDate => formatDateTime(availabilitesStartDate);
-  String get formattedAvailabilitiesDueDate => formatDateTime(availabilitesDueDate);
-  int get daysUntilAvailabilitiesDueDate => availabilitesDueDate.difference(DateTime.now()).inDays;
+  String get formattedAvailabilitiesStartDate => formatDateAndTime(currentAvailabilitesStartDate);
+  String get formattedAvailabilitiesDueDate => formatDateAndTime(currentAvailabilitesDueDate);
+  int get daysUntilAvailabilitiesDueDate => currentAvailabilitesDueDate.difference(DateTime.now()).inDays;
 
 
   //----------------- Setter methods -----------------
 
   set availabilitiesStartDate(DateTime value) {
-    DateTime earliestPossibleStartDate = availabilitesDueDate.subtract(_minimumBetweenStartAndDueDate);
+    DateTime earliestPossibleStartDate = currentAvailabilitesStartDate.subtract(_minimumBetweenStartAndDueDate);
 
     (value.isBefore(earliestPossibleStartDate)) 
-          ? availabilitesStartDate = value 
-          : availabilitesStartDate = earliestPossibleStartDate;
+          ? currentAvailabilitesStartDate = value 
+          : currentAvailabilitesStartDate = earliestPossibleStartDate;
   }
 
   set availabilitiesDueDate(DateTime value) {
-    DateTime latestPossibleDueDate = availabilitesStartDate.add(_minimumBetweenStartAndDueDate);
+    DateTime latestPossibleDueDate = currentAvailabilitesStartDate.add(_minimumBetweenStartAndDueDate);
 
     (value.isAfter(latestPossibleDueDate)) 
-          ? availabilitesDueDate = value 
-          : availabilitesDueDate = latestPossibleDueDate;
+          ? currentAvailabilitesDueDate = value 
+          : currentAvailabilitesDueDate = latestPossibleDueDate;
   }
 
   //----------------- UI methods -----------------
@@ -74,12 +71,22 @@ class AvailabilitiesModel extends ChangeNotifier{
     await _loadAvailabilities();
 
     /// get values from SharedPreferences using SettingsRepository
-    availabilitesStartDate = await settingsRepository.getAvailabilitiesStartDate() ?? _defaultAvailabilitiesStartDate;
-    availabilitesDueDate = await settingsRepository.getAvailabilitiesDueDate() ?? _defaultAvailabilityDueDate;
+    currentAvailabilitesStartDate = await _loadCurrentAvailabilitiesStartDate();
+    currentAvailabilitesDueDate = await _loadCurrentAvailabilitiesDueDate();
   }
 
   Future<void> _loadAvailabilities() async {
     /// TO-DO: implement loading availabilities from database
+  }
+
+  Future<DateTime> _loadCurrentAvailabilitiesStartDate() async {
+    int date = await settingsRepository.getAvailabilitiesStartDate() ?? 1;
+    return DateTime(DateTime.now().year, DateTime.now().month, date);
+  }
+
+  Future<DateTime> _loadCurrentAvailabilitiesDueDate() async {
+    int date = await settingsRepository.getAvailabilitiesDueDate() ?? 15;
+    return DateTime(DateTime.now().year, DateTime.now().month, date);
   }
 
 }
