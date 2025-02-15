@@ -20,12 +20,6 @@ class SettingsScreen extends StatelessWidget {
       body: Consumer<SettingsModel>(
         builder: (context, settings, child) {
 
-          final settingsIntroText = "Deine Auswahl legt fest, wie deine Schichten im Kalender eingetragen werden. \nDu kannst jederzeit einzelne Schichten im Kalender anpassen oder deine Einstellungen ändern.";
-
-          final frequencyTitle = "Frequenz";
-          final weekdayTitle = "Wochentage";
-          final timeTitle = "Schichtzeit";
-
           final controller = SettingsController(settings);
 
           return Column(
@@ -51,8 +45,8 @@ class SettingsScreen extends StatelessWidget {
                 
                       Settings(
                         title: frequencyTitle,
-                        selectedValue: controller.getFrequencyOption(
-                          settings.selectedFrequencyKey),
+                        selectedValue: 
+                          'Deine Assistenzkräfte sind ${settings.formattedShiftFrequency} im Einsatz',
                         openEditDialog: () => controller.editFrequency(context),
                       ),
                 
@@ -70,6 +64,14 @@ class SettingsScreen extends StatelessWidget {
                         title: timeTitle,
                         selectedValue: 'Schichten beginnen normalerweise um ${formatTimeOfDay(settings.shiftStart)} und enden um ${formatTimeOfDay(settings.shiftEnd)}',
                         openEditDialog: () => controller.editShiftTimes(context),
+                      ),
+
+                      Divider(),
+
+                      Settings(
+                        title: dueDateTitle, 
+                        selectedValue: 'Deine Assistenzkräfte können ihre Verfügbarkeiten vom ${settings.availabilitesStartDate}. bis zum ${settings.availabilitesDueDate}. des Monats einreichen.', 
+                        openEditDialog: () => controller.editAvailabilityDueDate(context),
                       ),
 
                       SizedBox(height: 40,),
