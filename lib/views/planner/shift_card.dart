@@ -1,7 +1,4 @@
-
-
-
-//----------------- ShiftCard + ShiftCardDetails -----------------
+import 'dart:developer';
 
 import 'package:der_assistenzplaner/data/models/shift.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
@@ -22,16 +19,16 @@ class ShiftCard extends StatelessWidget {
     required this.shift, 
     required this.assistantID,});
 
-  /// check if splittime is outside shift or new shift shorter than 15 minutes
+  /// check if split time is outside of shift or if the new shifts are too short
   bool _isInvalidShiftSplit(Shift shift, DateTime splitTime) {
-    return (
-      splitTime.isAtSameMomentAs(shift.start) ||
-      splitTime.isAtSameMomentAs(shift.end) ||
-      splitTime.isBefore(shift.start) || 
-      splitTime.isAfter(shift.end) ||
-      calculateDateTimeDuration(shift.start, shift.end) < 15.0
-    );
+    bool isOutsideShift = splitTime.isBefore(shift.start) || splitTime.isAfter(shift.end);
+    int firstShiftDuration = calculateDateTimeDuration(shift.start, splitTime);
+    int secondShiftDuration = calculateDateTimeDuration(splitTime, shift.end);
+    bool isTooShort = firstShiftDuration < 15.0 || secondShiftDuration < 15.0;
+    return isOutsideShift || isTooShort; 
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +61,7 @@ class ShiftCard extends StatelessWidget {
     );
   }
 
-  Widget _buildShiftTimeInfo(shift) {
+  Widget _buildShiftTimeInfo(Shift shift) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,6 +145,7 @@ class ShiftCard extends StatelessWidget {
               onTimeSelected: (time) {               
                 ShiftModel shiftModel = Provider.of<ShiftModel>(context, listen: false);
                 final breakpoint = timeOfDayToDateTime(time, shift.start);
+                log('Splitting shift at $breakpoint');
                 if (_isInvalidShiftSplit(shift, breakpoint)) {
                   showDialog(
                     context: context,
