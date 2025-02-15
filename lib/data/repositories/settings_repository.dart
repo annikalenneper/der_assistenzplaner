@@ -9,9 +9,9 @@ class SettingsRepository {
 
   //----------------- Get Data -----------------
 
-  Future<DateTime?> getAvailabilitiesDueDate() async {
+  Future<int?> getAvailabilitiesDueDate() async {
     try {
-      final dueDate = await SharedPreferencesHelper.loadValue('availabilitiesDueDate', DateTime);
+      final dueDate = await SharedPreferencesHelper.loadValue('availabilitiesDueDate', int);
       if (dueDate != null) {
         log('SettingsRepository: Fetched availabilities due date.');
         return dueDate;
@@ -25,12 +25,12 @@ class SettingsRepository {
     }
   }
 
-  Future<DateTime?> getAvailabilitiesStartDate() async {
+  Future<int?> getAvailabilitiesStartDate() async {
     try {
-      final startDate = await SharedPreferencesHelper.loadValue('availabilitiesStartDate', DateTime);
+      final startDate = await SharedPreferencesHelper.loadValue('availabilitiesStartDate', int);
       if (startDate != null) {
         log('SettingsRepository: Fetched availabilities start date.');
-        return startDate as DateTime;
+        return startDate as int;
       } else {
         log('SettingsRepository: No availabilities start date found.');
         return null;
