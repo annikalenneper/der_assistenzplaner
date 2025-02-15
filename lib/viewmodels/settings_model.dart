@@ -19,12 +19,17 @@ class SettingsModel extends ChangeNotifier {
 
   Duration get shiftDuration => calculateTimeOfDayDuration(shiftStart, shiftEnd);
 
+  late int availabilitesStartDate;
+  late int availabilitesDueDate;
+
   /// keys for SharedPreferences 
   static const String keyFrequency = 'shiftFrequency';
   static const String key24hShift = 'is24hShift';
   static const String keyWeekdays = 'weekdays';
   static const String keyShiftStart = 'shiftStart';
   static const String keyShiftEnd = 'shiftEnd';
+  static const String keyAvailabilitiesStartDate = 'availabilitiesStartDate';
+  static const String keyAvailabilitiesDueDate = 'availabilitiesDueDate';
 
   int get selectedFrequencyKey {
     switch (shiftFrequency) {
@@ -39,6 +44,19 @@ class SettingsModel extends ChangeNotifier {
 
   bool isWeekdaySelected(int day) => weekdays.contains(day);
 
+  //----------------- Formatting methods -----------------
+
+  String get formattedShiftFrequency {
+     switch (shiftFrequency) {
+      case ShiftFrequency.daily:
+        return 'täglich';
+      case ShiftFrequency.recurring:
+        return 'an bestimmten Wochentagen';
+      case ShiftFrequency.flexible:
+        return 'zu unterschiedlichen Zeiten';
+     }
+  }
+
   //----------------- Data Methods -----------------
 
   /// only save settings to SharedPreferences if user confirms 
@@ -48,6 +66,8 @@ class SettingsModel extends ChangeNotifier {
     _saveToPreferences(keyShiftStart, shiftStart);
     _saveToPreferences(keyShiftEnd, shiftEnd);
     _saveToPreferences(keyWeekdays, weekdays.toSet());
+    _saveToPreferences(keyAvailabilitiesStartDate, availabilitesStartDate);
+    _saveToPreferences(keyAvailabilitiesDueDate, availabilitesDueDate);
     notifyListeners();
   }
 
@@ -58,12 +78,32 @@ class SettingsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void saveShiftFrequency(ShiftFrequency frequency) {
-    shiftFrequency = frequency;
-    _saveToPreferences(keyFrequency, frequency.name);
-    log("settings_model: shiftFrequency set to $frequency");
+  void saveShiftFrequencyByKey(int frequencyKey) {
+    final frequencyData = _keyToFrequency(frequencyKey);
+    shiftFrequency = frequencyData.$1;
+    shiftDuration24h = frequencyData.$2;
+    _saveToPreferences(keyFrequency, shiftFrequency.name);
+    _saveToPreferences(key24hShift, shiftDuration24h);
+    log("settings_model: shiftFrequency set to $shiftFrequency (24h: $shiftDuration24h)");
     notifyListeners();
   }
+
+
+  (ShiftFrequency, bool) _keyToFrequency(int key) {
+    switch (key) {
+      case 1:
+        return (ShiftFrequency.daily, true);
+      case 2:
+        return (ShiftFrequency.daily, false);
+      case 3:
+        return (ShiftFrequency.recurring, false);
+      case 4:
+        return (ShiftFrequency.flexible, false);
+      default:
+        throw Exception("Ungültiger Frequenz-Key: $key");
+    }
+  }
+
   
   void saveWeekdays(Set<int> selectedWeekdays) {
     weekdays = selectedWeekdays;
@@ -87,6 +127,20 @@ class SettingsModel extends ChangeNotifier {
     shiftEnd = time;
     _saveToPreferences(keyShiftEnd, time);
     log("settings_model: customShiftEnd set to $time");
+    notifyListeners();
+  }
+
+  void saveAvailabilitiesStartDate(int startDate) {
+    availabilitesStartDate = startDate;
+    _saveToPreferences(keyAvailabilitiesStartDate, startDate);
+    log("settings_model: availabilitiesStartDate set to $startDate");
+    notifyListeners();
+  }
+
+  void saveAvailabilitiesDueDate(int dueDate) {
+    availabilitesDueDate = dueDate;
+    _saveToPreferences(keyAvailabilitiesDueDate, dueDate);
+    log("settings_model: availabilitiesDueDate set to $dueDate");
     notifyListeners();
   }
 
@@ -115,7 +169,9 @@ class SettingsModel extends ChangeNotifier {
     shiftStart = await SharedPreferencesHelper.loadValue(keyShiftStart, TimeOfDay) ?? defaultShiftStart;
     shiftEnd = await SharedPreferencesHelper.loadValue(keyShiftEnd, TimeOfDay) ?? defaultShiftEnd;
     shiftFrequency = await settingsRepository.getShiftFrequency();
-    weekdays = await settingsRepository.getSelectedWeekdays();    
+    weekdays = await settingsRepository.getSelectedWeekdays();  
+    availabilitesStartDate = await SharedPreferencesHelper.loadValue(keyAvailabilitiesStartDate, int) ?? 1;
+    availabilitesDueDate = await SharedPreferencesHelper.loadValue(keyAvailabilitiesDueDate, int) ?? 15;  
 
   }
 }
