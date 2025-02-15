@@ -19,8 +19,8 @@ Duration calculateTimeOfDayDuration(TimeOfDay start, TimeOfDay end) {
   return Duration(hours: hours, minutes: minutes);
 }
 
-double calculateDateTimeDuration(DateTime start, DateTime end) {
-  return end.difference(start).inMinutes / 60;
+int calculateDateTimeDuration(DateTime start, DateTime end) {
+  return end.difference(start).inMinutes;
 }
 
 DateTime lastDayOfMonth(DateTime dateTime) {
@@ -49,7 +49,6 @@ void insertSorted<T>(List<T> list, T element, int Function(T a, T b) compare) {
 }
 
 
-
 //------------------------- Time Formatting -------------------------
 
 
@@ -59,15 +58,17 @@ DateTime normalizeDate(DateTime dateTime) {
 }
 
 /// fotmatted as 'Mo, 01.01.2021 08:00 Uhr'
-String formatDateTime(DateTime dateTime) {
+String formatDateAndTime(DateTime dateTime) {
   final weekday = dayOfWeekToString(dateTime.weekday);
   final day = dateTime.day.toString().padLeft(2, '0');
   final month = dateTime.month.toString().padLeft(2, '0');
   final year = dateTime.year;
-  return '$weekday, $day.$month.$year';
+  final hour = dateTime.hour.toString().padLeft(2, '0');
+  final minute = dateTime.minute.toString().padLeft(2, '0');
+  return '$weekday, $day.$month.$year $hour:$minute Uhr';
 }
 
-/// formatted as '01.01.2021'
+/// fotmatted as 'Mo, 01.01.2021'
 String formatDate(DateTime dateTime) {
   final day = dateTime.day.toString().padLeft(2, '0');
   final month = dateTime.month.toString().padLeft(2, '0');
@@ -75,11 +76,11 @@ String formatDate(DateTime dateTime) {
   return '$day.$month.$year';
 }
 
-/// formatted as '08:00 Uhr'
+/// formatted as '08:00'
 String formatTimeOfDay(TimeOfDay time) {
   final hour = time.hour.toString().padLeft(2, '0');
   final minute = time.minute.toString().padLeft(2, '0');
-  return '$hour:$minute Uhr';
+  return '$hour:$minute';
 }
 
 /// convert String to DateTime
@@ -127,12 +128,15 @@ String dayOfWeekToString(int day) {
 }
 
 String daysOfWeekToString(Set<int> days) {
+  if (days.isEmpty) return 'Keine Wochentage ausgewählt';
+
   String result = '';
   for (var day in days) {
     result += '${dayOfWeekToString(day)}, ';
   }
-  return result.substring(0, result.length - 2);
+  return result.substring(0, result.length - 2); // Entfernt das letzte Komma + Leerzeichen
 }
+
 
 /// convert from String inputs to DateTimeRange
 DateTimeRange parseDateTimeRange(
