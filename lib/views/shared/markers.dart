@@ -1,9 +1,6 @@
 import 'package:der_assistenzplaner/data/models/shift.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
-import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
-import 'package:der_assistenzplaner/views/planner/shift_usecases.dart';
-import 'package:der_assistenzplaner/views/shared/single_input_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/data/models/tag.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
