@@ -102,7 +102,7 @@ class ShiftModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// delete shift from database
+  /// delete shift from database and local structure
   Future<void> deleteShift(String shiftID) async {
     await shiftRepository.deleteShift(shiftID);
     _deleteShiftFromLocalStructure(shiftID);
@@ -118,7 +118,7 @@ class ShiftModel extends ChangeNotifier {
     }
     final newShift = Shift(splitTime, shift.end, shift.assistantID);
     shift.end = splitTime;
-    await saveShift(shift);
+    await updateShift(shift);
     await saveShift(newShift);
   } 
 
@@ -130,11 +130,6 @@ class ShiftModel extends ChangeNotifier {
     _addToMapOfShiftsByDay(newShift);
     _addToMapOfShiftsByAssistant(newShift);
     log('ShiftModel: Added shift to local structure and updated shiftsByDay.');
-  }
-
-  void _updateShiftInLocalStructure(Shift updatedShift) {
-    _shifts.remove(updatedShift);
-    notifyListeners();
   }
 
   void _deleteShiftFromLocalStructure(String shiftID) {
