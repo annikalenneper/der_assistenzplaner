@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'package:der_assistenzplaner/data/repositories/shift_repository.dart';
-import 'package:der_assistenzplaner/utils/cache.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/data/models/shift.dart';
@@ -17,13 +16,11 @@ class ShiftModel extends ChangeNotifier {
   ShiftDisplayOptions _selectedShiftDisplayOption = ShiftDisplayOptions.scheduled;
   String? _selectedAssistantID;
   
-  final MarkerCache markerCache = MarkerCache();
 
   ShiftModel();
 
   //----------------- Getter methods -----------------
   
-
   Map<DateTime, List<Shift>> get shiftsByDay => _mapOfShiftsByDay;
   ShiftDisplayOptions get selectedShiftDisplayOption => _selectedShiftDisplayOption;
   Set<Shift> get scheduledShifts => _shifts.toSet()..removeWhere((shift) => !shift.isScheduled);
@@ -103,21 +100,13 @@ class ShiftModel extends ChangeNotifier {
 
   /// update shift in database and local structure
   Future<void> updateShift(Shift shiftToUpdate, {DateTime? newStart, DateTime? newEnd, String? newAssistantID}) async {
-    log('ShiftModel: Updating shift with ID ${shiftToUpdate.shiftID} from ${shiftToUpdate.start} to ${shiftToUpdate.end} with assistant ${shiftToUpdate.assistantID}');
-
     final updatedShift = shiftToUpdate.copyWith(
       start: newStart,
       end: newEnd,
       assistantID: newAssistantID,
     );
-    log('ShiftModel: Copied shift to new shift with start: ${updatedShift.start}, end: ${updatedShift.end}, assistantID: ${updatedShift.assistantID}');
-
-    await shiftRepository.saveShift(updatedShift);
     deleteShift(shiftToUpdate.shiftID);
-    _addShiftToLocalStructure(updatedShift);
-
-    log('ShiftModel: Updated shift with ID ${updatedShift.shiftID} in local structure');
-
+    await saveShift(updatedShift);
     notifyListeners();
   }
 
@@ -135,7 +124,7 @@ class ShiftModel extends ChangeNotifier {
     } if (splitTime.isAtSameMomentAs(shift.start) || splitTime.isAtSameMomentAs(shift.end)) {
       throw ArgumentError('Split time must not be equal to start or end of shift.');
     }
-    final newShift = Shift(splitTime, shift.end, shift.assistantID);
+    final newShift = createShift(splitTime, shift.end, shift.assistantID);
     shift.end = splitTime;
     await updateShift(shift);
     await saveShift(newShift);
@@ -148,7 +137,7 @@ class ShiftModel extends ChangeNotifier {
     _addToShifts(newShift);
     _addToMapOfShiftsByDay(newShift);
     _addToMapOfShiftsByAssistant(newShift);
-    log('ShiftModel: Added shift to local structure and updated shiftsByDay.');
+    log('ShiftModel: Added shift ${newShift.start} - ${newShift.end} to local structure and updated shiftsByDay.');
   }
 
   void _deleteShiftFromLocalStructure(String shiftID) {

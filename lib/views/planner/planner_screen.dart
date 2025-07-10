@@ -1,5 +1,4 @@
 import 'package:der_assistenzplaner/styles/styles.dart';
-import 'package:der_assistenzplaner/utils/cache.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/viewmodels/availabilities_model.dart';
@@ -27,7 +26,6 @@ class CalendarViewState extends State<CalendarView> {
   static final _defaultFirstDay = DateTime(DateTime.now().year, DateTime.now().month, 1);
   static final _defaultLastDay = lastDayOfMonth(DateTime.now());
 
-  MarkerCache markerCache = MarkerCache();
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +70,7 @@ class CalendarViewState extends State<CalendarView> {
           ),
 
           calendarBuilders: CalendarBuilders(
-            markerBuilder: (context, day, events) => buildDayMarker(context, day, shiftModel) 
+            markerBuilder: (context, day, events) => buildDayMarker(context, day) 
           ),
 
           selectedDayPredicate: (day) {
@@ -92,12 +90,12 @@ class CalendarViewState extends State<CalendarView> {
           },
         );
 
-        /// shows scheduled shifts for selected day         
+        /// scheduled shifts for selected day for the right side view      
         final normalizedSelectedDay = normalizeDate(_selectedDay);
         final shiftsForSelectedDay = shiftModel.shiftsByDay[(normalizedSelectedDay)] ?? [];
+        shiftsForSelectedDay.sort((a, b) => a.start.compareTo(b.start));
 
         final shiftsView = Column(
-          key: ValueKey(shiftModel.shiftsByDay.hashCode),
           children: [
             // Header mit Datum und Add-Button
             Container(
@@ -171,7 +169,6 @@ class CalendarViewState extends State<CalendarView> {
                         final shift = shiftsForSelectedDay[index];
                         return ShiftCard(
                           shift: shift,
-                          assistantID: shift.assistantID ?? '',
                         );
                       },
                     ),
