@@ -34,9 +34,7 @@ class CalendarViewState extends State<CalendarView> {
         final assistantModel = Provider.of<AssistantModel>(context);
 
         final calendar = TableCalendar(
-          // Fügen Sie einen eindeutigen Key hinzu, um Rebuilds zu erzwingen
-          key: ValueKey(shiftModel.shiftsByDay.hashCode),
-
+          key: ValueKey(shiftModel.shiftsByDay.hashCode), // TODO: check if this is necessary
           firstDay: _defaultFirstDay, 
           lastDay: _defaultLastDay, 
           focusedDay: _focusedDay,
@@ -46,9 +44,11 @@ class CalendarViewState extends State<CalendarView> {
           shouldFillViewport: true,
           headerVisible: true,
 
-          headerStyle: const HeaderStyle(
+          headerStyle: HeaderStyle(
             titleCentered: true,
             formatButtonVisible: false,
+            titleTextStyle: Theme.of(context).textTheme.headlineSmall!, 
+            headerMargin: const EdgeInsets.only(bottom: 22.0), 
           ),
 
           daysOfWeekStyle: const DaysOfWeekStyle(
