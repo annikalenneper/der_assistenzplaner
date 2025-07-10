@@ -188,6 +188,14 @@ class CalendarDayMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Bestimme den Tag anhand der ersten Schicht (angenommen, alle Schichten gehören zu diesem Tag)
+    final dayDate = normalizeDate(shifts.first.start);
+    final shiftModel = Provider.of<ShiftModel>(context, listen: false);
+    
+    // Verwende die im ShiftModel implementierte Filterlogik:
+    final scheduledShiftsInDay = shiftModel.getScheduledShiftsByDay(dayDate).toList();
+    final unscheduledShiftsInDay = shiftModel.getUnscheduledShiftsByDay(dayDate).toList();
+
     return Stack(
       children: [
         Positioned.fill(
@@ -204,31 +212,58 @@ class CalendarDayMarker extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  ...shifts
-                      .where((shift) => shift.assistantID != null)
-                      .map((shift) => shift.assistantID!)
-                      .toSet() // no duplicates
-                      .map((assistantID) => Padding(
+                  // Zeige AssistantMarker nur für geplante (scheduled) Schichten
+                  ...scheduledShiftsInDay
+                      .map((shift) => shift.assistantID)
+                      .where((assistantId) => assistantId != null)
+                      .toSet() // Duplikate entfernen
+                      .map((assistantId) => Padding(
                             padding: const EdgeInsets.all(1.0), 
                             child: AssistantMarker(
                               size: 14, 
-                              assistantID: assistantID,
+                              assistantID: assistantId!,
                               onTap: () {},
                             ),
                           )),
-                  // number of shifts
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                      child: Text(
-                        '${shifts.length} Schicht${shifts.length > 1 ? 'en' : ''}',
-                        style: const TextStyle(
-                          fontSize: 8,
-                          color: ModernBusinessTheme.primaryColor,
-                          fontWeight: FontWeight.bold,
+                  // Anzeige der Gesamtzahl und Statusindikatoren
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${shifts.length} Schicht${shifts.length > 1 ? 'en ' : ' '}',
+                          style: const TextStyle(
+                            fontSize: 8,
+                            color: ModernBusinessTheme.primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
+                        // Für jede geplante Schicht wird ein Haken generiert
+                        ...List.generate(scheduledShiftsInDay.length, (_) => 
+                          Text(
+                            '(✓)',
+                            style: TextStyle(
+                              fontSize: 8,
+                              color: Colors.green[800],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        ),
+                        // Für jede ungeplante Schicht wird ein Kreuz generiert
+                        ...List.generate(unscheduledShiftsInDay.length, (_) => 
+                          Text(
+                            '(✗)',
+                            style: TextStyle(
+                              fontSize: 8,
+                              color: Colors.red[800],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        ),
+                      ],
                     ),
-
+                  ),
                 ],
               ),
             ),
