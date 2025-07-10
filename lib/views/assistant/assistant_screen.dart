@@ -18,34 +18,37 @@ class AssistantPage extends StatefulWidget {
 }
 
 class _AssistantPageState extends State<AssistantPage> {
-  int _index = 0;
+  late int _selectedIndex;
+  late bool _showTeamSidebar;
 
-  /// change view in AssistantPage
-  void _setAssistantPageViewState(int index) {
-    setState(() {
-      _index = index;
-    });
-    log('AssistantPageViewState: $_index');
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = 0;
+    _showTeamSidebar = _selectedIndex == 1;
+    
+    // Wenn Team angezeigt wird, aber kein Assistent ausgewählt ist, setze currentAssistant auf null
+    if (_selectedIndex == 1) {
+      Future.microtask(() {
+        Provider.of<AssistantModel>(context, listen: false).deselectAssistant();
+      });
+    }
   }
 
- @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Center(
-          child: IndexedStack(
-            index: _index,
-            children: [
-              /// callback function executes setAssistantPageViewState() from AssistantListView
-              AssistantListView(
-                changePageViewIndex: _setAssistantPageViewState
-              ),
-              AssistantDetailView(),
-            ],
-          ),
-        ),
-      ),
+    return Consumer<AssistantModel>(
+      builder: (context, assistantModel, child) {
+        if (assistantModel.currentAssistant != null) {
+          return AssistantDetailView();
+        } else {
+          return Center(
+            child: Text(
+              'Wähle eine Assistenzkraft aus der Sidebar aus',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          );
+        }
+      },
     );
   }
 }
@@ -106,28 +109,28 @@ class _AssistantListViewState extends State<AssistantListView> {
                       child: Icon(Icons.add),
                       onPressed: () {
                         showDialog(
-                        context: context, 
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text('Neue Assistenzkraft hinzufügen'),
-                            content: AddAssistantForm(
-                              onSave: (name, hours, color) {
-                                final newAssistant = assistantModel.createAssistant(name, hours);
-                                assistantModel.saveAssistant(newAssistant);
-                                assistantModel.assignColor(newAssistant.assistantID, color);
-                              },
-                            ),
-                          );
-                        }, 
-                      );
-                    },
+                          context: context, 
+                          builder: (context) {
+                            return AlertDialog(
+                              title: Text('Neue Assistenzkraft hinzufügen'),
+                              content: AddAssistantForm(
+                                onSave: (name, hours, color) {
+                                  final newAssistant = assistantModel.createAssistant(name, hours);
+                                  assistantModel.saveAssistant(newAssistant);
+                                  assistantModel.assignColor(newAssistant.assistantID, color);
+                                },
+                              ),
+                            );
+                          }, 
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
     );
   }
 }
@@ -220,6 +223,109 @@ class AssistantDetailView extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class TeamSidebar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AssistantModel>(
+      builder: (context, assistantModel, child) {
+        return Container(
+          color: Theme.of(context).colorScheme.surface,
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Team',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.add),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: Text('Neue Assistenzkraft hinzufügen'),
+                              content: AddAssistantForm(
+                                onSave: (name, hours, color) {
+                                  final newAssistant = assistantModel.createAssistant(name, hours);
+                                  assistantModel.saveAssistant(newAssistant);
+                                  assistantModel.assignColor(newAssistant.assistantID, color);
+                                },
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: assistantModel.assistants.length,
+                  itemBuilder: (context, index) {
+                    var assistant = assistantModel.assistants.elementAt(index);
+                    return AssistantSidebarCard(
+                      assistantID: assistant.assistantID,
+                      onTap: () {
+                        assistantModel.currentAssistant = assistant;
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class AssistantSidebarCard extends StatelessWidget {
+  final String assistantID;
+  final VoidCallback onTap;
+
+  const AssistantSidebarCard({
+    super.key,
+    required this.assistantID,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final assistantModel = Provider.of<AssistantModel>(context);
+    final assistant = assistantModel.assistantMap[assistantID];
+    final name = assistant?.name ?? 'Unbekannt';
+    final deviation = assistant?.formattedDeviation ?? 'Unbekannt';
+    final color = assistantModel.assistantColorMap[assistantID] ?? Colors.grey;
+
+    return Card(
+      elevation: assistantModel.currentAssistant?.assistantID == assistantID ? 8 : 1,
+      color: assistantModel.currentAssistant?.assistantID == assistantID 
+          ? Theme.of(context).colorScheme.primaryContainer 
+          : null,
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: color,
+          child: Icon(Icons.person, color: Colors.white),
+        ),
+        title: Text(name),
+        subtitle: Text(deviation),
+        onTap: () {
+          assistantModel.selectAssistant(assistantID);
+          onTap();
+        },
       ),
     );
   }
