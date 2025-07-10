@@ -26,12 +26,26 @@ class ShiftModel extends ChangeNotifier {
   Set<Shift> get scheduledShifts => _shifts.toSet()..removeWhere((shift) => !shift.isScheduled);
   Set<Shift> get unscheduledShifts => _shifts.where((shift) => !shift.isScheduled).toSet();
 
+
+  bool isScheduled(shiftID) => 
+    getShiftById(shiftID)?.isScheduled ?? false;
+
   Shift? getShiftById(String shiftID) {
     try {
       return _shifts.firstWhere((shift) => shift.shiftID == shiftID);
     } catch (e) {
       return null;
     }
+  }
+
+  Set<Shift> getScheduledShiftsByDay(DateTime day) {
+    final normalizedDay = normalizeDate(day);
+    return _mapOfShiftsByDay[normalizedDay]?.where((shift) => shift.isScheduled).toSet() ?? <Shift>{};
+  }
+
+  Set<Shift> getUnscheduledShiftsByDay(DateTime day) {
+    final normalizedDay = normalizeDate(day);
+    return _mapOfShiftsByDay[normalizedDay]?.where((shift) => !shift.isScheduled).toSet() ?? <Shift>{};
   }
 
   //----------------- UI methods -----------------
