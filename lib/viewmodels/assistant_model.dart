@@ -110,6 +110,7 @@ class AssistantModel extends ChangeNotifier {
 
   Future<void> deleteAssistant(String assistantID) async {
     await assistantRepository.deleteAssistant(assistantID);
+    deselectAssistant();
     _removeAssistantFromLocalStructures(assistantID);
     notifyListeners();
   }

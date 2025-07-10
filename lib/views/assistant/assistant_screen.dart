@@ -2,8 +2,6 @@ import 'package:der_assistenzplaner/views/assistant/assistant_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
-import 'dart:developer';
-import 'package:der_assistenzplaner/utils/nav.dart';
 import 'package:der_assistenzplaner/views/assistant/assistant_usecases.dart';
 
 
@@ -91,8 +89,7 @@ class _AssistantListViewState extends State<AssistantListView> {
                             var assistant = assistantModel.assistants.elementAt(index);
                             return GestureDetector(
                               onTap: () {
-                                assistantModel.currentAssistant = assistant;
-                                /// navigate to AssistantDetailView
+                                assistantModel.selectAssistant(assistant.assistantID);
                                 widget.changePageViewIndex(1);
                               },
                               child: AssistantCard(assistantID: assistant.assistantID,)
@@ -152,7 +149,7 @@ class AssistantDetailView extends StatelessWidget {
           icon: Icon(Icons.arrow_back),
           onPressed: () {
             assistant.deselectAssistant();
-            navigateToAssistantScreen(context);
+
           },
         ),
       ),
@@ -189,7 +186,7 @@ class AssistantDetailView extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('${assistant.name} erfolgreich gelöscht.')),
                         );
-                        navigateToAssistantScreen(context);
+                        Navigator.of(context).pop();
                       },
                       child: Text('Entgültig löschen')
                     ),
