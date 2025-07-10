@@ -67,8 +67,23 @@ part 'shift.g.dart';
         ? _end = end
         : throw ArgumentError('Endzeitpunkt muss nach Startzeitpunkt liegen.');
 
-    
+    set assistantID(String? value) {
+      if (value != null && value.isEmpty) {
+        throw ArgumentError('Assistant ID cannot be an empty string.');
+      }
+      _assistantID = value;
+    }
+
+    Shift copyWith({
+      DateTime? start,
+      DateTime? end,
+      String? assistantID,
+    }) {
+      return Shift(
+        start ?? _start,
+        end ?? _end,
+        assistantID ?? _assistantID,
+      );
+    }
+
   }
-
-
-
