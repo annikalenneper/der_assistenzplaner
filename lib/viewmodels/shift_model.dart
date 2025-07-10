@@ -1,4 +1,3 @@
-
 import 'dart:developer';
 import 'package:der_assistenzplaner/data/repositories/shift_repository.dart';
 import 'package:der_assistenzplaner/utils/cache.dart';
@@ -23,12 +22,20 @@ class ShiftModel extends ChangeNotifier {
   ShiftModel();
 
   //----------------- Getter methods -----------------
+  
 
   Map<DateTime, List<Shift>> get shiftsByDay => _mapOfShiftsByDay;
   ShiftDisplayOptions get selectedShiftDisplayOption => _selectedShiftDisplayOption;
   Set<Shift> get scheduledShifts => _shifts.toSet()..removeWhere((shift) => !shift.isScheduled);
   Set<Shift> get unscheduledShifts => _shifts.where((shift) => !shift.isScheduled).toSet();
 
+  Shift? getShiftById(String shiftID) {
+    try {
+      return _shifts.firstWhere((shift) => shift.shiftID == shiftID);
+    } catch (e) {
+      return null;
+    }
+  }
 
   //----------------- UI methods -----------------
   
@@ -95,10 +102,22 @@ class ShiftModel extends ChangeNotifier {
   }
 
   /// update shift in database and local structure
-  Future<void> updateShift(Shift updatedShift) async {
-    await shiftRepository.saveShift(updatedShift);  
-    _deleteShiftFromLocalStructure(updatedShift.shiftID);
+  Future<void> updateShift(Shift shiftToUpdate, {DateTime? newStart, DateTime? newEnd, String? newAssistantID}) async {
+    log('ShiftModel: Updating shift with ID ${shiftToUpdate.shiftID} from ${shiftToUpdate.start} to ${shiftToUpdate.end} with assistant ${shiftToUpdate.assistantID}');
+
+    final updatedShift = shiftToUpdate.copyWith(
+      start: newStart,
+      end: newEnd,
+      assistantID: newAssistantID,
+    );
+    log('ShiftModel: Copied shift to new shift with start: ${updatedShift.start}, end: ${updatedShift.end}, assistantID: ${updatedShift.assistantID}');
+
+    await shiftRepository.saveShift(updatedShift);
+    deleteShift(shiftToUpdate.shiftID);
     _addShiftToLocalStructure(updatedShift);
+
+    log('ShiftModel: Updated shift with ID ${updatedShift.shiftID} in local structure');
+
     notifyListeners();
   }
 
