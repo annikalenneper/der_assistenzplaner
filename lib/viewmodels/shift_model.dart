@@ -257,7 +257,6 @@ class ShiftModel extends ChangeNotifier {
     }
   }
 
-
   void _deleteShiftFromMapOfShiftsByDay(String shiftID) {
     _mapOfShiftsByDay.forEach((day, shiftList) {
       shiftList.removeWhere((shift) => shift.shiftID == shiftID);
