@@ -23,7 +23,7 @@ class AssistantModel extends ChangeNotifier {
   double get deviation => currentAssistant?.deviation ?? 0.0;
   List<Tag> get tags => currentAssistant?.tags ?? [];
 
-  Color? getAssistantColor(assistantID) => assistantColorMap['assistantID'];
+  Color? getAssistantColorByID(assistantID) => assistantColorMap['assistantID'];
 
 
   //----------------- Setter methods -----------------
