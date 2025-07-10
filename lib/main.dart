@@ -97,69 +97,74 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+  bool _showTeamSidebar = false;
+
+  final List<Widget> _pages = [
+    CalendarView(),
+    AssistantPage(),
+    SettingsScreen(),
+  ];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.index = widget.initialTabIndex; 
-  }
-
-  /// avoid memory leaks
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+    _selectedIndex = widget.initialTabIndex;
+    _showTeamSidebar = _selectedIndex == 1;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: MediaQuery.of(context).size.height * 0.08,
-        title: Text('Der Assistenzplaner'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: IconButton(
-              icon: Icon(Icons.settings),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SettingsScreen()),
+      body: Row(
+        children: [
+          NavigationRail(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: (int index) {
+              setState(() {
+                _selectedIndex = index;
+                _showTeamSidebar = index == 1;
+              });
+            },
+            labelType: NavigationRailLabelType.all,
+            destinations: const [
+              NavigationRailDestination(
+                icon: Icon(Icons.calendar_month),
+                selectedIcon: Icon(Icons.calendar_month),
+                label: Text('Kalender'),
               ),
+              NavigationRailDestination(
+                icon: Icon(Icons.group),
+                selectedIcon: Icon(Icons.group),
+                label: Text('Team'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.settings),
+                selectedIcon: Icon(Icons.settings),
+                label: Text('Einstellungen'),
+              ),
+            ],
+          ),
+          const VerticalDivider(thickness: 1, width: 1),
+          if (_showTeamSidebar) ...[
+            Container(
+              width: 280,
+              child: TeamSidebar(),
+            ),
+            const VerticalDivider(thickness: 1, width: 1),
+          ],
+          Expanded(
+            child: Scaffold(
+              appBar: AppBar(
+                toolbarHeight: MediaQuery.of(context).size.height * 0.08,
+                title: Text('Der Assistenzplaner'),
+                automaticallyImplyLeading: false,
+              ),
+              body: _pages[_selectedIndex],
             ),
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: 'Kalender', icon: Icon(Icons.calendar_month)),
-            Tab(text: 'Team', icon: Icon(Icons.group)),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          CalendarView(),
-          AssistantPage(),
-        ],
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Row(
-              children: [
-                TextButton.icon(onPressed: (){}, label: Text('Dienstplan'), icon: Icon(Icons.add),),
-                Spacer(),
-                TextButton.icon(onPressed: (){}, label: Text('Downloads'), icon: Icon(Icons.download),)
-              ],      
-            ),
-          ],
-        ),      
       ),
     );
   }
