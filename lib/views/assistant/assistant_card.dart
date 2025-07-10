@@ -7,7 +7,6 @@ import 'package:der_assistenzplaner/views/shared/markers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-/// TO-DO: refactor with assistantID instead of assistant
 class AssistantCard extends StatelessWidget {
   final String assistantID;
 
