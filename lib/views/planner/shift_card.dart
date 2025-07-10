@@ -46,7 +46,7 @@ class ShiftCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        shift.toString(), // KORRIGIERT: shift statt widget
+                        shift.toString(), 
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
