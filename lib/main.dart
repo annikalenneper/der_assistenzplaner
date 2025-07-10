@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:der_assistenzplaner/data/models/assistant.dart';
+import 'package:der_assistenzplaner/data/models/availability.dart';
 import 'package:der_assistenzplaner/data/models/shift.dart';
 import 'package:der_assistenzplaner/styles/styles.dart';
 import 'package:der_assistenzplaner/viewmodels/availabilities_model.dart';
@@ -25,7 +26,7 @@ Future<void> main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(AssistantAdapter());
   Hive.registerAdapter(ShiftAdapter());
-  //Hive.registerAdapter(NoteAdapter());
+  Hive.registerAdapter(AvailabilityAdapter());
 
   /// initialize models 
   final assistantModel = AssistantModel();
@@ -100,6 +101,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _showTeamSidebar = false;
+  bool _showSettingsSidebar = false; // Diese Variable wurde hinzugefügt
 
   final List<Widget> _pages = [
     CalendarView(),
@@ -112,6 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _selectedIndex = widget.initialTabIndex;
     _showTeamSidebar = _selectedIndex == 1;
+    _showSettingsSidebar = _selectedIndex == 2; // Diese Zeile wurde hinzugefügt
   }
 
   @override
@@ -125,6 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
               setState(() {
                 _selectedIndex = index;
                 _showTeamSidebar = index == 1;
+                _showSettingsSidebar = index == 2; // Diese Zeile wurde hinzugefügt
               });
             },
             labelType: NavigationRailLabelType.all,
@@ -151,6 +155,14 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(
               width: 280,
               child: TeamSidebar(),
+            ),
+            const VerticalDivider(thickness: 1, width: 1),
+          ],
+          // Diese Sektion wurde hinzugefügt
+          if (_showSettingsSidebar) ...[
+            SizedBox(
+              width: 280,
+              child: SettingsSidebar(),
             ),
             const VerticalDivider(thickness: 1, width: 1),
           ],
