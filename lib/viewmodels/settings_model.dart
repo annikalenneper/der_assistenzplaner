@@ -1,4 +1,3 @@
-
 import 'dart:developer';
 import 'package:der_assistenzplaner/data/repositories/settings_repository.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
@@ -173,6 +172,22 @@ class SettingsModel extends ChangeNotifier {
     availabilitesStartDate = await SharedPreferencesHelper.loadValue(keyAvailabilitiesStartDate, int) ?? 1;
     availabilitesDueDate = await SharedPreferencesHelper.loadValue(keyAvailabilitiesDueDate, int) ?? 15;  
 
+  }
+
+  // Füge diese Properties und Methoden hinzu
+  String? _currentSetting;
+
+  String? get currentSetting => _currentSetting;
+
+  set currentSetting(String? setting) {
+    _currentSetting = setting;
+    notifyListeners();
+  }
+
+  // Methode zum Zurücksetzen der ausgewählten Einstellung (wie deselectAssistant)
+  void deselectSetting() {
+    _currentSetting = null;
+    notifyListeners();
   }
 }
 
