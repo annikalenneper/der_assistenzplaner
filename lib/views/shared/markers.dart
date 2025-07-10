@@ -1,6 +1,8 @@
 import 'package:der_assistenzplaner/data/models/shift.dart';
+import 'package:der_assistenzplaner/styles/styles.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
+import 'package:der_assistenzplaner/viewmodels/shift_model.dart';
 import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/data/models/tag.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -33,14 +35,42 @@ class AssistantMarker extends StatelessWidget {
     final name = assistant?.name ?? 'Unbekannt';
     final color = assistantModel.assistantColorMap[assistantID] ?? Colors.grey;
 
-    /// wrapped with Material Widget to enable InkWell without overflow
+    // Für sehr kleine Größen (< 20) kein Padding und vereinfachte Struktur
+    if (size < 20) {
+      return InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color,
+            border: Border.all(color: Colors.white, width: 1),
+          ),
+          child: Center(
+            child: Text(
+              name[0].toUpperCase(),
+              style: TextStyle(
+                fontSize: size * 0.5, // Etwas kleiner für bessere Lesbarkeit
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                height: 1,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Normale Größe mit Padding und Material-Wrapper
     return Padding(
       padding: const EdgeInsets.all(9.0),
       child: Material(
         color: Colors.transparent,
         shape: const CircleBorder(),
         child: InkWell(
-          onTap: onTap, // tap-callback
+          onTap: onTap,
           customBorder: const CircleBorder(), 
           child: Container(
             width: size,
@@ -130,13 +160,15 @@ class _TagWidgetViewState extends State<TagWidget> {
 
 //----------------- CalendarDayMarkers -----------------
 
-CalendarDayMarker? buildDayMarker(context, day, shiftModel) {
+CalendarDayMarker? buildDayMarker(context, day) {
   final normalizedDay = normalizeDate(day);
+
+  final shiftModel = Provider.of<ShiftModel>(context, listen: false);
   final shiftMap = shiftModel.shiftsByDay;
   final shifts = shiftMap[normalizedDay];
+  
   if (shifts != null && shifts.isNotEmpty){
-    //TO-DO: Assi-Farben anzeigen, wenn Schicht besetzt
-    return CalendarDayMarker(shift: shifts.first, color: Colors.grey.shade300);
+    return CalendarDayMarker(shifts: shifts); 
   }
   else {
     return null;
@@ -145,36 +177,67 @@ CalendarDayMarker? buildDayMarker(context, day, shiftModel) {
 
 
 class CalendarDayMarker extends StatelessWidget {
-  final Shift shift;
-  final Color color;
+  final List<Shift> shifts; 
+  final Color? color;
 
-  const CalendarDayMarker({super.key, required this.shift, required this.color});
+  const CalendarDayMarker({
+    super.key, 
+    required this.shifts,
+    this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-          Positioned.fill(
-            right: 1,
-            bottom: 1,
-            child: Align(
-              alignment: Alignment.bottomLeft,
-              child: SizedBox(
-                height: 20,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                  child: Text(shift.toString()),
-                ),
-              )
+        Positioned.fill(
+          right: 1,
+          bottom: 1,
+          child: Align(
+            alignment: Alignment.bottomLeft,
+            child: Container(
+              height: 20,
+              decoration: BoxDecoration(
+                color: color ?? Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...shifts
+                      .where((shift) => shift.assistantID != null)
+                      .map((shift) => shift.assistantID!)
+                      .toSet() // no duplicates
+                      .map((assistantID) => Padding(
+                            padding: const EdgeInsets.all(1.0), 
+                            child: AssistantMarker(
+                              size: 14, 
+                              assistantID: assistantID,
+                              onTap: () {},
+                            ),
+                          )),
+                  // number of shifts
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                      child: Text(
+                        '${shifts.length} Schicht${shifts.length > 1 ? 'en' : ''}',
+                        style: const TextStyle(
+                          fontSize: 8,
+                          color: ModernBusinessTheme.primaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+
+                ],
+              ),
             ),
           ),
-        ]
-      );
-    }    
+        ),
+      ],
+    );
   }
+}
 
 
 
