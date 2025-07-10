@@ -148,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const VerticalDivider(thickness: 1, width: 1),
           if (_showTeamSidebar) ...[
-            Container(
+            SizedBox(
               width: 280,
               child: TeamSidebar(),
             ),
@@ -156,11 +156,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
           Expanded(
             child: Scaffold(
-              appBar: AppBar(
-                toolbarHeight: MediaQuery.of(context).size.height * 0.08,
-                title: Text('Der Assistenzplaner'),
-                automaticallyImplyLeading: false,
-              ),
               body: _pages[_selectedIndex],
             ),
           ),
