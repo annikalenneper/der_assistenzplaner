@@ -1,4 +1,3 @@
-import 'package:der_assistenzplaner/data/models/assistant.dart';
 import 'package:der_assistenzplaner/data/models/shift.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
