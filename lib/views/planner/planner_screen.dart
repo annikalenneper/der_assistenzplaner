@@ -9,7 +9,7 @@ import 'package:der_assistenzplaner/views/shared/markers.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart' hide normalizeDate;
 import 'package:provider/provider.dart';
-import 'package:der_assistenzplaner/views/planner/shift_usecases.dart' as planner;
+import 'package:der_assistenzplaner/views/planner/shift_form.dart' as planner;
 
 
 class CalendarView extends StatefulWidget {
@@ -36,6 +36,8 @@ class CalendarViewState extends State<CalendarView> {
         final assistantModel = Provider.of<AssistantModel>(context);
 
         final calendar = TableCalendar(
+          // Fügen Sie einen eindeutigen Key hinzu, um Rebuilds zu erzwingen
+          key: ValueKey(shiftModel.shiftsByDay.hashCode),
 
           firstDay: _defaultFirstDay, 
           lastDay: _defaultLastDay, 
@@ -84,74 +86,123 @@ class CalendarViewState extends State<CalendarView> {
             });
           },
 
-          eventLoader: (day) => shiftModel.shiftsByDay[(day)] ?? [],
-
+          eventLoader: (day) {
+            final normalizedDay = normalizeDate(day);
+            return shiftModel.shiftsByDay[normalizedDay] ?? [];
+          },
         );
-
-        /// headline
-        final headingForSelectedDay = Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Text(formatDate(_selectedDay), style: const TextStyle(fontSize: 20)),
-        );        
 
         /// shows scheduled shifts for selected day         
         final normalizedSelectedDay = normalizeDate(_selectedDay);
         final shiftsForSelectedDay = shiftModel.shiftsByDay[(normalizedSelectedDay)] ?? [];
 
-        final scrollableListOfShifts = SingleChildScrollView(
-          child: Column(
-            children: [
-              ListView.builder(
-                itemCount: shiftsForSelectedDay.length,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  final shift = shiftsForSelectedDay[index];
-                  return ShiftCard(
-                    shift: shift,
-                    assistantID: shift.assistantID ?? '',
-                  );
-                },
-              ),
-
-              /// + Button
-              Padding(
-                padding: const EdgeInsets.all(40.0),
-                child: IconButton(
-                  icon: const Icon(Icons.add),
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.all(12),
-                  onPressed: () {
-                    showDialog(
-                      context: context, 
-                      builder:
-                       (context) {
-                        return AlertDialog(
-                          content: Padding(
-                            padding: const EdgeInsets.all(40.0),
-                            child: planner.ShiftForm(
-                              selectedDay: _selectedDay,
-                              onSave: (start, end, assistantID) {
-                                final newShift = shiftModel.createShift(start, end, assistantID);
-                                shiftModel.saveShift(newShift);
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  }
+        final shiftsView = Column(
+          key: ValueKey(shiftModel.shiftsByDay.hashCode),
+          children: [
+            // Header mit Datum und Add-Button
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade300),
                 ),
               ),
-            ],
-          ),
-        );
-
-
-        final scheduledShiftsView = Column(
-          children: [
-            headingForSelectedDay,         
-            Expanded(child: scrollableListOfShifts), 
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    formatDate(_selectedDay),
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: () {
+                      showDialog(
+                        context: context, 
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('Neue Schicht'),
+                            content: SizedBox(
+                              width: 400,
+                              child: planner.ShiftForm(
+                                selectedDay: _selectedDay,
+                                onSave: (start, end, assistantID) {
+                                  final newShift = shiftModel.createShift(start, end, assistantID);
+                                  shiftModel.saveShift(newShift);
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            // Scrollable Shifts Liste
+            Expanded(
+              child: shiftsForSelectedDay.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.event_busy,
+                            size: 64,
+                            color: Colors.grey.shade400,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Keine Schichten geplant',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(8.0),
+                      itemCount: shiftsForSelectedDay.length,
+                      itemBuilder: (context, index) {
+                        final shift = shiftsForSelectedDay[index];
+                        return ShiftCard(
+                          shift: shift,
+                          assistantID: shift.assistantID ?? '',
+                        );
+                      },
+                    ),
+            ),
+            // Assistant Markers Footer
+            Container(
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                border: Border(
+                  top: BorderSide(color: Colors.grey.shade300),
+                ),
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: assistantModel.assistants.map((assistant) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: AssistantMarker(
+                        assistantID: assistant.assistantID,
+                        size: 32,
+                        onTap: () {
+                          shiftModel.updateDisplayOption(ShiftDisplayOptions.assistant, assistant.assistantID);
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
           ],
         );
 
@@ -166,19 +217,23 @@ class CalendarViewState extends State<CalendarView> {
                     child: calendar
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Consumer<AvailabilitiesModel>(
-                        builder: (BuildContext context, availabilities, child) {  
-                          return Text (
-                            'Dein Team hat noch ${availabilities.daysUntilAvailabilitiesDueDate} Tage Zeit für die Abgabe der Verfügbarkeiten. \nZahl der eingetragenen Verfügbarkeiten: X',
-                            style: const TextStyle(fontSize: 12),
-                          );
-                        },
-                      ),
+                    padding: const EdgeInsets.all(12.0),
+                    child: Consumer<AvailabilitiesModel>(
+                      builder: (BuildContext context, availabilities, child) {
+                        return Container(
+                          padding: const EdgeInsets.all(12.0),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surfaceVariant,
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Text(
+                            'Dein Team hat noch ${availabilities.daysUntilAvailabilitiesDueDate} Tage Zeit für die Abgabe der Verfügbarkeiten.\nZahl der eingetragenen Verfügbarkeiten: X',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        );
+                      },
                     ),
-                  )
+                  ),
                 ],
               )
             ),
@@ -186,31 +241,7 @@ class CalendarViewState extends State<CalendarView> {
             /// right side
             Expanded(
               flex: 2,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: scheduledShiftsView,
-                  ),
-                  /// row of assistant markers to select all shifts for one assistant
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal, 
-                      child: Row(
-                        children: assistantModel.assistants.map((assistant) {
-                          return AssistantMarker(
-                            assistantID: assistant.assistantID,
-                            size: 40, 
-                            onTap: (){
-                              shiftModel.updateDisplayOption(ShiftDisplayOptions.assistant, assistant.assistantID);
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              child: shiftsView,
             ),
           ],      
         );   
