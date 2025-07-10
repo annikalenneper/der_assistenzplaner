@@ -57,15 +57,11 @@ DateTime normalizeDate(DateTime dateTime) {
   return DateTime(dateTime.year, dateTime.month, dateTime.day);
 }
 
-/// fotmatted as 'Mo, 01.01.2021 08:00 Uhr'
-String formatDateAndTime(DateTime dateTime) {
-  final weekday = dayOfWeekToString(dateTime.weekday);
-  final day = dateTime.day.toString().padLeft(2, '0');
-  final month = dateTime.month.toString().padLeft(2, '0');
-  final year = dateTime.year;
+/// fotmatted as '08:00 Uhr'
+String formatTime(DateTime dateTime) {
   final hour = dateTime.hour.toString().padLeft(2, '0');
   final minute = dateTime.minute.toString().padLeft(2, '0');
-  return '$weekday, $day.$month.$year $hour:$minute Uhr';
+  return '$hour:$minute Uhr';
 }
 
 /// fotmatted as 'Mo, 01.01.2021'

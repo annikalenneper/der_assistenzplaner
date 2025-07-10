@@ -36,8 +36,8 @@ part 'shift.g.dart';
 
     @override
     String toString() {
-      final formattedStart = formatDateAndTime(start);
-      final formattedEnd = formatDateAndTime(end);
+      final formattedStart = formatTime(start);
+      final formattedEnd = formatTime(end);
       return '$formattedStart - $formattedEnd';
     }
 

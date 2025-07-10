@@ -25,8 +25,8 @@ class AvailabilitiesModel extends ChangeNotifier{
 
   //----------------- Formatted Values -----------------
 
-  String get formattedAvailabilitiesStartDate => formatDateAndTime(currentAvailabilitesStartDate);
-  String get formattedAvailabilitiesDueDate => formatDateAndTime(currentAvailabilitesDueDate);
+  String get formattedAvailabilitiesStartDate => formatTime(currentAvailabilitesStartDate);
+  String get formattedAvailabilitiesDueDate => formatTime(currentAvailabilitesDueDate);
   int get daysUntilAvailabilitiesDueDate => currentAvailabilitesDueDate.difference(DateTime.now()).inDays;
 
 
