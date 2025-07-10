@@ -1,6 +1,3 @@
-
-
-
 import 'package:der_assistenzplaner/styles/styles.dart';
 import 'package:flutter/material.dart';
 
@@ -110,6 +107,15 @@ class DropDownColorPicker extends StatefulWidget {
 
 class DropDownColorPickerState extends State<DropDownColorPicker> {
   late Map<String, dynamic> selectedColor = widget.colors.first;
+
+  @override
+  void initState() {
+    super.initState();
+    // Trigger callback mit der anfänglichen Farbe
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onColorSelected(selectedColor['color']);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
