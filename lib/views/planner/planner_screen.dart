@@ -1,3 +1,4 @@
+import 'package:der_assistenzplaner/services/workschedule_service.dart';
 import 'package:der_assistenzplaner/styles/styles.dart';
 import 'package:der_assistenzplaner/utils/helper_functions.dart';
 import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
@@ -315,30 +316,131 @@ class CalendarViewState extends State<CalendarView> {
                       },
                     ),
             ),
-            // Assistant Markers Footer
+            // Generierungs-Info Footer (ohne Marker)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              padding: const EdgeInsets.all(16.0), // Mehr Padding
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 border: Border(
-                  top: BorderSide(color: Colors.grey.shade300),
+                  top: BorderSide(color: Colors.grey.shade300, width: 1.5), // Dickerer Border
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade100,
+                    blurRadius: 4,
+                    offset: Offset(0, -2),
+                  ),
+                ],
               ),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: assistantModel.assistants.map((assistant) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: AssistantMarker(
-                        assistantID: assistant.assistantID,
-                        size: 26,
-                        onTap: () {
-                          shiftModel.updateDisplayOption(ShiftDisplayOptions.assistant, assistant.assistantID);
+              child: Container(
+                padding: const EdgeInsets.all(20.0), // Noch mehr inneres Padding
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.blue.shade50,
+                      Colors.blue.shade100.withOpacity(0.3),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12), // Größere Rundungen
+                  border: Border.all(
+                    color: Colors.blue.shade300,
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blue.shade200.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        // Größeres Info Icon mit Hintergrund
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade600,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.auto_awesome,
+                            color: Colors.white,
+                            size: 24, // Größeres Icon
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        
+                        // Info Text
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Automatische Dienstplan-Generierung',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16, // Größere Schrift
+                                  color: Colors.blue.shade800,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Nächste automatische Generierung: ${_getNextGenerationDate()}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.blue.shade700,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Alle offenen Schichten werden optimal an verfügbare Assistenten verteilt.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.blue.shade600,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // Generieren Button (größer und präsenter)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          _generateScheduleNow(context, shiftModel);
                         },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade700,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                          elevation: 3,
+                          shadowColor: Colors.blue.shade300,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        icon: Icon(Icons.play_arrow, size: 18),
+                        label: Text(
+                          'Dienstplan jetzt generieren',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                    );
-                  }).toList(),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -515,6 +617,96 @@ class CalendarViewState extends State<CalendarView> {
           ],      
         );   
       },
+    );
+  }
+
+  // Hilfsmethode für das nächste Generierungsdatum
+  String _getNextGenerationDate() {
+    // TODO: Hier sollte die echte Logik für das nächste Generierungsdatum stehen
+    final nextMonth = DateTime.now().month == 12 
+        ? DateTime(DateTime.now().year + 1, 1, 25)
+        : DateTime(DateTime.now().year, DateTime.now().month + 1, 25);
+    
+    return '${nextMonth.day}.${nextMonth.month.toString().padLeft(2, '0')}.${nextMonth.year}';
+  }
+
+  // Methode für die manuelle Generierung
+  void _generateScheduleNow(BuildContext context, ShiftModel shiftModel) async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.auto_awesome, color: Colors.blue.shade600),
+            const SizedBox(width: 8),
+            Text('Dienstplan generieren'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Möchtest du jetzt den Dienstplan für den kommenden Monat generieren?',
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning, color: Colors.orange.shade600, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Bestehende Planungen könnten überschrieben werden.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.orange.shade700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Abbrechen'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Generiere Dienstplan…')),
+              );
+              
+              try {
+                final service = WorkscheduleService(context);
+                final result = await service.generateWorkschedule();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${result.length} Schichten zugewiesen')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Fehler: $e')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue.shade600,
+              foregroundColor: Colors.white,
+            ),
+            child: Text('Generieren'),
+          ),
+        ],
+      ),
     );
   }
 }
