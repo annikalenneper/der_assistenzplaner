@@ -63,7 +63,7 @@ class AssistantMarker extends StatelessWidget {
 
     // Normale Größe mit Padding und Material-Wrapper
     return Padding(
-      padding: const EdgeInsets.all(9.0),
+      padding: const EdgeInsets.all(6.0),
       child: Material(
         color: Colors.transparent,
         shape: const CircleBorder(),
@@ -227,6 +227,8 @@ class CalendarDayMarker extends StatelessWidget {
                 child: Align(
                   alignment: Alignment.topRight,
                   child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                    margin: const EdgeInsets.all(4.0),
                     height: 18,
                     decoration: BoxDecoration(
                       color: Colors.green.shade100,
@@ -250,7 +252,7 @@ class CalendarDayMarker extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.all(1.0),
                             child: AssistantMarker(
-                              size: 12,
+                              size: 14,
                               assistantID: assistantId,
                               onTap: () {},
                             ),
@@ -269,6 +271,8 @@ class CalendarDayMarker extends StatelessWidget {
               child: Align(
                 alignment: Alignment.bottomLeft,
                 child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                  margin: const EdgeInsets.all(4.0),
                   height: 20,
                   decoration: BoxDecoration(
                     color: color ?? Colors.grey.shade300,
@@ -285,7 +289,7 @@ class CalendarDayMarker extends StatelessWidget {
                           .map((assistantId) => Padding(
                                 padding: const EdgeInsets.all(1.0), 
                                 child: AssistantMarker(
-                                  size: 14, 
+                                  size: 16, 
                                   assistantID: assistantId!,
                                   onTap: () {},
                                 ),
