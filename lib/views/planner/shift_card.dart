@@ -20,13 +20,13 @@ class ShiftCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      margin: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 8.0), // Etwas kompakter
+      child: Column(
+        children: [
+          // Hauptinhalt
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
               children: [
                 AssistantMarker(
                   size: 32,
@@ -47,16 +47,29 @@ class ShiftCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         shift.toString(), 
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            // Actions
-            Row(
+          ),
+          
+          // Trennlinie zwischen Inhalt und Aktionen
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: Colors.grey.shade200,
+          ),
+          
+          // Actions Bereich
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+            color: Colors.grey.shade50, // Leichter Hintergrund für Aktionen
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildActionButton(
@@ -85,8 +98,8 @@ class ShiftCard extends StatelessWidget {
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -101,13 +114,13 @@ class ShiftCard extends StatelessWidget {
       onTap: onPressed,
       borderRadius: BorderRadius.circular(8.0),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+        padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 6.0), // Etwas kompakter
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              size: 20,
+              size: 22, // Etwas kleiner
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(height: 2),
@@ -115,6 +128,7 @@ class ShiftCard extends StatelessWidget {
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.primary,
+                fontSize: 12, 
               ),
             ),
           ],
@@ -166,7 +180,7 @@ class ShiftCard extends StatelessWidget {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Assistenzkraft tauschen'),
+          title: const Text('Assistenzkraft zuordnen'),
           content: SizedBox(
             width: 300,
             child: Column(
