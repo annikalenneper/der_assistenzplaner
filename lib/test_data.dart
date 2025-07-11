@@ -87,7 +87,7 @@ Future<void> addTestAvailabilities(context) async {
   
   // Für jede unbesetzte Schicht
   for (final shift in unscheduledShifts) {
-    // Bestimme zufällig, wie viele Assistenten für diese Schicht verfügbar sind (1-3)
+    // Bestimme zufällig, wie viele Assistenten für diese Schicht verfügbar sind (1-5)
     int availableAssistantsCount = random.nextInt(3) + 1; 
     
     // Mische die Assistenten-Liste für zufällige Auswahl

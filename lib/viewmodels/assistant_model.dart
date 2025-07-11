@@ -115,6 +115,20 @@ class AssistantModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> deleteAllAssistants() async {
+    // Kopie der aktuellen Werte, um ConcurrentModificationError zu vermeiden
+    for (var assistant in List<Assistant>.from(assistantMap.values)) {
+      await assistantRepository.deleteAssistant(assistant.assistantID);
+      _removeAssistantFromLocalStructures(assistant.assistantID);
+    }
+    assistantMap.clear();
+    assistantColorMap.clear();
+    deselectAssistant();
+    log('AssistantModel: all assistants deleted');
+    notifyListeners();
+    
+  }
+
 
   //----------------- Helper Methods -----------------
 

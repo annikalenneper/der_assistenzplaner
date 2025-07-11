@@ -131,6 +131,19 @@ class ShiftModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// delete all shifts from database and local structure
+  Future<void> deleteAllShifts() async {
+    final shiftsCopy = List<Shift>.from(_shifts);
+    for (final shift in shiftsCopy) {
+      await shiftRepository.deleteShift(shift.shiftID);
+    }
+    _shifts.clear();
+    _mapOfShiftsByDay.clear();
+    _mapOfShiftsByAssistant.clear();
+    log('ShiftModel: Deleted all shifts from database and local structure');
+    notifyListeners();
+  }
+
   /// split shift at given time and save both old and new shift
   Future<void> splitShift(Shift shift, DateTime splitTime) async{
     if (splitTime.isBefore(shift.start) || splitTime.isAfter(shift.end)) {

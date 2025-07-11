@@ -7,9 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:der_assistenzplaner/data/models/tag.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-
-
-
+import 'package:der_assistenzplaner/viewmodels/availabilities_model.dart';
 
 
 
@@ -162,15 +160,29 @@ class _TagWidgetViewState extends State<TagWidget> {
 
 CalendarDayMarker? buildDayMarker(context, day) {
   final normalizedDay = normalizeDate(day);
-
-  final shiftModel = Provider.of<ShiftModel>(context, listen: false);
-  final shiftMap = shiftModel.shiftsByDay;
-  final shifts = shiftMap[normalizedDay];
   
-  if (shifts != null && shifts.isNotEmpty){
-    return CalendarDayMarker(shifts: shifts); 
+  // Holen von ShiftModel und AvailabilitiesModel
+  final shiftModel = Provider.of<ShiftModel>(context, listen: false);
+  final availabilitiesModel = Provider.of<AvailabilitiesModel>(context, listen: true); // listen: true ist wichtig!
+  
+  final shifts = shiftModel.shiftsByDay[normalizedDay] ?? [];
+  
+  // Verfügbarkeiten prüfen auch wenn keine Schichten existieren
+  bool hasAvailabilities = false;
+  if (shifts.isNotEmpty) {
+    for (final shift in shifts) {
+      final assistants = availabilitiesModel.getAvailableAssistantsForShift(shift.shiftID);
+      if (assistants.isNotEmpty) {
+        hasAvailabilities = true;
+        break;
+      }
+    }
   }
-  else {
+
+  // Marker nur zurückgeben, wenn es Schichten ODER Verfügbarkeiten gibt
+  if (shifts.isNotEmpty || hasAvailabilities) {
+    return CalendarDayMarker(shifts: shifts); 
+  } else {
     return null;
   }
 }
@@ -196,80 +208,135 @@ class CalendarDayMarker extends StatelessWidget {
     final scheduledShiftsInDay = shiftModel.getScheduledShiftsByDay(dayDate).toList();
     final unscheduledShiftsInDay = shiftModel.getUnscheduledShiftsByDay(dayDate).toList();
 
-    return Stack(
-      children: [
-        Positioned.fill(
-          right: 1,
-          bottom: 1,
-          child: Align(
-            alignment: Alignment.bottomLeft,
-            child: Container(
-              height: 20,
-              decoration: BoxDecoration(
-                color: color ?? Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Zeige AssistantMarker nur für geplante (scheduled) Schichten
-                  ...scheduledShiftsInDay
-                      .map((shift) => shift.assistantID)
-                      .where((assistantId) => assistantId != null)
-                      .toSet() // Duplikate entfernen
-                      .map((assistantId) => Padding(
-                            padding: const EdgeInsets.all(1.0), 
-                            child: AssistantMarker(
-                              size: 14, 
-                              assistantID: assistantId!,
-                              onTap: () {},
-                            ),
-                          )),
-                  // Anzeige der Gesamtzahl und Statusindikatoren
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+    return Consumer<AvailabilitiesModel>( // Hinzugefügter Consumer
+      builder: (context, availabilitiesModel, child) {
+        // Sammle alle verfügbaren Assistenten für diesen Tag
+        final availableAssistantsForDay = <String>{};
+        for (final shift in shifts) {
+          final availableAssistants = availabilitiesModel.getAvailableAssistantsForShift(shift.shiftID);
+          availableAssistantsForDay.addAll(availableAssistants);
+        }
+
+        return Stack(
+          children: [
+            // Availability-Marker oben
+            if (availableAssistantsForDay.isNotEmpty)
+              Positioned.fill(
+                left: 1,
+                top: 1,
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: Container(
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade100,
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          '${shifts.length} Schicht${shifts.length > 1 ? 'en ' : ' '}',
-                          style: const TextStyle(
-                            fontSize: 8,
-                            color: ModernBusinessTheme.primaryColor,
-                            fontWeight: FontWeight.bold,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                          child: Text(
+                            'V',
+                            style: TextStyle(
+                              fontSize: 8,
+                              color: Colors.green.shade700,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        // Für jede geplante Schicht wird ein Haken generiert
-                        ...List.generate(scheduledShiftsInDay.length, (_) => 
-                          Text(
-                            '(✓)',
-                            style: TextStyle(
-                              fontSize: 8,
-                              color: Colors.green[800],
-                              fontWeight: FontWeight.bold,
+                        ...availableAssistantsForDay.map((assistantId) => 
+                          Padding(
+                            padding: const EdgeInsets.all(1.0),
+                            child: AssistantMarker(
+                              size: 12,
+                              assistantID: assistantId,
+                              onTap: () {},
                             ),
-                          )
-                        ),
-                        // Für jede ungeplante Schicht wird ein Kreuz generiert
-                        ...List.generate(unscheduledShiftsInDay.length, (_) => 
-                          Text(
-                            '(✗)',
-                            style: TextStyle(
-                              fontSize: 8,
-                              color: Colors.red[800],
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ],
+                ),
+              ),
+            
+            // Bestehende Schicht-Marker unten
+            Positioned.fill(
+              right: 1,
+              bottom: 1,
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: Container(
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: color ?? Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Zeige AssistantMarker nur für geplante (scheduled) Schichten
+                      ...scheduledShiftsInDay
+                          .map((shift) => shift.assistantID)
+                          .where((assistantId) => assistantId != null)
+                          .toSet() // Duplikate entfernen
+                          .map((assistantId) => Padding(
+                                padding: const EdgeInsets.all(1.0), 
+                                child: AssistantMarker(
+                                  size: 14, 
+                                  assistantID: assistantId!,
+                                  onTap: () {},
+                                ),
+                              )),
+                      // Anzeige der Gesamtzahl und Statusindikatoren
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${shifts.length} Schicht${shifts.length > 1 ? 'en ' : ' '}',
+                              style: const TextStyle(
+                                fontSize: 8,
+                                color: ModernBusinessTheme.primaryColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            // Für jede geplante Schicht wird ein Haken generiert
+                            ...List.generate(scheduledShiftsInDay.length, (_) => 
+                              Text(
+                                '(✓)',
+                                style: TextStyle(
+                                  fontSize: 8,
+                                  color: Colors.green[800],
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            ),
+                            // Für jede ungeplante Schicht wird ein Kreuz generiert
+                            ...List.generate(unscheduledShiftsInDay.length, (_) => 
+                              Text(
+                                '(✗)',
+                                style: TextStyle(
+                                  fontSize: 8,
+                                  color: Colors.red[800],
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }

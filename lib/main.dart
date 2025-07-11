@@ -168,9 +168,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       tooltip: 'Testassistenten hinzufügen',
                       onPressed: () async {
                         await addTestAssistants(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Assistenten hinzugefügt')),
-                        );
                       },
                       icon: Icon(Icons.person_add),
                       iconSize: 20,
@@ -180,9 +177,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       tooltip: 'Testschichten hinzufügen',
                       onPressed: () async {
                         await addCurrentMonthShifts(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Schichten hinzugefügt')),
-                        );
                       },
                       icon: Icon(Icons.schedule),
                       iconSize: 20,
@@ -192,9 +186,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       tooltip: 'Testverfügbarkeiten hinzufügen',
                       onPressed: () async {
                         await addTestAvailabilities(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Verfügbarkeiten hinzugefügt')),
-                        );
                       },
                       icon: Icon(Icons.av_timer),
                       iconSize: 20,
@@ -205,9 +196,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       tooltip: 'Alle Assistenten löschen',
                       onPressed: () async {
                         await Provider.of<AssistantModel>(context, listen: false).deleteAllAssistants();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Alle Assistenten gelöscht')),
-                        );
                       },
                       icon: Icon(Icons.delete),
                       iconSize: 20,
@@ -217,9 +205,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       tooltip: 'Alle Schichten löschen',
                       onPressed: () async {
                         await Provider.of<ShiftModel>(context, listen: false).deleteAllShifts();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Alle Schichten gelöscht')),
-                        );
                       },
                       icon: Icon(Icons.delete_sweep),
                       iconSize: 20,
