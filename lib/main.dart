@@ -15,6 +15,7 @@ import 'package:der_assistenzplaner/viewmodels/assistant_model.dart';
 import 'package:der_assistenzplaner/views/assistant/assistant_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:der_assistenzplaner/test_data.dart'; // Import hinzugefügt
 
 
 
@@ -101,7 +102,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _showTeamSidebar = false;
-  bool _showSettingsSidebar = false; // Diese Variable wurde hinzugefügt
+  bool _showSettingsSidebar = false;
 
   final List<Widget> _pages = [
     CalendarView(),
@@ -114,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _selectedIndex = widget.initialTabIndex;
     _showTeamSidebar = _selectedIndex == 1;
-    _showSettingsSidebar = _selectedIndex == 2; // Diese Zeile wurde hinzugefügt
+    _showSettingsSidebar = _selectedIndex == 2;
   }
 
   @override
@@ -122,31 +123,109 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Row(
         children: [
-          NavigationRail(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (int index) {
-              setState(() {
-                _selectedIndex = index;
-                _showTeamSidebar = index == 1;
-                _showSettingsSidebar = index == 2; // Diese Zeile wurde hinzugefügt
-              });
-            },
-            labelType: NavigationRailLabelType.all,
-            destinations: const [
-              NavigationRailDestination(
-                icon: Icon(Icons.calendar_month),
-                selectedIcon: Icon(Icons.calendar_month),
-                label: Text('Kalender'),
+          Column(
+            children: [
+              // Haupt NavigationRail
+              Expanded(
+                child: NavigationRail(
+                  selectedIndex: _selectedIndex,
+                  onDestinationSelected: (int index) {
+                    setState(() {
+                      _selectedIndex = index;
+                      _showTeamSidebar = index == 1;
+                      _showSettingsSidebar = index == 2;
+                    });
+                  },
+                  labelType: NavigationRailLabelType.all,
+                  destinations: const [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.calendar_month),
+                      selectedIcon: Icon(Icons.calendar_month),
+                      label: Text('Kalender'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.group),
+                      selectedIcon: Icon(Icons.group),
+                      label: Text('Team'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.settings),
+                      selectedIcon: Icon(Icons.settings),
+                      label: Text('Einstellungen'),
+                    ),
+                  ],
+                ),
               ),
-              NavigationRailDestination(
-                icon: Icon(Icons.group),
-                selectedIcon: Icon(Icons.group),
-                label: Text('Team'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.settings),
-                selectedIcon: Icon(Icons.settings),
-                label: Text('Einstellungen'),
+              // Testdaten Buttons
+              Container(
+                width: 80,
+                padding: EdgeInsets.all(8),
+                child: Column(
+                  children: [
+                    Divider(),
+                    // Button für Assistenten
+                    IconButton(
+                      tooltip: 'Testassistenten hinzufügen',
+                      onPressed: () async {
+                        await addTestAssistants(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Assistenten hinzugefügt')),
+                        );
+                      },
+                      icon: Icon(Icons.person_add),
+                      iconSize: 20,
+                    ),
+                    // Button für Schichten
+                    IconButton(
+                      tooltip: 'Testschichten hinzufügen',
+                      onPressed: () async {
+                        await addCurrentMonthShifts(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Schichten hinzugefügt')),
+                        );
+                      },
+                      icon: Icon(Icons.schedule),
+                      iconSize: 20,
+                    ),
+                    // Button für Verfügbarkeiten
+                    IconButton(
+                      tooltip: 'Testverfügbarkeiten hinzufügen',
+                      onPressed: () async {
+                        await addTestAvailabilities(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Verfügbarkeiten hinzugefügt')),
+                        );
+                      },
+                      icon: Icon(Icons.av_timer),
+                      iconSize: 20,
+                    ),
+                    Divider(),
+                    // Button für Assistenten löschen
+                    IconButton(
+                      tooltip: 'Alle Assistenten löschen',
+                      onPressed: () async {
+                        await Provider.of<AssistantModel>(context, listen: false).deleteAllAssistants();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Alle Assistenten gelöscht')),
+                        );
+                      },
+                      icon: Icon(Icons.delete),
+                      iconSize: 20,
+                    ),
+                    // Button für Schichten löschen
+                    IconButton(
+                      tooltip: 'Alle Schichten löschen',
+                      onPressed: () async {
+                        await Provider.of<ShiftModel>(context, listen: false).deleteAllShifts();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Alle Schichten gelöscht')),
+                        );
+                      },
+                      icon: Icon(Icons.delete_sweep),
+                      iconSize: 20,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -158,7 +237,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const VerticalDivider(thickness: 1, width: 1),
           ],
-          // Diese Sektion wurde hinzugefügt
           if (_showSettingsSidebar) ...[
             SizedBox(
               width: 280,
