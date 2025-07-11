@@ -56,22 +56,16 @@ Future<void> addCurrentMonthShifts(context) async {
   }
 }
 
-/// Erstellt zufällige Verfügbarkeiten für die Assistenten und Schichten im aktuellen Monat
+/// Erstellt Verfügbarkeiten assistentenweise mit 8-12 zufälligen Angaben pro Assistenz
 Future<void> addTestAvailabilities(context) async {
   final assistantModel = Provider.of<AssistantModel>(context, listen: false);
   final shiftModel = Provider.of<ShiftModel>(context, listen: false);
   final availabilitiesModel = Provider.of<AvailabilitiesModel>(context, listen: false);
   
-  // Zufallsgenerator
   final random = Random();
-  
-  // Alle unbesetzten Schichten holen (fokussiere auf unbesetzte Schichten für Verfügbarkeiten)
   final unscheduledShifts = shiftModel.unscheduledShifts.toList();
-  
-  // Alle Assistenten holen
   final assistants = assistantModel.assistants.toList();
   
-  // Überprüfen, ob Daten zum Erstellen von Verfügbarkeiten vorhanden sind
   if (unscheduledShifts.isEmpty) {
     print('Keine unbesetzten Schichten gefunden für Verfügbarkeiten');
     return;
@@ -82,32 +76,173 @@ Future<void> addTestAvailabilities(context) async {
     return;
   }
   
-  // Zähler für erstellte Verfügbarkeiten
-  int createdAvailabilities = 0;
+  print('Starte assistentenweise Erstellung von Verfügbarkeiten für ${assistants.length} Assistenten...');
   
-  // Für jede unbesetzte Schicht
-  for (final shift in unscheduledShifts) {
-    // Bestimme zufällig, wie viele Assistenten für diese Schicht verfügbar sind (1-5)
-    int availableAssistantsCount = random.nextInt(3) + 1; 
+  // Für jeden Assistenten
+  for (int assistantIndex = 0; assistantIndex < assistants.length; assistantIndex++) {
+    final assistant = assistants[assistantIndex];
     
-    // Mische die Assistenten-Liste für zufällige Auswahl
-    assistants.shuffle();
+    // Zufällige Anzahl von Verfügbarkeiten für diesen Assistenten (8-12)
+    final availabilityCount = random.nextInt(5) + 8; // 8-12
     
-    // Wähle die ersten 'availableAssistantsCount' Assistenten aus
-    for (int i = 0; i < min(availableAssistantsCount, assistants.length); i++) {
-      final assistant = assistants[i];
+    print('📋 ${assistant.name} gibt ${availabilityCount} Verfügbarkeiten ein...');
+    
+    // Mische die Schichten für zufällige Auswahl
+    final shuffledShifts = List<Shift>.from(unscheduledShifts)..shuffle();
+    
+    // Sammle Verfügbarkeiten für diesen Assistenten
+    final availabilitiesForThisAssistant = <dynamic>[];
+    
+    // Erstelle die gewünschte Anzahl von Verfügbarkeiten
+    for (int i = 0; i < min(availabilityCount, shuffledShifts.length); i++) {
+      final shift = shuffledShifts[i];
       
-      // Erstelle eine Verfügbarkeit für diese Kombination
       final availability = availabilitiesModel.createAvailability(
         shift.shiftID, 
         assistant.assistantID
       );
       
-      // Speichere die Verfügbarkeit
+      availabilitiesForThisAssistant.add(availability);
+      
+      // Kurze Verzögerung zwischen einzelnen Eingaben (50-150ms)
+      await Future.delayed(Duration(milliseconds: random.nextInt(100) + 50));
+      
+      // Zwischenstatus für realistische Simulation
+      if ((i + 1) % 3 == 0) {
+        print('   ... ${i + 1}/${availabilityCount} eingegeben');
+      }
+    }
+    
+    // Alle Verfügbarkeiten für diesen Assistenten auf einmal speichern
+    print('💾 Speichere ${availabilitiesForThisAssistant.length} Verfügbarkeiten für ${assistant.name}...');
+    
+    for (final availability in availabilitiesForThisAssistant) {
       await availabilitiesModel.saveAvailability(availability);
-      createdAvailabilities++;
+      
+      // Sehr kurze Pause zwischen Speichervorgängen (20-50ms)
+      await Future.delayed(Duration(milliseconds: random.nextInt(30) + 20));
+    }
+    
+    print('✅ ${assistant.name} fertig (${availabilitiesForThisAssistant.length} Verfügbarkeiten gespeichert)');
+    
+    // Pause zwischen Assistenten (300-800ms)
+    if (assistantIndex < assistants.length - 1) {
+      final pauseMs = random.nextInt(500) + 300;
+      print('⏳ Warte ${pauseMs}ms bis zum nächsten Assistenten...\n');
+      await Future.delayed(Duration(milliseconds: pauseMs));
     }
   }
   
-  print('Test-Verfügbarkeiten erstellt: $createdAvailabilities');
+  print('🎉 Alle Verfügbarkeiten für ${assistants.length} Assistenten erstellt!');
+}
+
+/// Alternative Version mit längeren Wartezeiten für Demo-Zwecke
+Future<void> addTestAvailabilitiesSlowDemo(context) async {
+  final assistantModel = Provider.of<AssistantModel>(context, listen: false);
+  final shiftModel = Provider.of<ShiftModel>(context, listen: false);
+  final availabilitiesModel = Provider.of<AvailabilitiesModel>(context, listen: false);
+  
+  final random = Random();
+  final unscheduledShifts = shiftModel.unscheduledShifts.toList();
+  final assistants = assistantModel.assistants.toList();
+  
+  if (unscheduledShifts.isEmpty || assistants.isEmpty) {
+    print('Keine Daten für Verfügbarkeiten vorhanden');
+    return;
+  }
+  
+  print('🎬 Demo: Langsame assistentenweise Erstellung von Verfügbarkeiten...');
+  
+  for (int assistantIndex = 0; assistantIndex < assistants.length; assistantIndex++) {
+    final assistant = assistants[assistantIndex];
+    final availabilityCount = random.nextInt(5) + 8; // 8-12
+    
+    print('📋 ${assistant.name} beginnt mit der Eingabe von ${availabilityCount} Verfügbarkeiten...');
+    
+    final shuffledShifts = List<Shift>.from(unscheduledShifts)..shuffle();
+    final availabilitiesForThisAssistant = <dynamic>[];
+    
+    // Eingabe-Phase mit längeren Verzögerungen
+    for (int i = 0; i < min(availabilityCount, shuffledShifts.length); i++) {
+      final shift = shuffledShifts[i];
+      
+      final availability = availabilitiesModel.createAvailability(
+        shift.shiftID, 
+        assistant.assistantID
+      );
+      
+      availabilitiesForThisAssistant.add(availability);
+      
+      print('   📝 ${assistant.name}: Verfügbarkeit ${i + 1}/${availabilityCount} für ${shift.start.day}.${shift.start.month}');
+      
+      // Längere Verzögerung für Demo (200-500ms)
+      await Future.delayed(Duration(milliseconds: random.nextInt(300) + 200));
+    }
+    
+    // "Absenden"-Phase
+    print('📤 ${assistant.name} sendet ${availabilitiesForThisAssistant.length} Verfügbarkeiten ab...');
+    await Future.delayed(Duration(milliseconds: 500)); // Kurze "Absende"-Pause
+    
+    // Speichern
+    for (final availability in availabilitiesForThisAssistant) {
+      await availabilitiesModel.saveAvailability(availability);
+      await Future.delayed(Duration(milliseconds: 50));
+    }
+    
+    print('✅ ${assistant.name} fertig! (${availabilitiesForThisAssistant.length} Verfügbarkeiten)');
+    
+    // Längere Pause zwischen Assistenten für Demo (1-3 Sekunden)
+    if (assistantIndex < assistants.length - 1) {
+      final pauseSec = random.nextInt(2) + 1;
+      print('⏳ Nächster Assistent in ${pauseSec} Sekunden...\n');
+      await Future.delayed(Duration(seconds: pauseSec));
+    }
+  }
+  
+  print('🎉 Demo abgeschlossen: Alle ${assistants.length} Assistenten haben ihre Verfügbarkeiten eingereicht!');
+}
+
+/// Hilfsmethode: Erstellt Verfügbarkeiten nur für bestimmte Assistenten (für Partial-Tests)
+Future<void> addTestAvailabilitiesForSpecificAssistants(
+  context, 
+  List<String> assistantNames
+) async {
+  final assistantModel = Provider.of<AssistantModel>(context, listen: false);
+  final shiftModel = Provider.of<ShiftModel>(context, listen: false);
+  final availabilitiesModel = Provider.of<AvailabilitiesModel>(context, listen: false);
+  
+  final random = Random();
+  final unscheduledShifts = shiftModel.unscheduledShifts.toList();
+  
+  // Filtere nur die gewünschten Assistenten
+  final selectedAssistants = assistantModel.assistants
+      .where((assistant) => assistantNames.contains(assistant.name))
+      .toList();
+  
+  if (selectedAssistants.isEmpty) {
+    print('Keine der angegebenen Assistenten gefunden: $assistantNames');
+    return;
+  }
+  
+  print('Erstelle Verfügbarkeiten nur für: ${selectedAssistants.map((a) => a.name).join(', ')}');
+  
+  for (final assistant in selectedAssistants) {
+    final availabilityCount = random.nextInt(5) + 8;
+    final shuffledShifts = List<Shift>.from(unscheduledShifts)..shuffle();
+    
+    print('📋 ${assistant.name}: ${availabilityCount} Verfügbarkeiten...');
+    
+    for (int i = 0; i < min(availabilityCount, shuffledShifts.length); i++) {
+      final availability = availabilitiesModel.createAvailability(
+        shuffledShifts[i].shiftID, 
+        assistant.assistantID
+      );
+      
+      await availabilitiesModel.saveAvailability(availability);
+      await Future.delayed(Duration(milliseconds: random.nextInt(100) + 50));
+    }
+    
+    print('✅ ${assistant.name} fertig');
+    await Future.delayed(Duration(milliseconds: random.nextInt(500) + 300));
+  }
 }

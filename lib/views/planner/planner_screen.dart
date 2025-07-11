@@ -482,7 +482,7 @@ class CalendarViewState extends State<CalendarView> {
                     child: Consumer<AvailabilitiesModel>(
                       builder: (BuildContext context, availabilities, child) {
                         return Container(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8.0), // Mehr Padding
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.surfaceVariant,
                             borderRadius: BorderRadius.circular(12.0),
@@ -495,95 +495,127 @@ class CalendarViewState extends State<CalendarView> {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              
-                              const SizedBox(height: 12),
-                              
-                              // AssistantMarker in Wrap-Layout
+                                          
+                              // AssistantMarker in weißem Container - nur für Assistenten mit Verfügbarkeiten
                               Consumer<AssistantModel>(
                                 builder: (context, assistantModel, child) {
-                                  return assistantModel.assistants.isEmpty 
-                                    ? Text(
-                                        'Keine Assistenten vorhanden',
-                                        style: TextStyle(
-                                          color: Colors.grey.shade500,
-                                          fontSize: 12,
+                                  // Filtere Assistenten, die bereits Verfügbarkeiten eingereicht haben
+                                  final assistantsWithAvailabilities = assistantModel.assistants
+                                      .where((assistant) => 
+                                          availabilities.availabilitiesByAssistant[assistant.assistantID]?.isNotEmpty ?? false)
+                                      .toList();
+                                  
+                                  return assistantsWithAvailabilities.isEmpty 
+                                    ? Container(
+                                        padding: const EdgeInsets.all(8.0),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: Colors.grey.shade200,
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.schedule,
+                                              color: Colors.grey.shade400,
+                                              size: 20,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              'Noch keine Verfügbarkeiten eingereicht',
+                                              style: TextStyle(
+                                                color: Colors.grey.shade500,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       )
-                                    : Wrap(
-                                        spacing: 8,
-                                        runSpacing: 8,
-                                        children: assistantModel.assistants.map((assistant) {
-                                          // TODO: Hier sollte geprüft werden, ob der Assistant bereits eingereicht hat
-                                          final hasSubmitted = true; // Platzhalter
-                                          
-                                          return Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(16),
-                                              border: Border.all(
-                                                color: hasSubmitted 
-                                                    ? Colors.green.shade300 
-                                                    : Colors.grey.shade300,
-                                                width: 1.5,
+                                    : Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(12.0),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: Colors.grey.shade200,
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Wrap(
+                                          spacing: 4,
+                                          runSpacing: 4,
+                                          children: assistantsWithAvailabilities.map((assistant) {
+                                            final availabilityCount = availabilities
+                                                .availabilitiesByAssistant[assistant.assistantID]?.length ?? 0;
+                                            
+                                            return Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(16),
+                                                border: Border.all(
+                                                  color: Colors.green.shade300,
+                                                  width: 1.5,
+                                                ),
+                                                color: Colors.green.shade50,
                                               ),
-                                              color: Colors.white,
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                AssistantMarker(
-                                                  assistantID: assistant.assistantID,
-                                                  size: 22,
-                                                  onTap: () {},
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsets.only(right: 6),
-                                                  child: Icon(
-                                                    hasSubmitted 
-                                                        ? Icons.check_circle 
-                                                        : Icons.schedule,
-                                                    size: 12,
-                                                    color: hasSubmitted 
-                                                        ? Colors.green.shade600 
-                                                        : Colors.grey.shade400,
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  AssistantMarker(
+                                                    assistantID: assistant.assistantID,
+                                                    size: 20,
+                                                    onTap: () {
+                                                      shiftModel.updateDisplayOption(
+                                                        ShiftDisplayOptions.assistant, 
+                                                        assistant.assistantID
+                                                      );
+                                                    },
                                                   ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        }).toList(),
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(right: 8.0, left: 8.0),
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        const SizedBox(width: 4),
+                                                        Text(
+                                                          '$availabilityCount',
+                                                          style: TextStyle(
+                                                            fontSize: 12,
+                                                            fontWeight: FontWeight.w600,
+                                                            color: Colors.green.shade700,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }).toList(),
+                                        ),
                                       );
                                 },
                               ),
                               
                               // Fortschrittsbalken
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 12),
                               Consumer<AssistantModel>(
                                 builder: (context, assistantModel, child) {
                                   final totalAssistants = assistantModel.assistants.length;
-                                  final submittedCount = assistantModel.assistants.length; // TODO: Echte Logik
+                                  
+                                  // Zähle Assistenten mit eingereichten Verfügbarkeiten
+                                  final submittedCount = assistantModel.assistants
+                                      .where((assistant) => 
+                                          availabilities.availabilitiesByAssistant[assistant.assistantID]?.isNotEmpty ?? false)
+                                      .length;
+                                  
                                   final progress = totalAssistants > 0 ? submittedCount / totalAssistants : 0.0;
                                   
                                   return Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            'Eingereichte Verfügbarkeiten',
-                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                              color: Colors.grey.shade600,
-                                            ),
-                                          ),
-                                          Text(
-                                            '$submittedCount von $totalAssistants',
-                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.grey.shade700,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 6),
+                                    children: [                         
                                       LinearProgressIndicator(
                                         value: progress,
                                         backgroundColor: Colors.grey.shade200,
@@ -595,6 +627,28 @@ class CalendarViewState extends State<CalendarView> {
                                         borderRadius: BorderRadius.circular(4),
                                         minHeight: 6,
                                       ),
+                                      if (progress == 1.0) ...[
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.check_circle,
+                                              size: 14,
+                                              color: Colors.green.shade600,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                            '$submittedCount von $totalAssistants Verfügbarkeitsangaben eingegangen',
+                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: progress == 1.0 
+                                                  ? Colors.green.shade700 
+                                                  : Colors.grey.shade700,
+                                            ),
+                                          ),
+                                          ],
+                                        ),
+                                      ],
                                     ],
                                   );
                                 },
@@ -634,7 +688,7 @@ class CalendarViewState extends State<CalendarView> {
   void _generateScheduleNow(BuildContext context, ShiftModel shiftModel) async {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Row(
           children: [
             Icon(Icons.auto_awesome, color: Colors.blue.shade600),
@@ -677,25 +731,40 @@ class CalendarViewState extends State<CalendarView> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text('Abbrechen'),
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Generiere Dienstplan…')),
+              // WICHTIG: Dialog schließen und context sichern BEVOR async Operation
+              Navigator.of(dialogContext).pop();
+              
+              // Sichere den ursprünglichen context VOR der async Operation
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              
+              // Zeige sofort die "wird generiert" Nachricht
+              scaffoldMessenger.showSnackBar(
+                SnackBar(content: Text('Generiere Dienstplan...')),
               );
               
               try {
                 final service = WorkscheduleService(context);
                 final result = await service.generateWorkschedule();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${result.length} Schichten zugewiesen')),
+                
+                // Verwende den gesicherten ScaffoldMessenger
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(
+                    content: Text('✅ ${result.length} Schichten erfolgreich zugewiesen'),
+                    backgroundColor: Colors.green.shade600,
+                  ),
                 );
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Fehler: $e')),
+                // Verwende den gesicherten ScaffoldMessenger
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(
+                    content: Text('❌ Fehler bei der Generierung: $e'),
+                    backgroundColor: Colors.red.shade600,
+                  ),
                 );
               }
             },
